@@ -1,0 +1,42 @@
+{
+	"name": "lemuria-pbem/renderer-magellan",
+	"description": "This library is part of the PbeM Lemuria. It creates game files in the Magellan CR format.",
+	"type": "library",
+	"keywords": [
+		"eressea",
+		"fantasya",
+		"game",
+		"lemuria",
+		"magellan",
+		"pbem"
+	],
+	"time": "2020-07-04",
+	"license": "GPL-3.0",
+	"authors": [
+		{
+			"name": "Sascha Ternes",
+			"email": "lemuria@online.de"
+		}
+	],
+
+	"require": {
+		"php": "~7.4",
+		"lemuria-pbem/lemuria": "dev-master"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "~9.2"
+	},
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "git@github.com:lemuria-pbem/lemuria.git"
+		}
+	],
+
+	"autoload": {
+		"psr-4": {
+			"Lemuria\\Renderer\\Magellan\\": "src/",
+			"Lemuria\\Tests\\Renderer\\Magellan\\": "tests/"
+		}
+	}
+}
