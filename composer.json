@@ -21,22 +21,23 @@
 
 	"require": {
 		"php": "~7.4",
-		"lemuria-pbem/lemuria": "dev-master"
-	},
-	"require-dev": {
-		"phpunit/phpunit": "~9.2"
+		"lemuria-pbem/lemuria": "dev-master",
+		"lemuria-pbem/model-lemuria": "dev-master"
 	},
 	"repositories": [
 		{
 			"type": "vcs",
 			"url": "git@github.com:lemuria-pbem/lemuria.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:lemuria-pbem/model-lemuria.git"
 		}
 	],
 
 	"autoload": {
 		"psr-4": {
-			"Lemuria\\Renderer\\Magellan\\": "src/",
-			"Lemuria\\Tests\\Renderer\\Magellan\\": "tests/"
+			"Lemuria\\Renderer\\Magellan\\": "src/"
 		}
 	}
 }
