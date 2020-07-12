@@ -2,11 +2,9 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
-use Lemuria\Model\Lemuria\Combat;
-use Lemuria\Model\Lemuria\Ability;
-use Lemuria\Model\Lemuria\Quantity;
 use function Lemuria\getClass;
 use Lemuria\Model\Coordinates;
+use Lemuria\Model\Lemuria\Ability;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Balsam;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Gem;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Myrrh;
@@ -14,19 +12,19 @@ use Lemuria\Model\Lemuria\Commodity\Luxury\Oil;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Olibanum;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Silk;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Spice;
-use Lemuria\Model\Lemuria\Luxuries;
-use Lemuria\Model\Lemuria\Luxury;
 use Lemuria\Model\Lemuria\Commodity\Peasant;
 use Lemuria\Model\Lemuria\Commodity\Silver;
 use Lemuria\Model\Lemuria\Commodity\Wood;
 use Lemuria\Model\Lemuria\Construction;
+use Lemuria\Model\Lemuria\Luxuries;
+use Lemuria\Model\Lemuria\Luxury;
 use Lemuria\Model\Lemuria\Party;
 use Lemuria\Model\Lemuria\Party\Census;
+use Lemuria\Model\Lemuria\Quantity;
 use Lemuria\Model\Lemuria\Region;
 use Lemuria\Model\Lemuria\Relation;
 use Lemuria\Model\Lemuria\Unit;
 use Lemuria\Model\Lemuria\Vessel;
-use Lemuria\Model\World;
 use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\Writer;
@@ -49,12 +47,6 @@ class MagellanWriter implements Writer
 		'mailto'        => 'lemuria@online.de',
 		'mailcmd'       => 'Lemuria Befehle'
 	];
-
-	private const BATTLE_ROW = [Combat::AGGRESSIVE => 0, Combat::BYSTANDER => 1, Combat::BACK  => 2,
-								Combat::DEFENSIVE  => 3, Combat::REFUGEE   => 5, Combat::FRONT => 0];
-
-	private const COAST = [World::NORTH => 1, World::NORTHEAST => 1, World::EAST => 2, World::SOUTHEAST => 3,
-		                   World::SOUTH => 4, World::SOUTHWEST => 4, World::WEST => 5, World::NORTHWEST => 0];
 
 	/**
 	 * @var resource|null
@@ -111,6 +103,8 @@ class MagellanWriter implements Writer
 			$this->writeRegion($region);
 		}
 
+		$this->writeTranslations();
+
 		if (!fclose($this->file)) {
 			throw new \RuntimeException('Could not close file.');
 		}
@@ -134,7 +128,7 @@ class MagellanWriter implements Writer
 		foreach ($data as $key => $value) {
 			if (is_array($value)) {
 				if ($block === 'TALENTE') {
-					$line = explode(' ', $value) . ';' . $key;
+					$line = implode(' ', $value) . ';' . $key;
 					fputs($this->file, $line . PHP_EOL);
 				} else {
 					$this->writeData($value);
@@ -143,7 +137,7 @@ class MagellanWriter implements Writer
 				if (is_int($key)) {
 					$line = $value;
 				} else {
-					if (isset($this->variables[$value])) {
+					if (is_string($value) && isset($this->variables[$value])) {
 						$value = $this->variables[$value];
 					}
 					if (is_int($value)) {
@@ -185,7 +179,7 @@ class MagellanWriter implements Writer
 			'Optionen'            => 1 + 2 + 8 + 64 + 256 + 512,
 			'Punkte'              => 0,
 			'Punktedurchschnitt'  => 0,
-			'Typ'                 => getClass($party->Race()),
+			'Typ'                 => Translator::RACE[getClass($party->Race())],
 			'Rekrutierungskosten' => $party->Race()->Recruiting(),
 			'Anzahl Personen'     => $party->People()->count(),
 			'Parteiname'          => $party->Name(),
@@ -248,7 +242,7 @@ class MagellanWriter implements Writer
 			'REGION ' . $x . ' ' . $y,
 			'id'       => $region->Id()->Id(),
 			'Name'     => $region->Name(),
-			'Terrain'  => getClass($region->Landscape()),
+			'Terrain'  => Translator::LANDSCAPE[getClass($region->Landscape())],
 			'Insel'    => 1,
 			'Beschr'   => $region->Description(),
 			'Bauern'   => $resources[Peasant::class]->Count(),
@@ -268,7 +262,7 @@ class MagellanWriter implements Writer
 			if ($object !== $peasant || $object !== $silver) {
 				$data = [
 					'RESOURCE ' . $hash++,
-					'type'   => getClass($object),
+					'type'   => Translator::COMMODITY[getClass($object)],
 					'skill'  => 1,
 					'number' => $item->Count()
 				];
@@ -329,13 +323,13 @@ class MagellanWriter implements Writer
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'        => $unit->Name(),
 			'Beschr'      => $unit->Description(),
-			'Partei'      => $unit->Party()->Id(),
+			'Partei'      => $unit->Party()->Id()->Id(),
 			'Anzahl'      => $unit->Size(),
-			'Typ'         => getClass($unit->Race()),
+			'Typ'         => Translator::RACE[getClass($unit->Race())],
 			'Burg'        => $unit->Construction() ? $unit->Construction()->Id()->Id() : 0,
 			'Schiff'      => $unit->Vessel() ? $unit->Vessel()->Id()->Id() : 0,
 			'bewacht'     => $unit->IsGuarding() ? 1 : 0,
-			'Kampfstatus' => self::BATTLE_ROW[$unit->BattleRow()] ?? 4,
+			'Kampfstatus' => Translator::BATTLE_ROW[$unit->BattleRow()] ?? 4,
 			'hp'          => $hp,
 			'weight'      => $unit->Weight()
 		];
@@ -353,7 +347,8 @@ class MagellanWriter implements Writer
 		if (count($unit->Knowledge()) > 0) {
 			$data = ['TALENTE'];
 			foreach ($unit->Knowledge() as $ability /* @var Ability $ability */) {
-				$data[getClass($ability->Talent())] = [$ability->Experience(), $ability->Level()];
+				$talent        = Translator::TALENT[getClass($ability->Talent())];
+				$data[$talent] = [$ability->Experience(), $ability->Level()];
 			}
 			$this->writeData($data);
 		}
@@ -361,7 +356,8 @@ class MagellanWriter implements Writer
 		if (count($unit->Inventory()) > 0) {
 			$data = ['GEGENSTAENDE'];
 			foreach ($unit->Inventory() as $quantity /* @var Quantity $quantity */) {
-				$data[getClass($quantity->Commodity())] = $quantity->Count();
+				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
+				$data[$commodity] = $quantity->Count();
 			}
 			$this->writeData($data);
 		}
@@ -375,11 +371,11 @@ class MagellanWriter implements Writer
 		$party = $owner ? $owner->Party()->Id()->Id() : 0;
 		$data  = [
 			'BURG ' . $construction->Id()->Id(),
-			'Typ'      => getClass($construction->Building()),
+			'Typ'      => Translator::BUILDING[getClass($construction->Building())],
 			'Name'     => $construction->Name(),
 			'Beschr'   => $construction->Description(),
 			'Groesse'  => $construction->Size(),
-			'Besitzer' => $owner->Id()->Id(),
+			'Besitzer' => $owner ? $owner->Id()->Id() : 0,
 			'Partei'   => $party
 		];
 		if (!$owner) {
@@ -394,23 +390,23 @@ class MagellanWriter implements Writer
 	 */
 	private function writeVessel(Vessel $vessel): void {
 		$captain  = $vessel->Passengers()->Owner();
-		$party    = $captain ? $captain->Id()->Id() : 0;
+		$party    = $captain ? $captain->Party()->Id()->Id() : 0;
 		$material = $vessel->Ship()->getMaterial();
 		$size     = (int)round($vessel->Completion() * $material[Wood::class]->Count());
-		$coast    = self::COAST[$vessel->Anchor()] ?? null;
+		$coast    = Translator::COAST[$vessel->Anchor()] ?? null;
 		$cargo    = 0;
 		foreach ($vessel->Passengers() as $unit /* @var Unit $unit */) {
 			$cargo += $unit->Weight();
 		}
 		$data = [
 			'SCHIFF ' . $vessel->Id()->Id(),
-			'Typ'      => getClass($vessel->Ship()),
+			'Typ'      => Translator::SHIP[getClass($vessel->Ship())],
 			'Name'     => $vessel->Name(),
 			'Beschr'   => $vessel->Description(),
 			'Groesse'  => $size,
 			'cargo'    => $cargo,
 			'capacity' => $vessel->Ship()->Payload(),
-			'Kapitaen' => $captain->Id()->Id(),
+			'Kapitaen' => $captain ? $captain->Id()->Id() : 0,
 			'Partei'   => $party,
 			'Kueste'   => $coast
 		];
@@ -420,6 +416,17 @@ class MagellanWriter implements Writer
 		}
 		if ($coast === null) {
 			unset($data['Kueste']);
+		}
+		$this->writeData($data);
+	}
+
+	/**
+	 * Write translations.
+	 */
+	private function writeTranslations(): void {
+		$data = ['TRANSLATION'];
+		foreach (Translator::TRANSLATIONS as $key => $translation) {
+			$data[$key] = $translation;
 		}
 		$this->writeData($data);
 	}
