@@ -2,7 +2,7 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="3486b006-bcc7-40fe-9ce2-dc899a490f66" name="Lemuria Test" url="http://localhost">
+      <webServer id="3486b006-bcc7-40fe-9ce2-dc899a490f66" name="Lemuria Test (project level)" url="http://localhost">
         <fileTransfer mountedRoot="$PROJECT_DIR$/../test" accessType="MOUNT" port="0" />
       </webServer>
     </option>

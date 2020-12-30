@@ -56,16 +56,10 @@ class MagellanWriter implements Writer
 	/**
 	 * @var array(string=>mixed)
 	 */
-	private $variables = [];
+	private array $variables = [];
 
-	/**
-	 * @var Coordinates
-	 */
 	private Coordinates $origin;
 
-	/**
-	 * @param string $path
-	 */
 	public function __construct(string $path) {
 		$this->file = fopen($path, 'w');
 		if (!$this->file) {
@@ -74,19 +68,12 @@ class MagellanWriter implements Writer
 		$this->initVariables();
 	}
 
-	/**
-	 * Close file if it has not been closed.
-	 */
 	public function __destruct() {
 		if ($this->file) {
 			$this->close();
 		}
 	}
 
-	/**
-	 * @param Id $party
-	 * @return Writer
-	 */
 	public function render(Id $party): Writer {
 		if (!$this->file) {
 			throw new \RuntimeException('File has been closed.');
@@ -112,17 +99,11 @@ class MagellanWriter implements Writer
 		return $this;
 	}
 
-	/**
-	 * Set variables.
-	 */
 	private function initVariables(): void {
 		$this->variables['$DATE'] = time();
 		$this->variables['$TURN'] = Lemuria::Calendar()->Round();
 	}
 
-	/**
-	 * @param array
-	 */
 	private function writeData(array $data): void {
 		$block = current($data);
 		foreach ($data as $key => $value) {
@@ -168,9 +149,6 @@ class MagellanWriter implements Writer
 		$this->writeData(self::HEADER);
 	}
 
-	/**
-	 * @param Party $party
-	 */
 	private function writeParty(Party $party): void {
 		$data = [
 			'PARTEI ' . $party->Id()->Id(),
@@ -196,9 +174,6 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	/**
-	 * @param Relation $relation
-	 */
 	private function writeAlliance(Relation $relation): void {
 		$status = 0;
 		if ($relation->has(Relation::SILVER)) {
@@ -230,9 +205,6 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	/**
-	 * @param Region $region
-	 */
 	private function writeRegion(Region $region): void {
 		$coordinates = Lemuria::World()->getCoordinates($region);
 		$x           = $coordinates->X() - $this->origin->X();
@@ -281,9 +253,6 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	/**
-	 * @param Luxuries|null $luxuries
-	 */
 	private function writeMarket(?Luxuries $luxuries): void {
 		if ($luxuries) {
 			$data = [
@@ -300,11 +269,6 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	/**
-	 * @param string $class
-	 * @param Luxuries $luxuries
-	 * @return int
-	 */
 	private function getPrice(string $class, Luxuries $luxuries): int {
 		/* @var Luxury $luxury */
 		$luxury = Lemuria::Builder()->create($class);
@@ -314,9 +278,6 @@ class MagellanWriter implements Writer
 		return $luxuries[$class]->Price();
 	}
 
-	/**
-	 * @param Unit $unit
-	 */
 	private function writeUnit(Unit $unit): void {
 		$hp   = 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
 		$data = [
@@ -363,9 +324,6 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	/**
-	 * @param Construction $construction
-	 */
 	private function writeConstruction(Construction $construction): void {
 		$owner = $construction->Inhabitants()->Owner();
 		$party = $owner ? $owner->Party()->Id()->Id() : 0;
@@ -385,9 +343,6 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
-	/**
-	 * @param Vessel $vessel
-	 */
 	private function writeVessel(Vessel $vessel): void {
 		$captain  = $vessel->Passengers()->Owner();
 		$party    = $captain ? $captain->Party()->Id()->Id() : 0;
@@ -420,9 +375,6 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
-	/**
-	 * Write translations.
-	 */
 	private function writeTranslations(): void {
 		$data = ['TRANSLATION'];
 		foreach (Translator::TRANSLATIONS as $key => $translation) {
