@@ -3,7 +3,6 @@ declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
 use function Lemuria\getClass;
-use Lemuria\Model\Coordinates;
 use Lemuria\Model\Lemuria\Ability;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Balsam;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Gem;
@@ -25,6 +24,7 @@ use Lemuria\Model\Lemuria\Region;
 use Lemuria\Model\Lemuria\Relation;
 use Lemuria\Model\Lemuria\Unit;
 use Lemuria\Model\Lemuria\Vessel;
+use Lemuria\Model\Lemuria\World\PartyMap;
 use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\Writer;
@@ -58,7 +58,7 @@ class MagellanWriter implements Writer
 	 */
 	private array $variables = [];
 
-	private Coordinates $origin;
+	private PartyMap $map;
 
 	public function __construct(string $path) {
 		$this->file = fopen($path, 'w');
@@ -81,8 +81,8 @@ class MagellanWriter implements Writer
 
 		$this->writeHeader();
 
-		$party = Party::get($party);
-		$this->origin = Lemuria::World()->getCoordinates($party->Origin());
+		$party     = Party::get($party);
+		$this->map = new PartyMap(Lemuria::World(), $party);
 		$this->writeParty($party);
 
 		$census = new Census($party);
@@ -206,12 +206,10 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeRegion(Region $region): void {
-		$coordinates = Lemuria::World()->getCoordinates($region);
-		$x           = $coordinates->X() - $this->origin->X();
-		$y           = $coordinates->Y() - $this->origin->Y();
+		$coordinates = $this->map->getCoordinates($region);
 		$resources   = $region->Resources();
 		$data = [
-			'REGION ' . $x . ' ' . $y,
+			'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
 			'id'       => $region->Id()->Id(),
 			'Name'     => $region->Name(),
 			'Terrain'  => Translator::LANDSCAPE[getClass($region->Landscape())],
