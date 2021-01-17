@@ -1,0 +1,3218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+	<title>Eressea CR-Format</title>
+	<style type="text/css">
+		h3 {
+			margin-bottom: 0.1cm;
+		}
+		table.unterschrift td {
+			padding-left: 2cm;
+			padding-right: 2cm;
+		}
+		table.unterschrift tr {
+		}
+		body {
+			color: #333399;
+			background-color: #DDE3EB;
+			font-family: sans-serif;
+			margin-top: 0.2cm;
+			margin-bottom: 0;
+			margin-left: 0.2cm;
+			margin-right: 0;
+		}
+		div.layright {
+			min-width: 25ex;
+			margin-right: 1.5ex;
+			margin-left: auto;
+		}
+		div.content {
+			text-align: left;
+		}
+		em {
+			font-weight: bold;
+			font-style: normal;
+		}
+		h1, h2, h3, h4, h5, h6 {
+			font-family: serif;
+		}
+		h1 {
+			text-align: center;
+			font-weight: bold;
+			padding-top: 1cm;
+			margin-bottom: 0;
+		}
+		h1 + div {
+			text-align: center;
+			margin-top: 0;
+			font-size: 100%;
+			margin-bottom: 1cm;
+		}
+		td {
+			vertical-align: top;
+		}
+		ul {
+			margin-top: 1ex;
+		}
+		li {
+			margin-top: 0.1ex;
+		}
+		a:link {
+			color: #2D852D;
+			text-decoration: none;
+		}
+		a:visited {
+			color: gray;
+			text-decoration: none;
+		}
+		a:hover {
+			color: #B43300;
+			text-decoration: none;
+		}
+		a:active {
+			color: #B43300;
+			text-decoration: none;
+		}
+		a:focus {
+			color: #B43300;
+			text-decoration: none;
+		}
+		table {
+			margin-top: 1ex;
+		}
+		td {
+			padding-right: 2.5ex;
+		}
+		em {
+			text-decoration: underline;
+		}
+		th {
+			text-align: left;
+		}
+		div.header img {
+			border: 0;
+		}
+	</style>
+</head>
+<body>
+<div class="layright">
+	<div class="content">
+		<h1>CR-Format</h1>
+		<div>Eine empirische Studie von Max-Julian Pogner</div>
+
+		<div><h2>Quick-Links</h2>
+			<a href="#syntax">Aufbau des CR</a><br>
+			<a href="#tableOfBlocks">Block-Referenz</a>
+		</div>
+
+		<div><h2>Einleitung</h2>
+			Diese Beschreibung des Eressea Computer Reports legt das
+			hauptsächliche Augenmerk auf der Bedeutung des Inhalts
+			einzelner Blöcke und Attribute. Der syntaktische Aufbau
+			wird aber ebenfalls kurz angerissen.<br>
+			<b>Hierbei handelt es sich nicht um offizielle Informationen, und
+				wurde auch in keinster Weise von Enno überprüft oder
+				dergleichen. Schickt keine EMails bezüglich Fehler auf
+				dieser Seite an ihn!</b>
+			Benutzung erfolgt auf eigene Gefahr.
+			<p>
+				Es kann sein, und ist auch sehr wahrscheinlich, dass einige Dinge
+				hier nicht genannt werden. Ist dies der Fall, weiß ich um
+				dieses Detail noch nicht
+				bescheid und würde mich über eine Email an
+				max-julian&nbsp;AT&nbsp;gmx.at freuen.
+			</p>
+			<p>
+				Ein Protokoll der Veränderungen findet sich im
+				<a href="#changelog">Changelog</a>.
+			</p></div>
+
+		<div><h2>Andere Quellen</h2>
+			Neben dieser Seite existieren noch weitere CR-Format-Beschreibungen.
+			Die mir Bekannten sind die folgenden:
+
+			<p>Das einzig offizielle Dokument von Enno zum CR-Format (leicht veraltert).
+				<a href="http://eressea.upb.de/~eressea/crformat.shtml">
+					http://eressea.upb.de/~eressea/crformat.shtml</a>.
+
+			</p>
+			<p>Die aktualisierte CR-Format Beschreibung von Ingo Schwarze (CRIPSY-Entwickler)
+				<a href="http://www.studis.de/Eressea/Tools/crispy/Doc/ref/obj/crformat.html">
+					http://www.studis.de/Eressea/Tools/crispy/Doc/ref/obj/crformat.html</a>
+			</p></div>
+
+		<div><h2>Danksagungen</h2>
+			Natürlich ist das ganze hier nicht alleine auf meinem Mist
+			gewachsenen. Ein großer Teil wurde von
+			Gulrak aka Steffen Schümann, Fiete Fietz und Ralf Duckstein mit getragen.<br>
+			Darüber hinaus mussten noch viele Leute aus #eressea meine löchernden
+			Fragen ertragen, deren dankenswerte Beantwortung aber ebenfalls hiezu beigetragen
+			hat.
+		</div>
+
+		<div><h2>Creative Commons - Some Right Reserved</h2>
+			<!-- Creative Commons-Lizenzvertrag -->
+			Dieser Inhalt ist unter einem Creative Commons
+			Namensnennung-NichtKommerziell-Weitergabe unter gleichen Bedingungen
+			Lizenzvertrag lizenziert. Um die Lizenz anzusehen, gehen Sie bitte zu
+			<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/at/">
+				http://creativecommons.org/licenses/by-nc-sa/2.0/at/
+			</a> oder schicken Sie
+			einen Brief an Creative Commons, 559 Nathan Abbott Way, Stanford,
+			California 94305, USA.
+		</div>
+
+		<a id="syntax"></a>
+		<div><h2>Syntax</h2>
+			<p>
+				Der CR besteht aus Blöcken, Attributen und Listeneinträgen.
+				Das Format ist zeilenorientiert, also je Zeile im CR ist ein Block, ein
+				Attribut oder ein Listeneintrag vorhanden.
+
+			</p>
+			<p>
+				Die Zeilen werden entweder durch ein Carrige-Return (0x0D) oder ein
+				Linefeed (0x0A) getrennt. Leerzeilen haben keine Bedeutung.<br>
+				Der Zeichensatz wird durch das charset-Attribut im
+				<a href="#version">VERSION-Block</a>
+				angegeben.
+
+			</p>
+			<p>
+				Ein Block, inklusive seiner Attribute und Subblöcke wird
+				im CR dargestellt, indem zuerst der Block an sich geschrieben wird, dann
+				alle Attribute (bzw eine Liste) aufgelistet werden, und schließlich
+				alle Subblöcke angegeben werden. Die Subblöcke können
+				ihrerseits dabei wieder Subblöcke haben.<br>
+				Damit der daraus entstandene CR konsistent ist, es also nur einen Weg
+				gibt die Blöcke in eine Hierarchie einzuordnen, bedarf es einerseits
+				der unten beschriebenen Hierarchie, andererseits ist auch in gewissem
+				Umfang auf die Anordnung gleichrangiger Blöcke
+				(Zum Beispiel ist die Anordnung der
+				<a href="#message">MESSAGE</a>-Subblöcke eines
+				<a href="#battle">BATTLE</a>-Blocks entscheidend)
+				zu achten.<br>
+				Als Beispiel hier ein gekürzter CR-Ausschnitt:
+			</p>
+			<pre>VERSION 64
+125;Runde
+7982734;date
+REGION 0 0
+"Foo";Name
+EINHEIT 1
+"Fred";Name
+1;Anzahl
+REGION 1 0
+"Bar";Name
+EINHEIT 2
+"Otto";Name
+1;Anzahl
+</pre>
+			Dieses konstruierte Beispiel würde folgenden Baum ergeben:
+			<pre>                         VERSION 64
+                  +----------------------+
+                  | Runde = int(125)     |
+                  | date  = int(7982734) |
+                  +----------------------+
+                             |
+            +----------------+----------------+
+            |                                 |
+        REGION 0 0                        REGION 1 0
+ +----------------------+         +-----------------------+
+ | Name = string("Foo") |         | Name = string("Bar")  |
+ +----------------------+         +-----------------------+
+            |                                 |
+         EINHEIT 1                         EINHEIT 2
++-------------------------+      +-------------------------+
+| Name   = string("Fred") |      | Name   = string("Otto") |
+| Anzahl = int(1)         |      | Anzahl = int(1)         |
++-------------------------+      +-------------------------+
+</pre>
+
+			<p>
+				Generell sei noch angemerkt, dass Nummern von Einheiten, Gebäuden
+				oder Schiffen nicht in base36 (wie im NR), sondern in base10 dargestellt
+				werden.
+
+			</p>
+			<h3>Blöcke</h3>
+			<p>
+				Name und Anzahl der Blöcke sind von Version zu Version
+				unterschiedlich,
+				eventuell ändert sich auch die Bedeutung eines Blocks.
+				Die Syntax ist aber immer gleich:
+
+			</p>
+			<pre>BLOCK      =&gt; UPPERALPHA {WS {WS} ID} {WS} [ ";" COMMENT ]
+ID         =&gt; INT_VAL
+COMMENT    =&gt; STRING
+Siehe auch <a href="#ebnf">EBNF-Syntax</a>
+</pre>
+
+			<p>
+				Die ID eines Blockes besteht aus keinem oder mehreren
+				signed 32-bit Integer.
+				Das Paar aus Block und ID ist eindeutig innerhalb
+				des Superblocks, darf dort also nur einmal vorkommen.
+
+			</p>
+			<p>
+				Unbekannte Blöcke ohne ID, also solche die nicht in der Hierarchy-Information
+				genannt werden,
+				sind immer Subblöcke des vorhergehenden Blocks
+				mit ID. Blöcke ohne ID sind nur in Bezug auf ihren Superblock
+				eindeutig.
+
+			</p>
+			<p>
+				Außerdem kann hinter einem Block noch ein Kommentar vorkommen, das mit
+				einem ";" beginnt und bis zum Ende der Zeile geht.
+
+			</p>
+			<p>
+				Beispiele für Blöcke im CR:<br>
+			</p>
+			<pre>VERSION 64
+REGION 34 -7; Kommentar
+REGIONSBOTSCHAFTEN
+</pre>
+
+			<h3>Attribute</h3>
+			<p>Name und Anzahl der Attribute sind von Version zu Version unterschiedlich.
+				Gewisse Attribute sind bekannt, doch es existieren wohl noch weitere Attribute.
+
+			</p>
+			<pre>ATTRIBUTE   =&gt; VALUE {WS} ";" {WS} TAG {WS}
+TAG         =&gt; ALPHANUM  { ALPHANUM | (WS ALPHANUM) }
+VALUE       =&gt; STRING_VAL | INT_VAL
+Siehe auch <a href="#ebnf">EBNF-Syntax</a>
+</pre>
+
+			<p>
+				Jedes Attribut besteht aus einem Wert und einem Tag, die durch ein
+				";" getrennt sind.
+
+			</p>
+			<p>Das Tag ist für das Attribut bezeichnend (Bei der Zeile
+				"23;Holz" kann man also auch vom Holz-Attribut sprechen),
+				und besteht aus Buchstaben, Zahlen und eventuell Leerzeichen die
+				aber nicht am Beginn oder Ende des Tags vorkommen dürfen.
+
+			</p>
+			<p>
+				Der Wert ist entweder vom Typ String oder Integer.
+
+			</p>
+			<p>
+				Ein String beginnt und endet mit einem doppeltem
+				Hochkomma ("), und enthält beliebige Zeichen in beliebiger
+				Anzahl.
+
+			</p>
+			<p>
+				Doppelte Hochkomma im Wert eines String-Attributs werden mit einem
+				Backslash escaped. Das Backslash, sollte es vorkommen, ebenfalls.
+				<br>
+				Beispiel: "Herr \"Müller\\Mayer\" Martin";Name
+				<br> Ergibt ein Attribut des Typs <i>String</i> mit dem Tag
+				<i>Name</i> und dem Wert <i>Herr "Müller\Mayer" Martin</i>
+
+			</p>
+			<p>Ein Attribut mit Integern enthält entweder
+				eine oder mehrere durch mindestens ein Leerzeichen getrennte Zahlen,
+				welche jeweils einen signed 32-Bit Integer in base10 darstellen.<br>
+				Beispiel: 10 5 -1;Holzfaellen
+
+			</p>
+			<p>
+				Jedes Attribut ist eindeutig einem Block zugeordnet, und darf nur
+				einmal je Block vorkommen.
+
+			</p>
+			<p>
+				Die Tags der Attribute sind case-insensitiv. "3;Holz" ist also
+				das selbe Attribut wie "3;holz"
+
+			</p>
+			<p>
+				Wenn ein Tag mit Umlauten, ein anderes mit einer Umschreibung der
+				Umlaute geschrieben wird, sind sie gleich.<br>
+				"30 1;Holzällen" und "30 1;Holzfaellen" sind
+				also das selbe Attribut.
+
+			</p>
+			<p>
+				Folgende Umlaute werden fix wie folgt umschrieben:<br>
+				ä == ae<br>
+				ü == ue<br>
+				ö == oe<br>
+				ß == ss??<br>
+
+			</p>
+			<p>
+				Andere Nicht-7Bit-ASCII Buchstaben werden nicht, oder in noch nicht
+				bekanntem Maße umschrieben. Hinweise sind willkommen.
+
+			</p>
+			<p>
+				Die Kombination der oberen Eigenschaften ergeben eine Vielzahl
+				von Möglichkeiten die beachtet werden müssen.<br>
+				Trotzdem sollte nicht einfach alles in eine Form (lower-case ohne Umlaute)
+				umgewandelt werden, sondern die eingelesene Schreibweise bei einer
+				Ausgabe beibehalten werden.
+
+			</p>
+			<p>Beispiele:
+			</p>
+			<pre>30 1;Bergbau
+"Xandaryl";Insel
+172;Runde
+</pre>
+
+			<h3>Listeneinträge</h3>
+			<p>
+				Listeneinträge sind die einzigen Attribute ohne einen Tag.
+				Hier hat ein Block keine String- oder Integerattribut, sondern nur eine
+				Reihe von "Taglosen Stringattributen" die zusammen eine Liste
+				bilden.
+
+			</p>
+			<pre>LISTENEINTRAG =&gt; {WS} STRING_VAL {WS}
+Siehe auch <a href="#ebnf">EBNF-Syntax</a>
+</pre>
+
+			<p>
+				Wie beim normalen Stringattribut ergeben sich hier Probleme aufgrund
+				eines möglichen Hochkommas innerhalb des Strings (siehe dort).
+
+			</p>
+			<p>
+				Beispiel für eine Liste aus drei Einträgen:
+			</p>
+			<pre>"MACHE Haus"
+"Thorin; ein Recke"
+"Thorin (thor) konnte kein Silber verdienen"
+</pre>
+
+			<h3>Reservierte Blöcke und Attribute</h3>
+			<ul>
+				<li>
+					Der <a href="#version">VERSION</a>-Block ist der Block, der die Datei
+					beschreibt. Es ist der erste Block
+					im CR. Es können auch mehrere VERSION-Blöcke in
+					einer Datei bzw in einer Eingabe vorkommen, dieser Fall ist so zu
+					behandeln, als sei ein zweiter Report
+					eingelesen worden (Beispiel: cat 1.cr 2.cr 3.cr | parser).
+				</li>
+				<li>
+					Runde ist ein Tag, in dem das Alter des Blocks enthalten ist. Blöcke
+					innerhalb eines CR können unterschiedlich datiert sein, wenn z.B.
+					ein
+					Report aus Informationen mehrere Runden zusammengestellt wurde. Das
+					Runde-Attribut sollte das Datum der aktuellsten Informationen über
+					den Block angeben. Es wird auf Unterblöcke vererbt, falls also
+					diese Blöcke neueren oder älteren Stand repräsentieren,
+					sollten sie ein eigenes
+					Runde-Attribut bekommen. CRs ohne Rundeninformation sind so zu
+					behandeln, als seine sie aus Runde 0.
+				</li>
+				<li>
+					Das Konfiguration-Attribut im VERSION-Block. Es kann verwendet werden,
+					um den Inhalt des CRs zu beschreiben, z.b. mit dem Namen des Tools, das
+					ihn erzeugt hat, oder einer Beschreibung.
+					Der Wert "Standard" ist für den Eressea-Server reserviert.
+				</li>
+			</ul>
+		</div>
+
+		<div>
+			<h2>Hirarchie der Blöcke</h2>
+			<div>
+				<p>
+					Im folgenden werden alle mir bekannten Blöcke inklusive deren
+					Attribute
+					gelistet und deren Bedeutung beschrieben.
+
+				</p>
+				<p>Die Blöcke sind in der Hierarchie so angeordnet, wie sie
+					im CR selbst auch seitens des Servers geordnet sind, bzw
+					bei clientspezifischen
+					Blöcken, wie sie der Client anordnen würde.
+
+				</p>
+				<p>Vor dem Doppelpunkt steht der Name des Blocks der gleichzeitig seine
+					Schreibweise
+					im Computerreport darstellt, nach dem Doppelpunkt steht die Anzahl der
+					<i>IDs</i> des Blocks. Werden im Report nur ein Teil der IDs
+					genannt,
+					so sind die fehlenden Stellen rechts mit Nuller zu ergänzen.
+
+				</p>
+				<p>Die Attribute der Blöcke sind über den Tag und den
+					Typen des Wertes (siehe oben) genannt, und kurz beschrieben.
+					Bei dynamisch auftretenden Attributen wurde darauf verzichtet, alle
+					Möglichkeiten aufzuzählen, sondern nur eine Beschreibung
+					des Musters geliefert.
+
+				</p>
+				<p>Sollte ein Attribut garnicht im Report genannt werden, ist die
+					Auswirkung unter "Defaultwert" genannt. Sollte kein
+					Defaultwert angegeben sein, so ist die vom Attribut beschriebene
+					Information undefiniert/unbekannt, und das Verhalten
+					eines Clients nicht fix vorgegeben.
+
+				</p>
+				<p>Wo es sinnvoll erscheint, können Attribute und Informationen
+					von Superblöcken an deren Subblöcke vererbt werden.
+					Zum Beispiel
+					bedeutet
+					ein <a href="#region">REGION</a>-Block, dass die Attribute des Blocks
+					selbst, aber auch die Blöcke/Attribute mancher Subblöcke auf
+					diese Region bezogen sind. Ein <a href="#einheit">EINHEIT</a>-Block
+					beschreibt also automatisch, dass
+					sich diese Einheit in der durch den REGION-Superblock beschriebenen
+					Region befindet.
+
+					<a id="tableOfBlocks"></a>
+				</p>
+				<pre><a href="#version">VERSION:1</a>
+ +-<a href="#partei">PARTEI:1</a>
+ |  +-<a href="#pgegenstaende">GEGENSTAENDE:0</a>
+ |  +-<a href="#optionen">OPTIONEN:0</a>
+ |  +-<a href="#allianz">ALLIANZ:1</a>
+ |  +-<a href="#gruppe">GRUPPE:1</a>
+ |  |  `-<a href="#allianz">ALLIANZ:1</a>
+ |  +-<a href="#message">MESSAGE:1</a>
+ |  `-<a href="#battle">BATTLE:3</a>
+ |     `-<a href="#message">MESSAGE:1</a>
+ +-<a href="#zauber">ZAUBER:1</a>
+ |  `-<a href="#komponenten">KOMPONENTEN:0</a>
+ +-<a href="#trank">TRANK:1</a>
+ |  `-<a href="#zutaten">ZUTATEN:0</a>
+ +-<a href="#island">ISLAND:1</a>
+ +-<a href="#region">REGION:3</a>
+ |  +-<a href="#message">MESSAGE:1</a>
+ |  +-<a href="#burg">BURG:1</a>
+ |  |   +-<a href="#effects">EFFECTS:0</a>
+ |  +-<a href="#schiff">SCHIFF:1</a>
+ |  |   +-<a href="#effects">EFFECTS:0</a>
+ |  +-<a href="#preise">PREISE:0</a>
+ |  +-<a href="#resource">RESOURCE:1</a>
+ |  +-<a href="#effects">EFFECTS:0</a>
+ |  +-<a href="#grenze">GRENZE:1</a>
+ |  |   +-<a href="#effects">EFFECTS:0</a>
+ |  +-<a href="#durchschiffung">DURCHSCHIFFUNG:0</a>
+ |  +-<a href="#durchreise">DURCHREISE:0</a>
+ |  +-<a href="#einheit">EINHEIT:1</a>
+ |  |   +-<a href="#commands">COMMANDS:0</a>
+ |  |   +-<a href="#talente">TALENTE:0</a>
+ |  |   +-<a href="#sprueche">SPRUECHE:0</a>
+ |  |   +-<a href="#kampfzauber">KAMPFZAUBER:1</a>
+ |  |   +-<a href="#gegenstaende">GEGENSTAENDE:0</a>
+ |  |   +-<a href="#effects">EFFECTS:0</a>
+ |  |   `-<a href="#einheitsbotschaften">EINHEITSBOTSCHAFTEN:0</a>
+ |  `-<a href="#schemen">SCHEMEN:3</a>
+ +-<a href="#messagetype">MESSAGETYPE:1</a>
+ +-<a href="#translation">TRANSLATION:0</a>
+ `-<a href="#hotspot">HOTSPOT:1</a>
+</pre>
+			</div>
+			<h3><a id="version">VERSION</a> <i>verNum</i></h3>
+			<div>
+				Markiert den Beginn eines (sowie das Ende des eventuell vorhergehenden)
+				Computerreports und enthält
+				Metainformationen.
+				Pro Report ist genau ein Block dieser Art vorhanden, es können
+				aber auch mehrere Reports in eine Datei geschrieben werden.<br>
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>verNum</td>
+						<td>CR-Version</td>
+						<td>Gibt die Versionsnummer
+							des in diesem Report verwendeten CR-Formats an. Die aktuelle
+							Version ist 64.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>charset</td>
+						<td>string</td>
+						<td>
+							Gibt die Zeichensatzkodierung dieses Reports an.<br>
+							<em>Solange man nichts gegenteiliges weiß (zB bei der
+								ersten Zeile des Reports), sollte ISO-8859-1 angenommen werden.</em>
+							<br>
+							Defaultwert: "ISO-8859-1"<br>
+							<i>Seit Report 530. Davor immer ISO-8859-1.</i>
+						</td>
+					</tr>
+					<tr>
+						<td>locale</td>
+						<td>string</td>
+						<td>
+							Zeigt an in welcher Sprache dieser Report erstellt wurde.<br>
+							Benutzte Werte sind "de" für Deutsch,
+							"en" für Englisch und "fr" für
+							Französisch.
+							Generell ist der String also das ISO-Kürzel der verwendeten
+							Sprache.<br>
+							Defaultwert: "de"
+						</td>
+					</tr>
+					<tr>
+						<td>noskillpoints</td>
+						<td>int</td>
+						<td>
+							Zeigt an, ob Talenttage Geltung besitzen oder nicht.<br>
+							Ab einer gewissen Regeländerung existiert dieses Attribut und ist
+							auf dem Wert "1" für "Talenttage haben keine
+							Bedeutung". Vor dieser Änderung fand sich dieses Attribut nicht
+							im Computerreport, und nimmt daher den Defaultwert "0"
+							für "Talenttage haben Bedeutung" an.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>date</td>
+						<td>int</td>
+						<td>
+							Das Datum des Reports in Sekunden seit 1.Jänner 1970.
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>Spiel</td>
+						<td>string</td>
+						<td>
+							Ein vom Server vergebener String zur Identifikation des Spiels von dem
+							dieser Report handelt.<br>
+							Bekannte Werte sind: "Eressea", "Tutorial" und
+							"Wettstreit der Weisen".
+						</td>
+					</tr>
+					<tr>
+						<td>Konfiguration</td>
+						<td>string</td>
+						<td>
+							Ein vom Reportersteller vergebener Wert zur Identifikation von
+							Besonderheiten im Report, insbesondere von Unterschieden zum
+							serverseitig erstellten Report.<br>
+							Bekannte Werte sind: "Java-Tools" von Magellan,
+							"Standard" vom Eresseaserver und
+							"Vorlage" von Gulraks
+							<a href="http://www.gulrak.net/wiki/view/Vorlage/Allgemeines">
+								Vorlage</a>.<br>
+							Defaultwert: "Standard", also Keine Unterschiede zum
+							Server-versendeten Report. Ein Client sollte aber immer einen
+							eigenen Wert setzten, um Fehlern vorzubeugen.
+						</td>
+					</tr>
+					<tr>
+						<td>Koordinaten</td>
+						<td>string</td>
+						<td>
+							Bezeichnet die Art der Anordnung der Regionen.<br>
+							Seit der Umstellung in Eressea vor ewigen Zeiten immer
+							"Hex".<br>
+							Default: Ist das Attribut nicht genannt, handelt es sich um einen
+							quadratischen Weltenaufbau.
+						</td>
+					</tr>
+					<tr>
+						<td>Basis</td>
+						<td>int</td>
+						<td>
+							Die Basis, mit der Nummern von Einheiten, Gebäuden und dergleichen
+							dargestellt werden sollten. Auf den Computerreport selber hat dieses
+							Attribut keine Auswirkungen.<br>
+							Im aktuellen Eressea immer 36. Früher wurden Einheitennummern
+							in base10 dargestellt.<br>
+							Default: 10
+						</td>
+					</tr>
+					<tr>
+						<td>Runde</td>
+						<td>int</td>
+						<td>
+							Die Runde von der dieser Report handelt.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Zeitalter</td>
+						<td>int</td>
+						<td>
+							Das Zeitalter der spielinternen Zeitrechnung.<br>
+							Seit vor ewigen Zeiten das zweite Zeitalter eingeläutet wurde,
+							immer auf dem Wert 2.<br>
+							Default: 1
+						</td>
+					</tr>
+					<tr>
+						<td>mailto</td>
+						<td>string</td>
+						<td>
+							Die E-Mail Adresse des Servers.<br>
+							In Eressea: "eressea-server@eressea.upb.de"<br>
+							Im Eressea-tutorial: "tutorial@eressea.upb.de"<br>
+							Bei allen Vinyambarvarianten: "vinyambar@eressea.amber.kn-bremen.de"<br>
+							Defaultwert: je nach Spiel (bei Eressea "eressea-server@eressea.upb.de")
+						</td>
+					</tr>
+					<tr>
+						<td>mailcmd</td>
+						<td>string</td>
+						<td>
+							Betreff damit der Server die Befehls-emails als solche erkennt.<br>
+							In Eressea (deutsche locale): "ERESSEA BEFEHLE"<br>
+							In Eressea (englische locale): "ERESSEA ORDERS"<br>
+							In Wettstreit der Weisen (deutsche locale): "WDW BEFEHLE"<br>
+							Defaultwert: je nach Spiel (bei Eressea "ERESSEA BEFEHLE")
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3><a id="partei">PARTEI</a> <i>factID</i></h3>
+			<div>
+				Informationen über eine bestimmte Partei.<br>
+				Es dürfen beliebig viele PARTEI-Blöcke im Report vorkommen.
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>factID</td>
+						<td>Parteinummer</td>
+						<td>Die Nummer der von diesem
+							Block beschriebenen Partei.
+							Diese Zahl ist innerhalb der Menge aller Parteien eindeutig.<br>
+							Reserviert: 0 ... Parteinummer unbekannt (seit Report 570). Vorher war 0 die Parteinummer
+							der Monster.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td> locale</td>
+						<td> string</td>
+						<td>
+							Spracheinstellung der Partei.
+							Wie beim <a href="#version">VERSION</a>-Block.
+						</td>
+					</tr>
+					<tr>
+						<td> age</td>
+						<td> int</td>
+						<td>
+							Das Alter der Partei in Runden.
+						</td>
+					</tr>
+					<tr>
+						<td> Optionen</td>
+						<td> int</td>
+						<td>
+							Kombinierte Optionen, gleiche Information wie im
+							<a href="#optionen">OPTIONEN</a> Unterblock.<br>
+							Defaultwert: Wenn nicht vorhanden, muss der
+							<a href="#optionen">OPTIONEN</a>-Block konsultiert werden. Sollte
+							dieser ebenfalls fehlen, sind die eingestellten Optionen unbekannt.
+						</td>
+					</tr>
+					<tr>
+						<td> Punkte</td>
+						<td> int</td>
+						<td>
+							Die Punkte der Partei. Umso mehr, umso besser.
+						</td>
+					</tr>
+					<tr>
+						<td> Punktedurchschnitt</td>
+						<td> int</td>
+						<td>
+							Der Punktedurchschnitt aller Parteien ähnlichen Alters.
+						</td>
+					</tr>
+					<tr>
+						<td> Typ</td>
+						<td> string</td>
+						<td>
+							Die Rasse der Personen dieser Partei.
+						</td>
+					</tr>
+					<tr>
+						<td> typprefix</td>
+						<td> string</td>
+						<td>
+							Das Rassenpräfix dieser Partei (dieses Attribut wird auf
+							<a href="#einheit">EINHEITEN</a> dieser Partei vererbt, kann dort aber
+							geändert werden).<br>
+							Default: "" (kein Präfix)
+						</td>
+					</tr>
+					<tr>
+						<td> Rekrutierungskosten</td>
+						<td> int</td>
+						<td>
+							Silberkosten um eine Person zu Rekrutieren.
+						</td>
+					</tr>
+					<tr>
+						<td> Anzahl&nbsp;Personen</td>
+						<td> int</td>
+						<td>
+							Die Anzahl aller Personen dieser Partei.
+						</td>
+					</tr>
+					<tr>
+						<td> Magiegebiet</td>
+						<td> string</td>
+						<td>
+							Das Magiegebiet dieser Partei.<br>
+							Default: "Kein Magiegebiet" (bevor eines gewählt wird)
+						</td>
+					</tr>
+					<tr>
+						<td> heroes</td>
+						<td> int</td>
+						<td>
+							Die aktuelle Anzahl Helden in dieser Partei.
+							Default: 0
+						</td>
+					</tr>
+					<tr>
+						<td> max_heroes</td>
+						<td> int</td>
+						<td>
+							Die maximale Anzahl Helden welche diese Partei befördern kann.
+							Default: 0
+						</td>
+					</tr>
+					<tr>
+						<td> Parteiname</td>
+						<td> string</td>
+						<td>
+							Der Name der Partei.
+						</td>
+					</tr>
+					<tr>
+						<td> email</td>
+						<td> string</td>
+						<td>
+							Die e-mail Adresse des Spielers.
+						</td>
+					</tr>
+					<tr>
+						<td> banner</td>
+						<td> string</td>
+						<td>
+							Das Banner der Partei.<br>
+							Defaultwert: ""
+						</td>
+					</tr>
+					</tbody>
+				</table>
+				<br>
+				Aufschlüsselung des Optionen-Attributs und der Bit-Position:<br>
+				<pre>AUSWERTUNG   *    1
+COMPUTER     *    2
+ZUGVORLAGE   *    4
+SILBERPOOL   *    8
+STATISTIK    *   16
+DEBUG        *   32
+ZIPPED       *   64
+ZEITUNG      *  128
+MATERIALPOOL *  256
+ADRESSEN     *  512
+BZIP2        * 1024
+PUNKTE       * 2048
+SHOWSKCHANGE * 4096
+            ========
+Summe: Wert des Optionen-Attributs.</pre>
+			</div>
+			<h3><a id="pgegenstaende">GEGENSTAENDE</a></h3>
+			<div>
+				Eine Liste der Gegenstände, welche mit dem <i>BEANSPRUCHE</i>
+				Befehl von einer Einheit dieser Partei beansprucht werden kann.<br>
+				Siehe <a href="#gegenstaende">GEGENSTAENDE</a> als Kindblock des
+				<a href="#einheit">EINHEIT</a>-blocks.
+			</div>
+			<h3><a id="optionen">OPTIONEN</a></h3>
+			<div>
+				In diesem Block werden die eingestellten Optionen aufgelistet.<br>
+				Jedes Attribut kann dabei den Wert 0 für "nicht gesetzt",
+				oder 1 für "Option gesetzt".
+
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td> AUSWERTUNG</td>
+						<td> int</td>
+						<td> Server schickt Normalreport.</td>
+					</tr>
+					<tr>
+						<td> COMPUTER</td>
+						<td> int</td>
+						<td> Server schickt Computerreprt.</td>
+					</tr>
+					<tr>
+						<td> ZUGVORLAGE</td>
+						<td> int</td>
+						<td> Server schickt eine Zugvorlage.</td>
+					</tr>
+					<tr>
+						<td> SILBERPOOL</td>
+						<td> int</td>
+						<td> Der Silberpool ist aktiviert.</td>
+					</tr>
+					<tr>
+						<td> STATISTIK</td>
+						<td> int</td>
+						<td> Je Region wird im Normalreport eine Statistik angezeigt.</td>
+					</tr>
+					<tr>
+						<td> DEBUG</td>
+						<td> int</td>
+						<td> Genaue Bedeutung unklar. Bis jetzt immer 0.</td>
+					</tr>
+					<tr>
+						<td> ZIPPED</td>
+						<td> int</td>
+						<td> Der Report wird gezippt übertragen.</td>
+					</tr>
+					<tr>
+						<td> ZEITUNG</td>
+						<td> int</td>
+						<td> Nicht mehr in Verwendung, Xontormia Express gibts keinen mehr.</td>
+					</tr>
+					<tr>
+						<td> MATERIALPOOL</td>
+						<td> int</td>
+						<td> Der Materialpool ist aktiviert.</td>
+					</tr>
+					<tr>
+						<td> ADRESSEN</td>
+						<td> int</td>
+						<td> Am Ende des Normalreports
+							wird eine Liste aller E-Mailadressen angezeigt. Aktuell keine Wirkung,
+							die Liste wird immer angezeigt.
+						</td>
+					</tr>
+					<tr>
+						<td> BZIP2</td>
+						<td> int</td>
+						<td> Der Report wird Bzip2-gepackt übertragen.</td>
+					</tr>
+					<tr>
+						<td> PUNKTE</td>
+						<td> int</td>
+						<td> Punkte und Punktedurschnitt werden im Normal- und Computerreport eingetragen.</td>
+					</tr>
+					<tr>
+						<td> SHOWSKCHANGE</td>
+						<td> int</td>
+						<td> Im Normalreport werden Talentsprünge hervorgehoben.</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="allianz">ALLIANZ</a> <i>factID</i></h3>
+			<div>
+				Liefert Informationen über das Allianzverhältnis zu einer
+				Partei (HELFE-Stati). Ist der Block zur gänze nicht im Report enthalten,
+				sind keine HELFE-Stati zu dieser Partei gesetzt.
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>factID</td>
+						<td>Parteinummer</td>
+						<td>Die Nummer der anderen
+							Partei, zu welcher die HELFE-Stati gesetzt sind.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td> Parteiname</td>
+						<td> string</td>
+						<td>
+							Der Name der Partei, dessen Allianz-status beschrieben wird.
+						</td>
+					</tr>
+					<tr>
+						<td> Status</td>
+						<td> int</td>
+						<td>
+							HELFE-Status zu dieser Partei.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					</tbody>
+				</table>
+				Wie beim Optionen Attribut des
+				<a href="#partei">PARTEI</a>-Blocks, berechnet sich der Wert des
+				Status-Attributs aus einer Bitverschiebung mit anschließender
+				Addition:<br>
+				<pre>SILBER         *  1
+KÄMPFE         *  2
+WAHRNEHMUNG    *  4
+GIB            *  8
+BEWACHE        * 16
+PARTEITARNUNG  * 32
+              ======
+Summe: Wert des Status-Attributs.
+</pre>
+				Anmerkung: Der Status HELFE WAHRNEHMUNG ist im aktuellen Eressea-Regelwerk
+				nicht mehr aktiv, und hat keine Bedeutung.<br>
+				Anmerkung 2: Wenn die Stati SILBER, KÄMPFE, GIB, BEWACHE und PARTEITARNUNG
+				gesetzt sind, nennt man diesen Kombinierten Zustand auch HELFE ALLES.
+			</div>
+			<h3><a id="gruppe">GRUPPE</a> <i>groupID</i></h3>
+			<div>
+				Der GRUPPE-Block dient hauptsächlich zur gruppierung der
+				ALLIANZ-Subblöcke, welche das Allianzverhältnis dieser Gruppe
+				und nicht der gesamten Partei beschreiben.
+
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>groupID</td>
+						<td>Gruppennummer</td>
+						<td>
+							Die Nummer der beschriebenen Gruppe.
+							Diese Zahl ist innerhalb der Menge aller Gruppen einer Partei
+							eindeutig.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td> name</td>
+						<td> string</td>
+						<td>
+							Der Name der Gruppe.
+						</td>
+					</tr>
+					<tr>
+						<td> typprefix</td>
+						<td> string</td>
+						<td>
+							Das Rassenpräfix dieser Gruppe.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="message">MESSAGE</a> <i>msgID</i></h3>
+			<div>
+				<p>
+					Ein MESSAGE-Block enthält eine Nachricht (Ereignismeldung,
+					Warnung, Wirtschafts-/Handelsmeldung, ...).<br>
+					Die verwendeten Attribute hängen (bis auf das type-Attribut) von
+					dem zugehörigen <a href="#messagetype">MESSAGETYPE</a>-Block ab,
+					und ergeben sich aus dem dortigen text-Attribut.
+
+				</p>
+				<p>
+					Sollte einmal auf ein Attribut der MESSAGE innerhalb des text-Attributes
+					des MESSAGETYPE-Blocks zugegriffen werden, dieses aber nicht vorhanden
+					sein, so ist in manchen Fällen die Annahme eines Defaultwertes von
+					0 bzw "" richtig, in den meisten Fällen ist dies aber
+					ein spezieller Fall bei dem das Attribut den Wert NULL annehmen sollte,
+					den es bei vorhanden sein des Attributes im Report niemals erreichen
+					kann.
+
+				</p>
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>msgID</td>
+						<td>Nachrichtennummer</td>
+						<td>
+							Die Nummer der Meldung.<br>
+							Diese Zahl ist sicher innerhalb eines Reports eindeutig,
+							und vermutlich sogar innerhalb der Menge aller Nachrichten einer
+							Runde eindeutig.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td> type</td>
+						<td> int</td>
+						<td> Gibt die <i>ID</i> des
+							zugehörigen <a href="#messagetype">MESSAGETYPE</a>-Blocks an.
+						</td>
+					</tr>
+					<tr>
+						<td> rendered</td>
+						<td> string</td>
+						<td>
+							Die serverseitig "gerenderte" Nachricht, wie sie dem
+							Spieler im Normalreport dargestellt wird. Theoretisch sollte beim
+							clientseitigen Rendern (mit Hilfe des
+							<a href="#messagetype">MESSAGETYPE</a>-Blocks), der gleiche String
+							herauskommen.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="battle">BATTLE</a> <i>x</i> <i>y</i> <i>z</i></h3>
+			<div>
+				Der BATTLE-Block umschließt eine Menge von
+				<a href="https://dose.0wnz.at/thewhitewolf/message">MESSAGE</a>-Blöcken,
+				welche zusammen einen Kampfbericht ergeben.<br>
+				Wichtig ist, das die Reihenfolge der Kindblöcke
+				eingehalten wird.
+
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>x</td>
+						<td>X-Koordinate</td>
+						<td>Die X-Koordinate des
+							Kampfes.
+						</td>
+					</tr>
+					<tr>
+						<td>y</td>
+						<td>Y-Koordinate</td>
+						<td>Die Y-Koordinate des
+							Kampfes.
+						</td>
+					</tr>
+					<tr>
+						<td>z</td>
+						<td>Z-Koordinate</td>
+						<td>Die Z-Koordinate des
+							Kampfes.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+
+			</div>
+			<h3><a id="zauber">ZAUBER</a> <i>zauberID</i></h3>
+			<div>
+				Ein ZAUBER-Block befindet sich dann im Report, wenn ein neuer Zauber
+				gewirkt werden kann, oder wenn ein entsprechender ZEIGE Befehl
+				gesetzt wurde. Um die Eigenschaften aller Zauber zu erfahren, muss man
+				also auch ältere Computerreports konsultieren.<br>
+				Weiters ist zu beachten, dass der im Normalreport genannte Befehlssyntax
+				für Zauber <em>nicht</em> im Computerreport enthalten ist.
+
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>zauberID</td>
+						<td>Zaubernummer</td>
+						<td>
+							Die Nummer des Zaubers.<br>
+							Es handelt sich hier zwar um eine eindeutige
+							Nummer, bezogen auf die Menge aller Zauber,
+							doch kann man nie sicher sein ob die nächste
+							Regeländerung nicht eine Änderung der Zaubernummer mit sich
+							bringt.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>name</td>
+						<td>string</td>
+						<td>
+							Der Name dieses Zaubers.
+						</td>
+					</tr>
+					<tr>
+						<td>level</td>
+						<td>int</td>
+						<td>
+							Die Stufe des Zaubers.
+						</td>
+					</tr>
+					<tr>
+						<td>rank</td>
+						<td>int</td>
+						<td>
+							Der Rang des Zaubers.
+						</td>
+					</tr>
+					<tr>
+						<td>info</td>
+						<td>string</td>
+						<td>
+							Eine menschenlesbare Beschreibung der Wirkungsweise des Zaubers.
+						</td>
+					</tr>
+					<tr>
+						<td>class</td>
+						<td>string</td>
+						<td>
+							Die Klasse des Zaubers. Bekannte Werte sind:<br>
+							"combat" ... Ein Kampfzauber<br>
+							"normal" ... Ein normaler Zauber<br>
+							"postcombat" ... Ein Postkampfzauber<br>
+							"precombat" ... Ein Präkampfzauber
+						</td>
+					</tr>
+					<tr>
+						<td>far</td>
+						<td>int</td>
+						<td>
+							Ungleich 0, Wenn es sich um einen Fernkampfzauber handels.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>ship</td>
+						<td>int</td>
+						<td>
+							Ungleich 0, Wenn es sich um einen Shiffszauber handelt.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>familiar</td>
+						<td>int</td>
+						<td>
+							Ungleich 0, Wenn es sich um einen Vertrautenzauber handelt.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>syntax</td>
+						<td>string</td>
+						<td>
+							Die Syntax eines Zauber in kryptischer Form. Die Einhaltung ist zum
+							erfolgreichen Zaubern notwendig aber nicht hinreichend.
+
+							<p>Bekannte Beispiele (unvollständig):
+
+							</p>
+							<pre>ZAUBERE [STUFE n] Zauber
+"";syntax
+
+ZAUBERE [STUFE n] Zauber &lt;Einheit-Nr&gt;
+"u";syntax
+
+ZAUBERE Zauber &lt;Einheit-Nr&gt; &lt;investierte Aura&gt;
+"ui";syntax
+
+ZAUBERE [REGION x y] [STUFE n] Zauber REGION
+ZAUBERE [REGION x y] [STUFE n] Zauber EINHEIT &lt;Einheit-Nr&gt;
+ZAUBERE [REGION x y] [STUFE n] Zauber GEBÄUDE &lt;Gebäude-Nr&gt;
+ZAUBERE [REGION x y] [STUFE n] Zauber SCHIFF &lt;Schiff-Nr&gt;
+"kc?";syntax
+
+ZAUBERE Zauber &lt;Richtung&gt;
+"c";syntax
+
+ZAUBERE [STUFE n] Zauber &lt;Einheit-Nr&gt; [&lt;Einheit-Nr&gt; ...]
+"u+";syntax
+</pre>
+
+							<p>
+								Bedeutung der einzelnen Buchstaben:
+							</p>
+							<pre>'c' = Zeichenkette
+'k' = REGION|EINHEIT|STUFE|SCHIFF|GEBAEUDE
+'i' = Zahl
+'s' = Schiffsnummer
+'b' = Gebaeudenummer
+'r' = Regionskoordinaten (x, y)
+'u' = Einheit
+'+' = Wiederholung des vorangehenden Parameters
+'?' = vorangegangener Parameter ist nicht zwingend
+</pre>
+
+							<p>Defaultwert: ZAUBERE [STUFE n] Zauber<br>
+								oder Syntax nicht bekannt.<br>
+								<i>Seit Report 511.</i>
+							</p></td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="komponenten">KOMPONENTEN</a></h3>
+			<div>
+				Die Auflistung der "materiellen" Komponenten eines Zaubers.
+				Neben den unten aufgelistetn häufigen Attributen, ist generell
+				jeder Gegenstandsname als Tag erlaubt. Die Art und das Schema der Werte
+				ist bei allen Attributen gleich.
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Aura</td>
+						<td>int int</td>
+						<td>
+							Der erste int-Wert bezeichnet die grundsätzlichen Aurakosten,<br>
+							der zweite Wert besagt, ob die Kosten bei Stufe n das n-fache
+							(wert ist ungleich 0) oder das 1-fache (wert ist gleich 0)
+							betragen.<br>
+							Defaultwert: 0 0
+						</td>
+					</tr>
+					<tr>
+						<td>permanente Aura</td>
+						<td>int int</td>
+						<td>
+							Wie Aura, nur handelt es sich um permanente Aurakosten. Auch hier
+							bestimmt der erste int-Wert die grundsätzlichen Kosten,
+							und der zweite Wert ob der erste Wert mit der Stufe multipliziert
+							wird.<br>
+							Defaultwert: 0 0
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="trank">TRANK</a> <i>trankID</i></h3>
+			<div>
+				Wie der <a href="#zauber">ZAUBER</a>-Block wird ein TRANK-Block nur
+				einmal bei Entdeckung eines neuen Trankes in den Computerreport
+				geschrieben.
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>trankID</td>
+						<td>Tranknummer</td>
+						<td>
+							Diese Nummer ist innerhalb der Menge aller Tränke eindeutig.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Name</td>
+						<td>string</td>
+						<td>
+							Der Name des Tranks
+						</td>
+					</tr>
+					<tr>
+						<td>Stufe</td>
+						<td>int</td>
+						<td>
+							Die Stufe des Tranks.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Beschr</td>
+						<td>string</td>
+						<td>
+							Die Beschreibung der Trankwirkung.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="zutaten">ZUTATEN</a></h3>
+			<div>
+				Dieser Block enthält die Auflistung der nötigen Zutaten um
+				einen Trank zu brauchen. Meistens nur Kräuter.<br>
+				Wie eine eventuelle benötigte Anzahl ungleich eins dargestellt
+				wird ist unbekannt.
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>---</td>
+						<td>Liste</td>
+						<td>
+							Je Listeneintrag in der Liste wird eine Zutat angegeben.
+							Die Menge der Zutat ist 1.<br>
+							Zum Beispiel:
+							<pre>ZUTATEN
+"Flachwurz"
+"Fjordwuchs"
+</pre>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3><a id="island">ISLAND</a> <i>islandID</i></h3>
+			<div>
+				Ein Block, der verwendet wird, wenn die erste oder dritte Methode der
+				Inselbenennung angewandt wird (siehe Insel-Attribut des
+				<a href="#region">REGION</a>-Blocks).
+
+				<p>Kommt nicht in der Konfiguratin "Standard" vor.
+
+				</p>
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>islandID</td>
+						<td>Inselnummer</td>
+						<td>
+							Die Nummer der Insel.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Name</td>
+						<td>string</td>
+						<td>
+							Der Name der Insel.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3><a id="region">REGION</a> <i>x</i><i>y</i><i>z</i></h3>
+			<div>
+				Der REGION-Block beschreibt genau eine Region, welche sich an den
+				in den IDs angegebenen xyz-Koordinaten befindet.<br>
+				Eine Region ist dann im serverseitig generierten Report aufgelistet,
+				wenn sich entweder eine eigene Einheit in dieser befindet,
+				oder einer der beim visibility-Attribut aufgelisteten Fälle
+				eintritt.
+
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>x</td>
+						<td>X-Koordinate</td>
+						<td>
+							Die X-Koordinate der Region.
+						</td>
+					</tr>
+					<tr>
+						<td>y</td>
+						<td>Y-Koordinate</td>
+						<td>
+							Die Y-Koordinate der Region.
+						</td>
+					</tr>
+					<tr>
+						<td>z</td>
+						<td>Z-Koordinate</td>
+						<td>
+							Die Z-Koordinate der Region, auch Ebene genannt. Ebene 0 ist zum
+							Beispiel der Normalraum (Dann wird die Koordinate vom
+							Server garnicht angegeben). Ebene 1 ist der "Astralraum".
+						</td>
+					</tr>
+
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>id</td>
+						<td>int</td>
+						<td>
+							Die global eindeutige und unveränderliche Nummer der Region. Ursprünglich
+							eingeführt um das Zusammenfügen mehrer Karten zu erleichtern.<br>
+							Reserviert: 0 ... id der Region unbekannt.<br>
+							Defaultwert: 0<br>
+							Wertebereich: 1 bis 0xFFFFFFFF inklusive (unsigned 32bit int).<br>
+							Seit Report 570<br>
+						</td>
+					</tr>
+					<tr>
+						<td>Name</td>
+						<td>string</td>
+						<td>
+							Der Name der Region. Entweder automatisch vom Server vergeben, oder
+							durch den <i>BENENNE REGION</i> Befehl bestimmt.
+						</td>
+					</tr>
+					<tr>
+						<td>Terrain</td>
+						<td>string</td>
+						<td>
+							Bezeichnet die Art des Terrains in dieser Region. Bekannte Werte
+							sind:
+							"Ozean", "Ebene", "Wald",
+							"Hochland", "Gebirge", "Berge",
+							"Wüste", "Sumpf", "Gletscher",
+							"Vulkan",
+							"Aktiver Vulkan", "Eisberg",
+							"Feuerwand", "Nebel", "Dichter Nebel".
+						</td>
+					</tr>
+					<tr>
+						<td>Insel</td>
+						<td>string/int</td>
+						<td>
+							Kommt nicht in der Konfiguration "Standard" vor.
+							<p>Zwischen dem Vorlage-Entwickler (Glurak) und den Magellanentwicklern
+								hat man sich auf ein einheitliches System geeinigt, das allerdings
+								noch nicht implementiert ist.<br>
+								Hierbei wird auf einer Region einer Insel ein Insel-Attribut angelegt,
+								oder mehrere Regionen mit unterschiedlichen Werten, falls die Insel
+								bezüglich des Namens geteilt ist, das als int-Wert die Nummer der
+								Insel enthält.<br>
+								Existiert nur ein solch ein Insel-Attribut auf der Insel, wird so
+								die gesamte Insel benannt. Existieren jedoch mehrere Attribute,
+								entscheidet die Entfernung einer Region zu den benennenden
+								Regionen zu welchem Teil der Insel diese Region nun gehört.<br>
+								Weiters existiert je Insel ein
+								<a href="#island">ISLAND</a>-Block, der die weitere Benennung und
+								Beschreibung der Insel enthält.
+
+							</p>
+							<p>Aktuell sind noch folgende beiden Systeme etabliert:
+
+							</p>
+							<p>Die <i>Mercator</i>-Methode, ist das zuerst vom Client Mercator
+								etablierte System. Hierbei wird wie in der erstgenannten Methode
+								ein Insel-Attribut in einer der Regionen einer Insel angelegt, welches
+								jedoch direkt den Inselnamen als String enthält.<br>
+								Auch hier wird der Name an die anderen Regionen der Insel wie oben
+								weitergegeben. Ein zusätzlicher Block existiert nicht.
+
+							</p>
+							<p>Die von <i>Magellan</i> angewendete Methode verwendet
+								auch ein Insel-Attribut mit
+								einem String als Wert, doch wird der Inhalt des Strings zwingend
+								als base10 Integer interpretiert. Die weitere Beschreibung der
+								Insel geschieht hier über einen
+								<a href="#island">ISLAND</a>-Block.<br>
+								Bei dieser Methode wird der Name allerdings nicht von Region
+								zur restlichen Insel weitergegeben, sondern jede Region einer
+								Insel muss ein Attribut mit der Inselnummer als String enthalten.
+							</p></td>
+					</tr>
+					<tr>
+						<td>Beschr</td>
+						<td>string</td>
+						<td>
+							Die per <i>BESCHREIBE REGION</i> Befehl gegebene Beschreibung der Region.<br>
+							Defaultwert: ""
+						</td>
+					</tr>
+					<tr>
+						<td>visibility</td>
+						<td>string</td>
+						<td>
+							Dieses Attribut besagt durch welchen Umstand die Region von den
+							eigenen Einheiten eingesehen wird, falls sich nicht sowieso eine
+							eigene Einheit in der Region befindet (und man folglich die Region
+							komplett einsieht, sieht man von getarnten Einheiten ab).<br>
+							Bei einem serverseitig generierten Report gibt es folgende
+							Möglichkeiten:<br>
+							<table>
+								<tbody>
+								<tr>
+									<td>""</td>
+									<td>
+										Entweder befindet sich eine eigene Einheit in der Region,
+										oder es befindet sich weder eine Einheit in der Region noch
+										trifft einer der unteren Fälle zu.
+									</td>
+								</tr>
+								<tr>
+									<td>"travel"</td>
+									<td>Eine eigene Einheit hat diese Region durchreist</td>
+								</tr>
+								<tr>
+									<td>"lighthouse"</td>
+									<td>Diese Region wird mittels Leuchtturm erblickt</td>
+								</tr>
+								<tr>
+									<td>"neighbour"</td>
+									<td>Diese Region ist zumindest einer Region benachbart,
+										in welcher man eigene Einheiten besitzt.<br>
+										<i>Seit Report 456.</i>
+									</td>
+								</tr>
+								</tbody>
+							</table>
+							Treffen mehrere Faktoren zu (zB: ein eigenes Schiff durchreist ein
+							durch einen eigenen Leuchtturm erblicktes Ozeanfeld), wird der oberste
+							Wert genommen (in diesem Beispiel also "travel").<br>
+							Defaultwert: ""
+						</td>
+					</tr>
+					<tr>
+						<td>Baeume</td>
+						<td>int</td>
+						<td>
+							Die Anzahl der Bäume in dieser Region. Siehe auch den
+							<a href="#resource">RESOURCE</a>-Block.<br>
+							Defaultwert: Ist kein Baeume-Attribut vorhanden, so gelten die Angaben
+							eines entsprechenden RESOURCE-Blocks. Ist dieser auch nicht vorhanden,
+							ist der Wert 0.
+						</td>
+					</tr>
+					<tr>
+						<td>Schoesslinge</td>
+						<td>int</td>
+						<td>
+							Die Anzahl der Schößlinge in dieser Region. Siehe auch den
+							<a href="#resource">RESOURCE</a>-Block.<br>
+							Defaultwert: Ist kein Schoesslinge-Attribut vorhanden, so gelten die
+							Angaben eines entsprechenden RESOURCE-Blocks. Ist dieser auch nicht
+							vorhanden, ist der Wert 0.
+						</td>
+					</tr>
+					<tr>
+						<td>Mallorn</td>
+						<td>int</td>
+						<td>
+							Wenn ungleich 0, handelt es sich in dieser Region nicht um normale
+							Bäme sondern um Mallorn.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Bauern</td>
+						<td>int</td>
+						<td>
+							Die Anzahl der Bauen in dieser Region.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Pferde</td>
+						<td>int</td>
+						<td>
+							Die Anzahl der Pferde in dieser Region.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Silber</td>
+						<td>int</td>
+						<td>
+							Das Regionssilber dieser Region. (Das ist die Summe allen Silbers
+							welches den Bauern dieser Region gehört).<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Unterh</td>
+						<td>int</td>
+						<td>
+							Der maximale Wert, welcher mit dem Befehl <i>UNTERHALTE</i>
+							eingenommen werden kann.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Rekruten</td>
+						<td>int</td>
+						<td>
+							Die maximale Anzahl von Bauern, die insgesamt mit dem
+							<i>REKRUTIEREN</i> Befehl rekrutiert werden können.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Lohn</td>
+						<td>int</td>
+						<td>
+							Der Lohn, welche eine mittels <i>ARBEITEN</i> arbeitende
+							nicht-Ork-Einheit pro Person verdient. Für die Ork-Werte
+							existiert auf <a href="http://www.eressea.de/rules">www.eressea.de</a>
+							eine Umrechnungstabelle.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Steine</td>
+						<td>int</td>
+						<td>
+							Die Anzahl der Steine, welche auf der aktuellen Stufe abgebaut werden
+							können. Die Stufe ist nur über den
+							<a href="#resource">RESOURCE</a>-Block zu
+							erfahren.<br>
+							Defaultwert: Ist kein Steine-Attribut vorhanden, so gelten die
+							Angaben eines entsprechenden RESOURCE-Blocks. Ist dieser auch nicht
+							vorhanden, ist der Wert 0.
+						</td>
+					</tr>
+					<tr>
+						<td>Eisen</td>
+						<td>int</td>
+						<td>
+							Wie Steine.<br>
+							Defaultwert: Ist kein Eisen-Attribut vorhanden, so gelten die
+							Angaben eines entsprechenden RESOURCE-Blocks. Ist dieser auch nicht
+							vorhanden, ist der Wert 0.
+						</td>
+					</tr>
+					<tr>
+						<td>Laen</td>
+						<td>int</td>
+						<td>
+							Befindet sich in dieser Region Laen, wird hier die Anzahl des
+							gesichteten Laens angezeigt. Wie bei Stein und Eisen, ist aber der
+							zugehörige <a href="#resource">RESOURCE</a>-Block bevorzugt zu
+							verwenden.<br>
+							Defaultwert: Ist kein Laen-Attribut vorhanden, so gelten die
+							Angaben eines entsprechenden RESOURCE-Blocks. Ist dieser auch nicht
+							vorhanden, ist der Wert 0.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="burg">BURG</a> <i>buildID</i></h3>
+			<div>
+				Ein BURG-Block beschreibt generell ein Gebäude. Um welche
+				Art von Gebäude es sich genau handelt, wird durch das Typ-Attribut
+				bestimmt.
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>buildID</td>
+						<td>Gebäudenummer</td>
+						<td>
+							Die Nummer des Gebäudes. Diese Zahl ist innerhalb der Menge
+							aller Gebäude eindeutig.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Typ</td>
+						<td>string</td>
+						<td>
+							Die Art des Gebäudes. Bekannte Werte sind:
+							"Akademie", "Befestigung", "Bergwerk",
+							"Burg", "Damm", "Festung",
+							"Grundmauern", "Hafen", "Handelsposten",
+							"Karawanserei", "Leuchtturm",
+							"Magierturm", "Monument", "Pferdezucht",
+							"Sägewerk", "Schmiede",
+							"Steinbruch", "Taverne", "Tunnel",
+							"Turm" und "Zitadelle".
+						</td>
+					</tr>
+					<tr>
+						<td>wahrerTyp</td>
+						<td>string</td>
+						<td>
+							Ist bei einem Gebäude der wahre Typ verborgen, kann
+							ihn aber trotzdem erkennen, wird der wahre Typ in diesem
+							Attribut genannt und im Attribut "Typ" der
+							vorgetäuschte Typ.
+							<br>
+							Existiert das Attribut nicht, so kann man entweder den
+							wahren Typen des Gebäudes nicht erkennen, oder der
+							Typ ist nicht verborgen.
+						</td>
+					</tr>
+					<tr>
+						<td>Name</td>
+						<td>string</td>
+						<td>
+							Der Name des Gebäudes.
+						</td>
+					</tr>
+					<tr>
+						<td>Beschr</td>
+						<td>string</td>
+						<td>
+							Die per <i>BESCHREIBE BURG</i> Befehle gesetzte Beschreibung.<br>
+							Defaultwert: ""
+						</td>
+					</tr>
+					<tr>
+						<td>Groesse</td>
+						<td>int</td>
+						<td>
+							Die Größe des Gebäudes.
+						</td>
+					</tr>
+					<tr>
+						<td>Besitzer</td>
+						<td>int</td>
+						<td>
+							Die Einheitennummer der besitzenden Einheit.<br>
+							Defaultwert: Bei Nichtnennung des Attributs im Report ist
+							dieses Gebäude ohne Besitzer.
+						</td>
+					</tr>
+					<tr>
+						<td>Partei</td>
+						<td>int</td>
+						<td>
+							Die Parteinummer der besitzenden Partei<br>
+							Defaultwert: Bei Nichtnennung des Attributs im Report ist
+							dieses Gebäude ohne Besitzer.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="schiff">SCHIFF</a> <i>shipID</i></h3>
+			<div>
+				Beschreibt ein Schiff.
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>shipID</td>
+						<td>Schiffsnummer</td>
+						<td>
+							Die innerhalb der Menge alles Schiffe eindeutige Nummer des Schiffes.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Name</td>
+						<td>string</td>
+						<td>
+							Der Name des Schiffes.
+						</td>
+					</tr>
+					<tr>
+						<td>Beschr</td>
+						<td>string</td>
+						<td>
+							Die Beschreibung des Schiffes.<br>
+							Defaultwert: ""
+						</td>
+					</tr>
+					<tr>
+						<td>Typ</td>
+						<td>string</td>
+						<td>
+							Die Art des Schifes. Bekannte Werte sind:
+							"Boot", "Langboot", "Drachenschiff",
+							"Karavelle" und "Tireme".
+						</td>
+					</tr>
+					<tr>
+						<td>Groesse</td>
+						<td>int</td>
+						<td>
+							Die Größe des Schiffes.
+						</td>
+					</tr>
+					<tr>
+						<td>Schaden</td>
+						<td>int</td>
+						<td>
+							Der Schaden des Schiffes in Prozent.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>Kapitaen</td>
+						<td>int</td>
+						<td>
+							Die Nummer der Kapitänseinheit.<br>
+							Defaultwert: Bei Nichtnennung des Attributs im Report ist
+							dieses Gebäude ohne Kapitän.
+						</td>
+					</tr>
+					<tr>
+						<td>Partei</td>
+						<td>int</td>
+						<td>
+							Die Parteinummer der Kapitänseinheit.<br>
+							Defaultwert: Bei Nichtnennung des Attributs im Report ist
+							dieses Gebäude ohne Kapitän.
+						</td>
+					</tr>
+					<tr>
+						<td>Ladung</td>
+						<td>int</td>
+						<td>
+							Die Beladung des Schiffes in GE.<br>
+							<i>Wird in Zukunft entfernt.</i>
+						</td>
+					</tr>
+					<tr>
+						<td>MaxLadung</td>
+						<td>int</td>
+						<td>
+							Die maximale Beladung des Schiffes in GE.<br>
+							<i>Wird in Zukunft entfernt.</i>
+						</td>
+					</tr>
+					<tr>
+						<td>cargo</td>
+						<td>int</td>
+						<td>
+							Die Beladung des Schiffes in Silberstückäquivalent.<br>
+							Defaultwert: Ist dieses Attribut nicht im CR, so ist das
+							Gewicht der Ladung unbekannt.<br>
+							<i>Seit Report 458.</i>
+						</td>
+					</tr>
+					<tr>
+						<td>capacity</td>
+						<td>int</td>
+						<td>
+							Die maximale Beladung des Schiffes in
+							Silberstückäquivalent.<br>
+							Defaultwert: Ist dieses Attribut nicht im CR, so ist die
+							maximale Ladung unbekannt.<br>
+							<i>Seit Report 458.</i>
+						</td>
+					</tr>
+					<tr>
+						<td>Kueste</td>
+						<td>int</td>
+						<td>
+							Bezeichnet die Küste an der sich das Schiff befindet.
+							<table>
+								<tbody>
+								<tr>
+									<td>0</td>
+									<td>Nordwestküste</td>
+								</tr>
+								<tr>
+									<td>1</td>
+									<td>Nordostküste</td>
+								</tr>
+								<tr>
+									<td>2</td>
+									<td>Ostküste</td>
+								</tr>
+								<tr>
+									<td>3</td>
+									<td>Südostküste</td>
+								</tr>
+								<tr>
+									<td>4</td>
+									<td>Südwestküste</td>
+								</tr>
+								<tr>
+									<td>5</td>
+									<td>Westküste</td>
+								</tr>
+								</tbody>
+							</table>
+							<br>
+							Defaultwert: Bei Nichtnennung des Attributs befindet sich
+							das Schiff auf keiner Küste.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="preise">PREISE</a></h3>
+			<div>
+				Der Preise für Luxusgüter, den man bei Verkauf in dieser
+				Region erziehlt.
+				Ein negativer Wert bedeutet, dass man dieses Luxusgut, mit dem
+				Absolutbetrag des angegebenen Grundpreis, kaufen kann. <br>
+				Ist kein PREISE-Block für eine Region vorhanden, kann man hier
+				Luxusgüter weder kaufen noch verkaufen.
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Balsam</td>
+						<td>int</td>
+						<td>
+							Der Preis für Balsam.
+						</td>
+					</tr>
+					<tr>
+						<td>Gewürz</td>
+						<td>int</td>
+						<td>
+							Der Preis für Gewürze.
+						</td>
+					</tr>
+					<tr>
+						<td>Juwel</td>
+						<td>int</td>
+						<td>
+							Der Preis für Juwelen.
+						</td>
+					</tr>
+					<tr>
+						<td>Myrrhe</td>
+						<td>int</td>
+						<td>
+							Der Preis für Myrrhe.
+						</td>
+					</tr>
+					<tr>
+						<td>Öl</td>
+						<td>int</td>
+						<td>
+							Der Preis für Öl.
+						</td>
+					</tr>
+					<tr>
+						<td>Seide</td>
+						<td>int</td>
+						<td>
+							Der Preis für Seide.
+						</td>
+					</tr>
+					<tr>
+						<td>Weihrauch</td>
+						<td>int</td>
+						<td>
+							Der Preis für Weihrauch.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="resource">RESOURCE</a> <i>resID</i></h3>
+			<div>
+				Ein RESOURCE-Block wird dann in einer Region aufgelistet,
+				wenn in dieser Region eine bestimmte Art von Resourcen gefunden wurden.
+
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>resID</td>
+						<td>Resourcentyp</td>
+						<td>
+							Die resID ist ein hash des Wertes vom type-Attribut, und sagt
+							somit aus um welche Resource es sich handelt. Die Hashfunktion
+							ist aber nicht fix, und könnte sich im laufe der Zeit
+							ändern.
+							<br>
+							Bei allen Resourcen existiert noch ein Attribut direkt im
+							<a href="#region">REGION</a>-Block, welches früher verwendet
+							wurde und noch aus Kompatibilitätsgründen beibehalten wird.
+							Die Informationen aus dem RESOURCE-Block (so vorhanden) sind
+							gegenüber den alten Attributen bevorzugt zu behandeln.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>type</td>
+						<td>string</td>
+						<td>
+							Der Typ der Resource.<br>
+							Der Wert hier entspricht der Bedeutung
+							der resID, also "Eisen" wenn die resID 235898859 ist,
+							und so fort. Es gibt also die Werte
+							"Eisen", "Schößlinge",
+							"Mallornschößlinge", "Mallorn",
+							"Bäume", "Laen" und "Steine"
+							mit den entsprechenden resID Werten.
+						</td>
+					</tr>
+					<tr>
+						<td>skill</td>
+						<td>int</td>
+						<td>
+							Der Mindesttalentwert den man benötigt um diese Resource
+							zumindest teilweise abzubauen.
+						</td>
+					</tr>
+					<tr>
+						<td>number</td>
+						<td>int</td>
+						<td>
+							Die gefundene Menge der Resource.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="grenze">GRENZE</a> <i>grenzID</i></h3>
+			<div>
+				Ein GRENZE-Block beschreibt eine Begebenheit, welche nur beim betreten
+				bzw. verlassen einer Region über eine bestimmte Himmelsrichtung
+				zum tragen kommt (zum Beispiel Straßen).
+
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>grenzID</td>
+						<td>Nummer</td>
+						<td>
+							Eine durchlaufende Nummer, ohne erkennbarer tiefgründigeren
+							Bedeutung.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>typ</td>
+						<td>string</td>
+						<td>
+							Die Art der Grenze.<br>
+							Bekannte werte sind: "Straße" und
+							"Feuerwand".
+						</td>
+					</tr>
+					<tr>
+						<td>richtung</td>
+						<td>int</td>
+						<td>
+							Die von der Grenze betroffene Himmelsrichtung. 0 .. Nordwesten,
+							1 .. Nordosten, usw.
+						</td>
+					</tr>
+					<tr>
+						<td>prozent</td>
+						<td>int</td>
+						<td>
+							Der Grad der Fertigstellung dieser Grenze (zB Strassen wirken erst
+							bei 100%).
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="effects">EFFECTS</a></h3>
+			<div>
+				Der Block beinhaltet eine Aufzählung aller sichtbaren Effekte
+				(meist magischer Natur) die den Superblock betreffen (zB REGION,
+				EINHEIT, SCHIFF oder BURG).
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>---</td>
+						<td>Liste</td>
+						<td>
+							Pro Listeneintrag in wird ein Effekt gespeichert.<br>
+							Eine Zeile hat hierbei folgendes besonderes Format:
+							<pre>EFFECT     =&gt; "\"" EFFECT_STR "(" NUMMER ")"
+            | "\"" EFFECT_NUM EFFECT_STR"\""
+EFFECT_STR =&gt; {ANY_ASCII_CHAR}
+EFFECT_NUM =&gt; NUMBER
+NUMMER     =&gt; BASE36 [BASE36 [BASE36 [BASE36]]]
+BASE36     =&gt; "0" | ... | "9" | "a" | ... | "z" | "A" | ... | "Z"
+</pre>
+							<p>Der EFFECT_STR Teil ist hierbei ein vom genauen Effekt abhängiger
+								String, der vom Spieler lesbar ist. Der NUMMER Teil ist eine base36
+								Zahl, welche die Nummer des Effekts angibt. Die Nummer eines Effektes
+								ist fix vergeben, hält der Effekt also über mehrere Runden
+								an, so findet sich beim entsprechenden Listeneintrag immer die
+								selbe Nummer.</p>
+							<p>
+								Es gibt alternativ dazu auch Effekte von Alchemistischen Tränken, welche
+								keine Effekt-Nummer haben, sondern durch deren Anzahl und einen vom
+								Spieler lesbaren String gegeben sind.
+							</p>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="durchschiffung">DURCHSCHIFFUNG</a></h3>
+			<div>
+				Die hier aufgelisteten Schiffe haben diese Region bei ihrer Fahrt
+				durchquert.
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>---</td>
+						<td>Liste</td>
+						<td>
+							Pro Listeneintrag wird ein Schiff (Name plus Nummer) in
+							folgender Form genannt:
+							<pre>DURCHSCHIFFUNG =&gt; "\"" NAME "(" NUMMER ")"
+NAME           =&gt; {ANY_ASCII_CHAR}
+NUMMER         =&gt; BASE36 [BASE36 [BASE36 [BASE36]]]
+BASE36         =&gt; "0" | ... | "9" | "a" | ... | "z" | "A" | ... | "Z"
+</pre>
+							NAME ist naheliegender Weise der Name des Schiffes, und die base36
+							NUMMER in Klammern die Schiffsnummer.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="durchreise">DURCHREISE</a></h3>
+			<div>
+				Die hier aufgelisteten Einheiten haben diese Region bei ihrer
+				Reise durchquert.
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>---</td>
+						<td>Liste</td>
+						<td>
+							Pro Listeneintrag wird eine Einheit genannt. Das Format entspricht
+							dem des <a href="#durchschiffung">DURCHSCHIFFUNG</a>-Blocks.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="einheit">EINHEIT</a> <i>unitID</i></h3>
+			<div>
+				Ein EINHEIT-Block beschreibt eine Einheit.
+
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>
+							<a id="einheit_unitid">
+								unitID
+							</a>
+						</td>
+						<td>Einheitennummer</td>
+						<td>
+							Die, in Bezug auf die Menge aller Einheiten, eindeutige Nummer
+							dieser Einheit.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Name</td>
+						<td>string</td>
+						<td>
+							Der Name der Einheit.
+						</td>
+					</tr>
+					<tr>
+						<td>Beschr</td>
+						<td>string</td>
+						<td>
+							Die Beschreibung der Einheit.<br>
+							Defaultwert: ""
+						</td>
+					</tr>
+					<tr>
+						<td>privat</td>
+						<td>string</td>
+						<td>
+							Die private Beschreibung der Einheit.<br>
+							Defaultwert: ""
+						</td>
+					</tr>
+					<tr>
+						<td>gruppe</td>
+						<td>int</td>
+						<td>
+							Die Nummer der Gruppe (grouID), zu der diese Einheit gehört.<br>
+							Defaultwert: 0 (keine Gruppe)
+						</td>
+					</tr>
+					<tr>
+						<td>Partei</td>
+						<td>int</td>
+						<td>
+							Die Parteinummer zu der diese Einheit gehört, oder sich ausgibt
+							zu gehören.<br>
+							Default: Ist das Attribut nicht im CR, ist die Partei unbekannt.
+						</td>
+					</tr>
+					<tr>
+						<td>Parteitarnung</td>
+						<td>int</td>
+						<td>
+							Hat den Wert 1, wenn diese Einheit parteigetarnt ist. Sonst ist nichts bekannt.
+						</td>
+					</tr>
+					<tr>
+						<td>Anderepartei</td>
+						<td>int</td>
+						<td>
+							Wenn die wahre Parteizugehörigkeit dieser Einheit bekannt ist
+							(entweder eine eigene Einheit oder hinreichende HELFE-Stati):<br>
+							Die Parteinummer jener Partei, als welche sich diese Einheit
+							parteitarnt.<br>
+							Default: Der genannte Fall trifft nicht zu.
+						</td>
+					</tr>
+					<tr>
+						<td>Verraeter</td>
+						<td>int</td>
+						<td>
+							1, wenn die Einheit fremd ist und sich als eigene Partei parteitarnt,
+							und die wahre Parteizugehörigkeit nicht bekannt ist (es sich
+							also um einen Verräter handelt).<br>
+							Default: 0 (kein Verräter)
+						</td>
+					</tr>
+					<tr>
+						<td>typprefix</td>
+						<td>string</td>
+						<td>
+							Der Rassenpräfix dieser Einheit. Bei der Zusammensetzung mit
+							dem Rassentyp ist zu beachten, dass die Rasse (Typ-Attribut) der
+							Einheit mit einem Großbuchstaben beginnt, dieser also vorher
+							in einen Kleinbuchstaben umzuwandeln ist.<br>
+							Defaultwert: ""
+						</td>
+					</tr>
+					<tr>
+						<td>Anzahl</td>
+						<td>int</td>
+						<td>
+							Die Anzahl von Personen in dieser Einheit.
+						</td>
+					</tr>
+					<tr>
+						<td>Typ</td>
+						<td>string</td>
+						<td>
+							Die Rasse der Personen dieser Einheit. Eventuell noch mit dem
+							Rassenpräfix (typprefix-Attribut) modifiziert.
+						</td>
+					</tr>
+					<tr>
+						<td>wahrerTyp</td>
+						<td>string</td>
+						<td>
+							Die echte Rasse der Personen dieser Einheit, zB wenn sich ein
+							Dämon Rassengetarnt hat.<br>
+							Defaultwert: Ist dieses Attribut nicht im CR vorhanden, entspricht
+							der wahrerTyp dem Typ.
+						</td>
+					</tr>
+					<tr>
+						<td>Burg</td>
+						<td>int</td>
+						<td>
+							Die Nummer der Burg, in welcher sich die Einheit befindet.<br>
+							Defaultwert: 0 (Einheit ist in keiner Burg)
+						</td>
+					</tr>
+					<tr>
+						<td>Schiff</td>
+						<td>int</td>
+						<td>
+							Die Nummer des Schiffes, in welchem sich die Einheit befindet.<br>
+							Defaultwert: 0 (Einheit ist in keinem Schiff)
+						</td>
+					</tr>
+					<tr>
+						<td>bewacht</td>
+						<td>int</td>
+						<td>
+							Ungleich 0, wenn diese Einheit die Region bewacht.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					<tr>
+						<td>temp</td>
+						<td>int</td>
+						<td>
+							Wenn vorhanden, enthält die TEMP-ID der Einheit welche sie
+							vorige Runde hatte.<br>
+							Defaultwert: War vorige Runde keine TEMP-Einheit.
+						</td>
+					</tr>
+					<tr>
+						<td>alias</td>
+						<td>int</td>
+						<td>
+							Wenn vorhanden, gibt die <a href="#einheit_unitid">unitID</a> der
+							Einheit in der vorigen Runde an.<br>
+							Defaultwert: Wenn nicht vorhanden, hatte sich die
+							<a href="#einheit_unitid">unitID</a>
+							nicht verändert.
+						</td>
+					</tr>
+					<tr>
+						<td>Kampfstatus</td>
+						<td>int</td>
+						<td>
+							Der Kampfstatus dieser Einheit.
+							<table>
+								<tbody>
+								<tr>
+									<td>0</td>
+									<td>aggressiv</td>
+								</tr>
+								<tr>
+									<td>1</td>
+									<td>kämpft nicht</td>
+								</tr>
+								<tr>
+									<td>2</td>
+									<td>hinten</td>
+								</tr>
+								<tr>
+									<td>3</td>
+									<td>defensiv</td>
+								</tr>
+								<tr>
+									<td>4</td>
+									<td>kämpft nicht</td>
+								</tr>
+								<tr>
+									<td>5</td>
+									<td>flieht</td>
+								</tr>
+								</tbody>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td>unaided</td>
+						<td>int</td>
+						<td>
+							Ungleich 0, wenn der Einheit nicht automatisch bei einer Attacke gegen
+							sie geholfen wird (siehe den Befehl <i>KÄMPFE HELFE NICHT</i>)
+							<br>
+							Defaultwert: Ist das Attribut nicht im CR, so ist der
+							unaided-Status entweder auf 0 gesetzt oder unbekannt.
+						</td>
+					</tr>
+					<tr>
+						<td>Aura</td>
+						<td>int</td>
+						<td>
+							Wieviel Aura diese Einheit im Augenblick hat.<br>
+							Defaultwert: Ist dieses Attribut nicht im CR, so hat die Einheit
+							keine Aura (Oder die Auramenge ist unbekannt).
+						</td>
+					</tr>
+					<tr>
+						<td>Auramax</td>
+						<td>int</td>
+						<td>
+							Der Maximalwert, bis zu welchem Aura regeneriert werden kann.<br>
+							Defaultwert: Ist dieses Attribut nicht im CR, so hat die Einheit
+							keine Aura (Oder die Auramax Menge ist unbekannt).
+						</td>
+					</tr>
+					<tr>
+						<td>hp</td>
+						<td>string</td>
+						<td>
+							Ein String in menschenlesbarer Form der den gesundheitlichen
+							Zustand der Einheit beschreibt. Zur Zeit bekannt sind
+							"erschöpft", "verwundet" und
+							"schwer verwundet".<br>
+							Defaultwert: Ist dieses Attribut nicht im CR, so ist die Einheit
+							bei voller Gesundheit oder der Gesundheitsstatus ist unbekannt.
+						</td>
+					</tr>
+					<tr>
+						<td>weight</td>
+						<td>int</td>
+						<td>
+							Das Gesamtewicht der Einheit (Personen plus Gegenstände)
+							in Silberstückäquivalent.<br>
+							Defaultwert: Ist dieses Attribut nicht im CR, so ist das
+							Gewicht unbekannt.<br>
+							<i>Seit Report 458.</i>
+						</td>
+					</tr>
+					<tr>
+						<td>familiarmage</td>
+						<td>int</td>
+						<td>
+							Falls diese Einheit ein Vertrauter ist, wird hier die Einheiten-Nummer
+							des zugehörigen Magiers angegeben.<br>
+							Defaultwert: Ist dieses Attribut nicht im CR, so ist diese Einheit
+							kein Vertrauter.<br>
+							<i>Seit Report 468 (oder ein bischen früher).</i>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="commands">COMMANDS</a></h3>
+			<div>
+				Die Liste von Befehlen, die die Einheit im Augenblick hat.
+				(Diese müssen eventuell noch eingesendet werden um
+				tatsächliche Wirkung zu zeigen.)
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>---</td>
+						<td>Liste</td>
+						<td>
+							Je Listeneintrag wird eine Befehlszeile angegeben.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="talente">TALENTE</a></h3>
+			<div>
+				Unter diesem Block sind alle Talentwerte einer Einheit zusammengefasst.
+				Hier ist nur ein Talent als Beispiel dargestellt, alle anderen Talente
+				werden in der selben Art und Weise aufgelistet<br>
+				(Hinweis: Welche Talente es alle gibt, ist unbekannt).
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Holzfällen</td>
+						<td>int-triple</td>
+						<td>
+							Der erste Wert ist in allen neueren Report zu ignorieren (siehe
+							noskillpoints-Attribut des <a href="#version">VERSION</a>-Blocks).
+							In den älteren Computerreports gibt er die Anzahl der gesammelten
+							Lerntage in diesem Talent an.<br>
+							Der zweite Wert gibt die aktuelle Stufe in diesem Talent an (kann auch
+							0 sein, wenn es einmal gelernt wurde, aber durch Mali noch auf 0 ist).<br>
+							Der nicht immer vorhandene dritte Wert gibt die Veränderung
+							der Talentstufe im Vergleich zur Vorwoche an.
+							<br>
+							<i>Defaultwert:</i> Default des dritten Int-Werts ist 0.
+							Wird ein Talent nicht genannt, wird es
+							nicht beherrscht, oder die Talente dieser
+							Einheit sind gänzlich unbekannt.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="sprueche">SPRUECHE</a></h3>
+			<div>
+				Hier aufgelistet werden alle Zaubersprüche, die von dieser Einheit
+				gezaubert werden können.
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>---</td>
+						<td>Liste</td>
+						<td>
+							Pro Listeneintrag wird der Name eines Zaubers genannt.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="kampfzauber">KAMPFZAUBER</a> <i>kampfzID</i></h3>
+			<div>
+				Gibt an, dass ein bestimmter Kampfzauber gesetzt ist, also im falle
+				eines Kampfes gezaubert wird.
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>kampfzID</td>
+						<td>Kampfzaubertyp</td>
+						<td>
+							0 ... Präkampfzauber<br>
+							1 ... Kampfzauber<br>
+							2 ... Postkampfzauber
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>name</td>
+						<td>string</td>
+						<td>
+							Der Name des Kampfzaubers.
+						</td>
+					</tr>
+					<tr>
+						<td>level</td>
+						<td>int</td>
+						<td>
+							Die Stufe, auf der dieser Zauber im Kampffall gezaubert werden
+							wird.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="gegenstaende">GEGENSTAENDE</a></h3>
+			<div>
+				Die Auflistung aller Gegenstände die diese Einheit besitzt.<br>
+				Aus Gründen der Übersichtlichkeit nur beispielhaft
+				an Holz dargestellt:
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Holz</td>
+						<td>int</td>
+						<td>
+							Der Wert bezeichnet die Menge des genannten Gegenstandes
+							bei dieser Einheit.<br>
+							Defaultwert: 0
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="einheitsbotschaften">EINHEITSBOTSCHAFTEN</a></h3>
+			<div>
+				<em>Seit 25.07.2005 (Report 434) werden Einheitsbotschaften als normale
+					<a href="#message">MESSAGE</a> behandelt, mit eigenem
+					<a href="#messagetype">MESSAGETYPE</a>.</em><br>
+				Einheiten können mittels den Varianten des <i>BOTSCHAFT</i>
+				Befehls Botschaften erhalten, welche hier aufgelistet werden.
+				<table>
+					<tbody>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>---</td>
+						<td>Liste</td>
+						<td>
+							Je Listeneintrag wird eine Botschaft gelistet.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="schemen">SCHEMEN</a> <i>x</i><i>y</i><i>z</i></h3>
+			<div>
+				Ist man im Astralraum, sieht man Schemen. Dieser Block beschreibt
+				einen gesichteten Schemen. Die Koordinaten stimmen mit einem eventuell
+				existierendem <a href="#region">REGION</a>-Block überein.
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>x</td>
+						<td>X-Koordinaten</td>
+						<td>
+							Die X-Koordinate der schemenhaft gesichteten Region im Normalraum.
+						</td>
+					</tr>
+					<tr>
+						<td>y</td>
+						<td>Y-Koordinaten</td>
+						<td>
+							Die Y-Koordinate der schemenhaft gesichteten Region im Normalraum.
+						</td>
+					</tr>
+					<tr>
+						<td>z</td>
+						<td>Z-Koordinaten</td>
+						<td>
+							Die Z-Koordinate der schemenhaft gesichteten Region im Normalraum.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>Name</td>
+						<td>string</td>
+						<td>
+							Der Name der schemenhaft gesichteten Region im Normalraum.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="messagetype">MESSAGETYPE</a> <i>type</i></h3>
+			<div>
+				Zu jeder Art von Nachricht existiert ein MESSAGETYPE Block der beschreibt,
+				wie eine Nachricht clientseitig zu Verarbeiten wäre.
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>type</td>
+						<td>Nachrichtentyp</td>
+						<td>
+							Mehrere Nachrichten sind jeweils einem Typus zugeordnet. Diese Zahl
+							ist zwar eindeutig innerhalb eines Reports, kann sich aber von Woche
+							zu Woche ändern (und tut dies auch regelmäßig).<br>
+							Die Ereignisse um Runde 460 haben gezeigt, dass die Message-IDs
+							eher fix geworden sind. Dies ist aber nicht sicher.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>text</td>
+						<td>string</td>
+						<td>
+							Dieser String gibt an, wie der <a href="#message">MESSAGE</a>-Block
+							"gerendert" (also durch einen String dargestellt)
+							wird
+							(siehe rendered-Attribut des <a href="#message">MESSAGE</a>-Blocks)
+
+							<p>
+								Generell besteht der Wert des text-Attributs aus reinem Text, welcher
+								1:1 übernommen wird, und Text der zu ersetzenden ist.
+							</p>
+							<p>
+								Der Wert des String-Attributs nimmt diese Gestalt an (Siehe bei
+								Beschreibung des Attribut-Syntax wegen Hochkomma-escapen):
+							</p>
+							<pre>TEXT =&gt; "\"" { ATTR | FUNC | CHAR } "\""
+EXPR =&gt; ATTR | FUNC | STRING | CONST
+ATTR =&gt; "$" ALPHA { ALPHANUM }
+      | "${" {WS} ALPHA { ALPHANUM } {WS} "}"
+FUNC =&gt; "$int"   {WS} "(" {WS} EXPR {WS} ")"
+      | "$if"        {WS} "(" {WS} EXPR {WS} "," {WS} EXPR {WS} "," {WS} EXPR {WS} ")"
+      | "$eq"        {WS} "(" {WS} EXPR {WS} "," {WS} EXPR {WS} ")"
+      | "$unit"      {WS} "(" {WS} EXPR {WS} ")"
+      | "$region"    {WS} "(" {WS} EXPR {WS} ")"
+      | "$building"  {WS} "(" {WS} EXPR {WS} ")"
+      | "$ship"      {WS} "(" {WS} EXPR {WS} ")"
+      | "$faction"   {WS} "(" {WS} EXPR {WS} ")"
+      | "$resource"  {WS} "(" {WS} EXPR {WS} "," {WS} EXPR {WS} ")"
+      | "$resources" {WS} "(" {WS} EXPR {WS} ")"
+      | "$order"     {WS} "(" {WS} EXPR {WS} ")"
+      | "$isnull"    {WS} "(" {WS} EXPR {WS} ")"
+      | "$strlen"    {WS} "(" {WS} EXPR {WS} ")"
+      | "$add"       {WS} "(" {WS} EXPR {WS} "," {WS} EXPR {WS} ")"
+      | "$direction" {WS} "(" {WS} EXPR {WS} ")"
+      | "$localize"  {WS} "(" {WS} EXPR {WS} ")"
+      | "$skill"     {WS} "(" {WS} EXPR {WS} ")"
+      | "$spell"     {WS} "(" {WS} EXPR {WS} ")"
+      | "$sace"      {WS} "(" {WS} EXPR {WS} ")"
+      | "$weight"    {WS} "(" {WS} EXPR {WS} ")"
+STRING   =&gt; "\"" EXPR "\""
+CONST    =&gt; {NUM} { {WS} {NUM} }
+CHAR     =&gt; ALPHA | NUM | WS | SYMB | UMLAUT
+ALPHANUM =&gt; ALPHA | NUM
+ALPHA    =&gt; "a" | ... | "z" | "A" | ... | "Z"
+UMLAUT   =&gt; "ä" | "ü" | ... | "ß"
+NUM      =&gt; "0" | ... | "9"
+WS       =&gt; " "
+SYMB     =&gt; "." | "," | "\\$" | HTAB
+HTAB     =&gt; 0x09
+</pre>
+							<p>
+								Die mit "$" beginnenden Teile sind nun speziell zu
+								behandelnde Funktionsaufrufe und Verweise auf ein Attribut im
+								<a href="#message">MESSAGE</a>-Block.
+
+							</p><h4>Funktionen</h4>
+							<p>$int( expr )<br>
+								Es wird versucht <i>expr</i> als int zu interpretieren und in die
+								umgebende Zeichenkette eingebettet. Diese Funktion scheint also nur den
+								Zweck zu erfüllen, Zahlenwerte in Zeichenketten umzuwandeln. Zum
+								Beispiel: "$int($amount) Korken."<br>
+								Unklar ist ob auch ein Wert, wie er bei den Koordinaten einer
+								Region vorkommt, erlaubt ist. Ist dem so, wäre ein Beispiel wie folgt:
+								$int("10 -4 0") ergibt den int-wert: 10 -4 0.
+							</p>
+							<p>$if( condition, expr1, expr2 )<br>
+								Condition erwartet einen int-Wert. Dieser int-Wert wird C-üblich interpretiert, d.h. bei
+								<i>condition!=0</i> wird der Wert von <i>expr1</i> zurückgegeben, sonst wird der Wert
+								von <i>expr2</i> zurückgegeben. Welcher der beiden Werte bei einem NULL-Wert
+								zurückgegeben werden soll, ist unklar. Im Zweifelsfall sollte das <i>expr2</i> sein.
+							</p>
+							<p>$eq( expr1, expr2 )<br>
+								Gibt einen int-Wert ungleich 0 zurück, wenn <i>expr1</i> und <i>expr2</i> den selben
+								Wert annehmen, sonst 0. In allen bekannten Messagetypen sind <i>expr1</i> und
+								<i>expr2</i> int-Werte, dies muss aber nicht zwangsläufig so sein.
+							</p>
+							<p>$unit( expr )<br>
+								Erwartet für <i>expr</i> einen int-Wert, und interpretiert diesen
+								als Einheitennummer. Zurückgegeben wird ein zusammengestzer String aus
+								Name und Nummer (in base36, siehe das Basis-Attribut des <a href="#version">VERSION</a>-Blocks)
+								der Einheit. Zum Beispiel: "Fridolin (foo)". Eine Ausnahme gilt für den
+								Wert 1: In diesem Fall wird vom Server der Text "eine unbekannte
+								Einheit (1)" zurückgegeben. Einen NULL Wert sollte die Funktion ähnlich
+								behandeln. Abweichend gibt es auch die Schreibweise $unit.dative() die
+								aber offenbar die gleichen Ergebnisse liefert.
+							</p>
+							<p>$region( expr )<br>
+								Ähnlich wie $unit.<br>
+								Erwartet für <i>expr</i> einen Verweis auf ein Attribut mit 3
+								int-Werten, und interpretiert diese als Koordinaten einer Region.
+								Zurückgegeben wird ein zusammengestzer String aus Name und Koordinaten
+								der Region. Zum Beispiel: "Waldberge (23,-4)" (Ist die z-Koordinate 0,
+								wird sie nicht dargestellt).<br>
+								Als Konstante kann dieses int-Tripel eigentlich nur wie bei $int()
+								beschrieben dargestellt werden, also "1 2 1". Nur Kommas sind als
+								Trenner ungeignet, da bereits die Funktionsparameter durch Kommas
+								getrennt werden. Möglicherweise wäre eine Einklammerung in eckige
+								Klammern denkbar "[1 2 0]". Konform mit der Schreibweise in den Tags im
+								CR sollte es aber die erste genannte Variante sein.
+							</p>
+							<p>$building( expr )<br>
+								Ähnlich wie $unit.<br>
+								Erwartet für <i>expr</i> einen int-Werten, und interpretiert diese
+								als Gebäudenummer. Zurückgegeben wird ein zusammengestzer String aus
+								Name und Nummer (in base36, siehe das Basis-Attribut des <a href="#version">VERSION</a>-Blocks)
+								des Gebäudes. Zum Beispiel: "Seefeste (r5x)".
+							</p>
+							<p>$ship( expr )<br>
+								Ähnlich wie $unit.<br>
+							</p>
+							<p>$faction( expr )<br>
+								Ähnlich wie $unit.<br>
+							</p>
+							<p>$resource( expr1, expr2 )<br>
+								Erwartet für <i>expr1</i> einen String, der den Namen der Resource (In der
+								Reportinternen gültigen Form, also "Pferd", "Juwel", ...) bezeichnet, und für
+								<i>expr2</i>
+								einen int-Wert der die Menge angibt. Zurückgegeben wird dann ein
+								zusammengesetzer String, der die Resource in der Menge grammatikalisch
+								richtig und lokalisiert angibt. Zum Beispiel: $resource("Pferd",32)
+								ergibt "Pferde" oder bei Locale=EN "horses". Zu beachten ist, das die
+								Menge selbst nicht mit ausgegeben wird.
+							</p>
+							<p>$order( expr )<br>
+								<i>expr</i> ist ein String, und wird als Befehl interpretiert.
+								Vor der Rückgabe des Befehlsstrings wird dieser noch hinsichtlich
+								der Lesbarkeit verändert (zum Beispiel in eine andere Sprache
+								übersetzt).
+							</p>
+							<p>$isnull( expr )<br>
+								Der Rückgabewert ist ein int-Wert ungleich 0, wenn das Attribut auf das <i>expr</i>
+								verweist fehlt, oder -1 ist.
+							</p>
+							<p>$strlen( expr )<br>
+								Erwartet für <i>expr</i> einen String, und gibt dessen
+								Länge als int-Wert zurück.
+							</p>
+							<p>$add( expr1, expr2 )<br>
+								Erwartet für <i>expr1</i> und <i>expr2</i> jeweils einen int-Wert,
+								und gibt deren Summe zurück.
+							</p>
+							<p>$direction( expr ) <br>
+								Die Funktion erwartet einen int-Wert und liefert eine Zeichenkette
+								mit der Richtung zurück. Dabei gleichen die gleichen Beziehungen wie
+								bei Küste:<br>
+								0 = Nordwesten<br>
+								1 = Nordosten<br>
+								2 = Osten<br>
+								3 = Südosten<br>
+								4 = Südwesten<br>
+								5 = Westen<br>
+								Der String sollte entsprechend lokalisiert werden. Die Übersetzung findet man NICHT im
+								Translation-Block.
+							</p>
+
+							<p>$localize( expr )<br>
+								Erwartet einen String der mithilfe der im <a
+									href="https://dose.0wnz.at/thewhitewolf/translation">TRANSLATION</a> Block
+								enthaltenen Daten lokalisiert werden muss.
+							</p>
+							<p>$spell( expr )<br>
+								Wie $localize(), interpretiert den String aber speziell als Zauberspruch.
+							</p>
+							<p>$skill( expr )<br>
+								Wie $localize(), interpretiert den String aber speziell als Talent.
+							</p>
+							<p>$race( expr )<br>
+								Wie $localize(), interpretiert den String aber speziell als Rasse.
+							</p>
+
+							<p>$weight( expr )<br>
+								Erwartet einen int-Wert der ein Gewicht in Silber angibt. Die
+								zurückgegebene Zeichenkette sollte deutlich machen, das es sich um ein
+								Gewicht handelt. Beispiele: $weight(100)="1 GE", $weight(10)="0.1 GE".
+								Ich bin mir nicht sicher ob Gewichtseinheiten im englischen tatsächlich
+								als "WU" gekennzeichnet werden.
+							</p>
+
+							<p>$resources( expr )<br>
+								Erwartet eine Zeichenkette. Diese sollte bereits richtig
+								lokalisiert sein und kann daher ungeändert ausgegeben werden. Lediglich
+								bei einer Änderung der Lokalisierung kann eine Übersetzung notwendig
+								werden.
+							</p>
+
+
+							<h4>Verweise</h4>
+							<p>
+								Verweise auf Attribute des MESSAGE-Blocks sind nun alle jene speziell
+								behandelten Teile, die keine Funktion sind.
+
+							</p>
+							<p>
+								Sie beginnen also alle ebenfalls mit einem "$" Zeichen,
+								dem das Tag des Attributs folgt.
+
+							</p>
+							<p>
+								Der Verweis nimmt dann den Wert des Attributs an, wobei ein nicht
+								Vorhanden sein des Attributs mit diesem Tag einen speziellen NULL
+								Wert ergibt (Zum Beispiel bei der $isnull() Funktion von
+								Bedeutung).
+
+							</p>
+							<p>
+								Der zurückgegebene Wert ist Typbehaftet, ist also ein
+								Integer (int), ein Integer-Tupel (zB int-Trippel) oder ein
+								String.
+
+							</p></td>
+					</tr>
+					<tr>
+						<td>section</td>
+						<td>string</td>
+						<td>
+							Die Kategorie, in der Nachrichten dieses Types einzuordnen sind.
+							Bekannte Bereiche sind: "events", "errors",
+							"economy", "magic", "production" und
+							"study".
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3><a id="translation">TRANSLATION</a></h3>
+			<div>
+				Dieser Block listet alle Übersetzungen von Namen auf. Wird im Report
+				zum Beispiel gesagt, dass eine gewisse Einheit 3 Holz hat
+				(3;Holz), so findet sich hier bei einer englischen Spracheinstellung
+				die entsprechende Zeile, mit der Holz nach wood übersetzt wird
+				("wood";Holz).<br>
+				Es existiert also für jeden Gegenstand, für jedes Talent,
+				und noch etliche andere Begriffe ein String-Attribut,
+				das den im Report verwendeten Namen als Tag, und
+				die Übersetzung in die
+				eingestellte Sprache als Wert enthält.
+			</div>
+			<h3><a id="hotspot">HOTSPOT</a></h3>
+			<div>
+				Kommt nur bei Konfiguration "Java-Tools" vor.
+				<p>Markiert einen Hotspot innerhalb von Magellan, zu welchem man
+					mit einem Klick springen kann.
+				</p>
+				<table>
+					<tbody>
+					<tr>
+						<th>ID</th>
+						<th>Bedeutung</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>idx</td>
+						<td>Index</td>
+						<td>
+							Nummer um die Hotspots untereinander eindeutig zu unterscheiden.
+						</td>
+					</tr>
+					<tr>
+						<th>Attribut</th>
+						<th>Typ</th>
+						<th>Beschreibung</th>
+					</tr>
+					<tr>
+						<td>name</td>
+						<td>string</td>
+						<td>
+							Enthält den Namen des Hotspots.
+						</td>
+					</tr>
+					<tr>
+						<td>coord</td>
+						<td>string (int)</td>
+						<td>
+							Gibt die Koordinaten des Hotspots (zu welchen gesprungen
+							wird) an.<br>
+							Entgegen des CR-Syntax, wird hier ein Int-Attribut
+							innerhalb von doppelten Hochkomme (") geschrieben.
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<div><h2><a id="ebnf">EBNF-Syntax</a></h2>
+			Folgende EBNFs gelten global für dieses Dokument:
+			<pre>STRING_VAL  =&gt; "\"" STRING "\""
+INT_VAL     =&gt; NUMBER {{WS} NUMBER}
+STRINGCHAR =&gt; Any normal Character (only printables, no NL or CR, etc).
+              Nothing exact is specified.
+STRING     =&gt; {STRINGCHAR}
+NUMBER     =&gt; ["-"] DIGIT {DIGIT}
+ALPHANUM   =&gt; ALPHA | DIGIT
+ALPHA      =&gt; UPPERALPHA | LOWERALPHA | UMLAUTS
+UPPERALPHA =&gt; "A" | "B" | "C" | "D" | "E" |
+              "F" | "G" | "H" | "I" | "J" |
+              "K" | "L" | "M" | "N" | "O" |
+              "P" | "Q" | "R" | "S" | "T" |
+              "U" | "V" | "W" | "X" | "Y" |
+              "Z"
+LOWERALPHA =&gt; "a" | "b" | "c" | "d" | "e" |
+              "f" | "g" | "h" | "i" | "j" |
+              "k" | "l" | "m" | "n" | "o" |
+              "p" | "q" | "r" | "s" | "t" |
+              "u" | "v" | "w" | "x" | "y" |
+              "z"
+UMLAUTS    =&gt; "ä" | "ö" | "ü" | "ß" |
+              "Ä" | "Ö" | "Ü"
+DIGIT      =&gt; "0" | "1" | "2" | "3" | "4" |
+              "5" | "6" | "7" | "8" | "9"
+WS         =&gt; " "
+</pre>
+		</div>
+
+		<div><h2><a id="changelog">Changelog</a></h2>
+			<ul>
+				<li>2008-04-30 19:13<br>
+					- <a href="#region">REGION</a>: Attribut "id" hinzugefügt.<br>
+					- <a href="#einheit">EINHEIT</a>: Attribut "Parteitarnung" hinzugefügt.<br>
+					- <a href="#einheit">EINHEIT</a>: Attribut "Partei" hat nun reservierten Wert.<br>
+					- <a href="#messagetype">MESSAGETYPE</a>: Die Bedeutung fast aller Funktionen korrigiert. <i>Thanks
+						to Ralf Duckstein!</i>
+				</li>
+				<li>2007-11-16 20:42<br>
+					- <a href="#effects">EFFECTS</a> um Alchimistische Tränkte erweitert. <i>Thanks to Ralf
+						Duckstein!</i>
+				</li>
+				<li>2007-07-03 13:48<br>
+					- <a href="#version">VERSION</a> um das Attribut "charset"
+					erweitert.
+				</li>
+				<li>2007-02-19 00:56<br>
+					- <a href="#zauber">ZAUBER</a> um das Attribut "syntax"
+					erweitert.
+				</li>
+				<li>2006-12-08 21:33<br>
+					- <a href="#hotspot">HOTSPOT</a> hinzugefügt.
+				</li>
+				<li>2006-11-24 12:15<br>
+					- EBNF überarbeitet
+				</li>
+				<li>2006-11-22 18:08<br>
+					- REGION-&gt;Mallorn ist int (bool gibt es nicht).
+					- Quicklink at start
+					- TODO: EBNF im ganzen dokument anpassen (ist nicht wirklich richtig)
+				</li>
+				<li>2006-11-17 13:08<br>
+					- Erklärung, was ein eventueller dritter Int-Wert
+					eines Attriuts im Block <a href="#talente">TALENTE</a>
+					bedeutet. <i>Thanks to Fiete!</i><br>
+					- Bug im EBNF der Attribute: Es war möglich, dass ein Tag
+					mit einem WhiteSpace endet.<br>
+					- Umformulierung der Erklärung über die Gesalt
+					eines Attributs.
+				</li>
+				<li>2006-11-12 00:35<br>
+					Attribute "heroes" und "max_heroes"
+					beim Block
+					<a href="#partei">PARTEI</a> hinzugefügt.
+					<i>Thanks to Fiete!</i>
+				</li>
+				<li>2006-09-04 20:20<br>
+					Attribut "wahrerTyp" beim Block
+					<a href="#burg">BURG</a> hinzugefügt.
+					<i>Thanks to Fiete!</i>
+				</li>
+				<li>2006-06-07 19:48<br>
+					Attribut "alias" und "temp" beim
+					<a href="#einheit">EINHEIT</a> Block hinzugefügt. <i>Thanks to
+						Perat!</i>
+				</li>
+				<li>2006-04-25 12:30<br>
+					Attribut "familiarmage" beim
+					<a href="#einheit">EINHEIT</a> Block hinzugefügt. <i>Thanks to
+						Gulrak!</i>
+				</li>
+				<li>2006-02-12 00:39<br>
+					Anmerkung bei der ID vom
+					<a href="#messagetype">MESSAGETYPE</a> Block hinzugefügt.
+				</li>
+				<li>2006-02-08 02:17<br>
+					"Verraeter"- und "Anderepartei"-Attribut beim
+					<a href="#einheit">EINHEIT</a> Block hinzugefügt.
+				</li>
+				<li>2006-01-19 00:54<br>
+					"weight" Attribut beim
+					<a href="#einheit">EINHEIT</a> Block, und
+					"cargo" sowie "capacity" Attribut beim
+					<a href="#schiff">SCHIFF</a> Block hinzugefügt. - Positionen
+					im CR noch nicht korrekt, und Konflikt mit Ladung/MaxLadung
+					noch nicht gelöst.
+				</li>
+				<li>2006-01-15 18:45<br>
+					"visibility" Attribut bei
+					<a href="#region">REGION</a> Block geupdated.
+				</li>
+				<li>2005-10-27 18:00<br>
+					"age" Attribut bei
+					<a href="#partei">PARTEI</a> Block hinzugefügt.
+				</li>
+				<li>2005-08-07 03:39<br>
+					Block <a href="#grenze">GRENZE</a> hinzugefügt.
+				</li>
+				<li>2005-08-01 00:09<br>
+					Block <a href="#einheitsbotschaften">
+						EINHEITSBOTSCHAFTEN</a> wird durch MESSAGETYPE ersetzt.
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+</body>
+</html>

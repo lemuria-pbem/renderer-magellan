@@ -2,6 +2,7 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
+use Lemuria\Engine\Message;
 use function Lemuria\getClass;
 use Lemuria\Model\Lemuria\Ability;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Balsam;
@@ -31,6 +32,20 @@ use Lemuria\Renderer\Writer;
 
 class MagellanWriter implements Writer
 {
+	private const MESSAGE_DEFAULT = 'Meldungen';
+
+	private const MESSAGE_EVENT = 'events';
+
+	private const MESSAGE_ERROR = 'errors';
+
+	private const MESSAGE_PRODUCTION = 'production';
+
+	private const MESSAGE_ECONOMY = 'economy';
+
+	private const MESSAGE_MAGIC = 'magic';
+
+	private const MESSAGE_STUDY = 'study';
+
 	private const HEADER = [
 		'VERSION 67',
 		'charset'       => 'UTF-8',
@@ -46,6 +61,11 @@ class MagellanWriter implements Writer
 		'Zeitalter'     => 1,
 		'mailto'        => 'lemuria@online.de',
 		'mailcmd'       => 'Lemuria Befehle'
+	];
+
+	private const MESSAGETYPES = [
+		self::MESSAGE_DEFAULT => 1, self::MESSAGE_ECONOMY    => 2, self::MESSAGE_ERROR => 3, self::MESSAGE_EVENT => 4,
+		self::MESSAGE_MAGIC   => 5, self::MESSAGE_PRODUCTION => 6, self::MESSAGE_STUDY => 7
 	];
 
 	/**
@@ -90,6 +110,7 @@ class MagellanWriter implements Writer
 			$this->writeRegion($region);
 		}
 
+		$this->writeMessagetype();
 		$this->writeTranslations();
 
 		if (!fclose($this->file)) {
@@ -163,15 +184,16 @@ class MagellanWriter implements Writer
 			'Parteiname'          => $party->Name(),
 			'email'               => 'lemuria@online.de',
 			'banner'              => $party->Description(),
-			'ISLAND 1',
-			'Name'                => 'Kontinent Lemuria',
-			'Beschr'              => 'Dies ist der Hauptkontinent Lemuria.'
 		];
 		$this->writeData($data);
 
 		foreach ($party->Diplomacy() as $relation) {
 			$this->writeAlliance($relation);
 		}
+		foreach (Lemuria::Report()->getAll($party) as $message) {
+			$this->writeMessage($message, self::MESSAGE_EVENT);
+		}
+		$this->writeIsland();
 	}
 
 	private function writeAlliance(Relation $relation): void {
@@ -205,6 +227,15 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	private function writeIsland(): void {
+		$data = [
+			'ISLAND 1',
+			'Name'   => 'Kontinent Lemuria',
+			'Beschr' => 'Dies ist der Hauptkontinent Lemuria.'
+		];
+		$this->writeData($data);
+	}
+
 	private function writeRegion(Region $region): void {
 		$coordinates = $this->map->getCoordinates($region);
 		$resources   = $region->Resources();
@@ -222,6 +253,9 @@ class MagellanWriter implements Writer
 			'Lohn'     => 11
 		];
 		$this->writeData($data);
+		foreach (Lemuria::Report()->getAll($region) as $message) {
+			$this->writeMessage($message, self::MESSAGE_EVENT);
+		}
 		$this->writeMarket($region->Luxuries());
 
 		$peasant = Lemuria::Builder()->create(Peasant::class);
@@ -242,12 +276,21 @@ class MagellanWriter implements Writer
 
 		foreach ($region->Residents() as $unit /* @var Unit $unit */) {
 			$this->writeUnit($unit);
+			foreach (Lemuria::Report()->getAll($unit) as $message) {
+				$this->writeMessage($message, self::MESSAGE_PRODUCTION);
+			}
 		}
 		foreach ($region->Estate() as $construction /* @var Construction $construction */) {
 			$this->writeConstruction($construction);
+			foreach (Lemuria::Report()->getAll($construction) as $message) {
+				$this->writeMessage($message, self::MESSAGE_ECONOMY);
+			}
 		}
 		foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
 			$this->writeVessel($vessel);
+			foreach (Lemuria::Report()->getAll($vessel) as $message) {
+				$this->writeMessage($message ,self::MESSAGE_ECONOMY);
+			}
 		}
 	}
 
@@ -371,6 +414,26 @@ class MagellanWriter implements Writer
 			unset($data['Kueste']);
 		}
 		$this->writeData($data);
+	}
+
+	private function writeMessage(Message $message, string $section = self::MESSAGE_DEFAULT): void {
+		$data = [
+			'MESSAGE ' . $message->Id()->Id(),
+			'type' => self::MESSAGETYPES[$section] ?? self::MESSAGETYPES[self::MESSAGE_DEFAULT],
+			'rendered' => (string)$message
+		];
+		$this->writeData($data);
+	}
+
+	private function writeMessagetype(): void {
+		foreach (self::MESSAGETYPES as $section => $id) {
+			$data = [
+				'MESSAGETYPE ' . $id,
+				'text'    => '"$rendered"',
+				'section' => $section
+			];
+			$this->writeData($data);
+		}
 	}
 
 	private function writeTranslations(): void {
