@@ -2,8 +2,8 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
-use Lemuria\Engine\Message;
 use function Lemuria\getClass;
+use Lemuria\Engine\Message;
 use Lemuria\Model\Lemuria\Ability;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Balsam;
 use Lemuria\Model\Lemuria\Commodity\Luxury\Gem;
@@ -145,7 +145,7 @@ class MagellanWriter implements Writer
 					if (is_int($value)) {
 						$line = $value . ';' . $key;
 					} else {
-						$line = '"' . $value . '";' . $key;
+						$line = '"' . $this->escape($value) . '";' . $key;
 					}
 				}
 				fputs($this->file, $line . PHP_EOL);
@@ -328,8 +328,8 @@ class MagellanWriter implements Writer
 			'Partei'      => $unit->Party()->Id()->Id(),
 			'Anzahl'      => $unit->Size(),
 			'Typ'         => Translator::RACE[getClass($unit->Race())],
-			'Burg'        => $unit->Construction() ? $unit->Construction()->Id()->Id() : 0,
-			'Schiff'      => $unit->Vessel() ? $unit->Vessel()->Id()->Id() : 0,
+			'Burg'        => $unit->Construction()?->Id()->Id(),
+			'Schiff'      => $unit->Vessel()?->Id()->Id(),
 			'bewacht'     => $unit->IsGuarding() ? 1 : 0,
 			'Kampfstatus' => Translator::BATTLE_ROW[$unit->BattleRow()] ?? 4,
 			'hp'          => $hp,
@@ -363,19 +363,27 @@ class MagellanWriter implements Writer
 			}
 			$this->writeData($data);
 		}
+
+		$orders = Lemuria::Orders()->getCurrent($unit->Id());
+		if (count($orders)) {
+			$data = ['COMMANDS'];
+			foreach ($orders as $order) {
+				$data[] = '"' . $this->escape($order) . '"';
+			}
+			$this->writeData($data);
+		}
 	}
 
 	private function writeConstruction(Construction $construction): void {
 		$owner = $construction->Inhabitants()->Owner();
-		$party = $owner ? $owner->Party()->Id()->Id() : 0;
 		$data  = [
 			'BURG ' . $construction->Id()->Id(),
 			'Typ'      => Translator::BUILDING[getClass($construction->Building())],
 			'Name'     => $construction->Name(),
 			'Beschr'   => $construction->Description(),
 			'Groesse'  => $construction->Size(),
-			'Besitzer' => $owner ? $owner->Id()->Id() : 0,
-			'Partei'   => $party
+			'Besitzer' => $owner?->Id()->Id(),
+			'Partei'   => $owner?->Party()->Id()->Id()
 		];
 		if (!$owner) {
 			unset($data['Besitzer']);
@@ -386,7 +394,6 @@ class MagellanWriter implements Writer
 
 	private function writeVessel(Vessel $vessel): void {
 		$captain  = $vessel->Passengers()->Owner();
-		$party    = $captain ? $captain->Party()->Id()->Id() : 0;
 		$material = $vessel->Ship()->getMaterial();
 		$size     = (int)round($vessel->Completion() * $material[Wood::class]->Count());
 		$coast    = Translator::COAST[$vessel->Anchor()] ?? null;
@@ -402,8 +409,8 @@ class MagellanWriter implements Writer
 			'Groesse'  => $size,
 			'cargo'    => $cargo,
 			'capacity' => $vessel->Ship()->Payload(),
-			'Kapitaen' => $captain ? $captain->Id()->Id() : 0,
-			'Partei'   => $party,
+			'Kapitaen' => $captain?->Id()->Id(),
+			'Partei'   => $captain->Party()->Id()->Id(),
 			'Kueste'   => $coast
 		];
 		if (!$captain) {
@@ -442,5 +449,9 @@ class MagellanWriter implements Writer
 			$data[$key] = $translation;
 		}
 		$this->writeData($data);
+	}
+
+	private function escape(string $string): string {
+		return str_replace('"', '\\"', $string);
 	}
 }
