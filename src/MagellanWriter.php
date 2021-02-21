@@ -364,7 +364,7 @@ class MagellanWriter implements Writer
 			$this->writeData($data);
 		}
 
-		$orders = Lemuria::Orders()->getCurrent($unit->Id());
+		$orders = Lemuria::Orders()->getDefault($unit->Id());
 		if (count($orders)) {
 			$data = ['COMMANDS'];
 			foreach ($orders as $order) {
