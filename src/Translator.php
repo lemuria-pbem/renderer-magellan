@@ -2,7 +2,7 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
-use Lemuria\Model\Lemuria\Combat;
+use Lemuria\Model\Fantasya\Combat;
 use Lemuria\Model\World;
 
 final class Translator
@@ -55,11 +55,9 @@ final class Translator
 		'Catapult'   => 'Katapult',
 		'Crossbow'   => 'Armbrust',
 		'Elephant'   => 'Elefant',
-		'Food'       => 'Nahrung',
 		'Fur'        => 'Pelz',
 		'Gem'        => 'Juwel',
 		'Gold'       => 'Gold',
-		'Granite'    => 'Granit',
 		'Griffin'    => 'Greif',
 		'Griffinegg' => 'Greifenei',
 		'Horse'      => 'Pferd',
@@ -69,7 +67,6 @@ final class Translator
 		'Myrrh'      => 'Myrrhe',
 		'Oil'        => 'Öl',
 		'Olibanum'   => 'Weihrauch',
-		'Ore'        => 'Erz',
 		'Peasant'    => 'Bauer',
 		'Pegasus'    => 'Pegasus',
 		'Silk'       => 'Seide',
@@ -78,7 +75,6 @@ final class Translator
 		'Spice'      => 'Gewürz',
 		'Stone'      => 'Stein',
 		'Sword'      => 'Schwert',
-		'Tree'       => 'Bäume',
 		'Warhammer'  => 'Kriegshammer',
 		'Wood'       => 'Holz',
 		'Woodshield' => 'Holzschild'
