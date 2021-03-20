@@ -104,12 +104,7 @@ class MagellanWriter implements Writer
 		$party     = Party::get($party);
 		$this->map = new PartyMap(Lemuria::World(), $party);
 		$this->writeParty($party);
-
-		$census = new Census($party);
-		foreach ($census->getAtlas() as $region /* @var Region $region */) {
-			$this->writeRegion($region);
-		}
-
+		$this->writeRegions($party);
 		$this->writeMessagetype();
 		$this->writeTranslations();
 
@@ -236,60 +231,100 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
-	private function writeRegion(Region $region): void {
+	protected function writeRegions(Party $party): void {
+		$regions = [];
+		$census  = new Census($party);
+		foreach ($census->getAtlas() as $id => $region /* @var Region $region */) {
+			$regions[$id] = $region;
+		}
+
+		$neighbours = [];
+		foreach ($regions as $id => $region) {
+			foreach (Lemuria::World()->getNeighbours($region)->getAll() as $neighbour /* @var Region $neighbour */) {
+				$nid = $neighbour->Id()->Id();
+				if (!isset($regions[$nid]) && !isset($neighbours[$nid])) {
+					$neighbours[$nid] = $neighbour;
+				}
+			}
+		}
+
+		$ids = array_fill_keys(array_keys($regions), '') + array_fill_keys(array_keys($neighbours), 'neighbour');
+		ksort($ids);
+		foreach ($ids as $id => $visibility) {
+			$region = empty($visibility) ? $regions[$id] : $neighbours[$id];
+			$this->writeRegion($region, $visibility);
+		}
+	}
+
+	private function writeRegion(Region $region, string $visibility): void {
 		$coordinates = $this->map->getCoordinates($region);
 		$resources   = $region->Resources();
-		$data = [
-			'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
-			'id'       => $region->Id()->Id(),
-			'Name'     => $region->Name(),
-			'Terrain'  => Translator::LANDSCAPE[getClass($region->Landscape())],
-			'Insel'    => 1,
-			'Beschr'   => $region->Description(),
-			'Bauern'   => $resources[Peasant::class]->Count(),
-			'Silber'   => $resources[Silver::class]->Count(),
-			'Unterh'   => (int)floor($resources[Silver::class]->Count() * 0.05),
-			'Rekruten' => (int)floor($resources[Peasant::class]->Count() * 0.05),
-			'Lohn'     => 11
-		];
+
+		if (empty($visibility)) {
+			$data = [
+				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
+				'id'       => $region->Id()->Id(),
+				'Name'     => $region->Name(),
+				'Terrain'  => Translator::LANDSCAPE[getClass($region->Landscape())],
+				'Insel'    => 1,
+				'Beschr'   => $region->Description(),
+				'Bauern'   => $resources[Peasant::class]->Count(),
+				'Silber'   => $resources[Silver::class]->Count(),
+				'Unterh'   => (int)floor($resources[Silver::class]->Count() * 0.05),
+				'Rekruten' => (int)floor($resources[Peasant::class]->Count() * 0.05),
+				'Lohn'     => 11
+			];
+		} else {
+			$data = [
+				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
+				'id'         => $region->Id()->Id(),
+				'Name'       => $region->Name(),
+				'Terrain'    => Translator::LANDSCAPE[getClass($region->Landscape())],
+				'Insel'      => 1,
+				'visibility' => $visibility
+			];
+		}
 		$this->writeData($data);
-		foreach (Lemuria::Report()->getAll($region) as $message) {
-			$this->writeMessage($message, self::MESSAGE_EVENT);
-		}
-		$this->writeMarket($region->Luxuries());
 
-		$peasant = Lemuria::Builder()->create(Peasant::class);
-		$silver  = Lemuria::Builder()->create(Silver::class);
-		$hash    = 1;
-		foreach ($resources as $item) {
-			$object = $item->getObject();
-			if ($object !== $peasant || $object !== $silver) {
-				$data = [
-					'RESOURCE ' . $hash++,
-					'type'   => Translator::COMMODITY[getClass($object)],
-					'skill'  => 1,
-					'number' => $item->Count()
-				];
-				$this->writeData($data);
+		if (empty($visibility)) {
+			foreach (Lemuria::Report()->getAll($region) as $message) {
+				$this->writeMessage($message, self::MESSAGE_EVENT);
 			}
-		}
+			$this->writeMarket($region->Luxuries());
 
-		foreach ($region->Residents() as $unit /* @var Unit $unit */) {
-			$this->writeUnit($unit);
-			foreach (Lemuria::Report()->getAll($unit) as $message) {
-				$this->writeMessage($message, self::MESSAGE_PRODUCTION);
+			$peasant = Lemuria::Builder()->create(Peasant::class);
+			$silver  = Lemuria::Builder()->create(Silver::class);
+			$hash    = 1;
+			foreach ($resources as $item) {
+				$object = $item->getObject();
+				if ($object !== $peasant || $object !== $silver) {
+					$data = [
+						'RESOURCE ' . $hash++,
+						'type'   => Translator::COMMODITY[getClass($object)],
+						'skill'  => 1,
+						'number' => $item->Count()
+					];
+					$this->writeData($data);
+				}
 			}
-		}
-		foreach ($region->Estate() as $construction /* @var Construction $construction */) {
-			$this->writeConstruction($construction);
-			foreach (Lemuria::Report()->getAll($construction) as $message) {
-				$this->writeMessage($message, self::MESSAGE_ECONOMY);
+
+			foreach ($region->Residents() as $unit/* @var Unit $unit */) {
+				$this->writeUnit($unit);
+				foreach (Lemuria::Report()->getAll($unit) as $message) {
+					$this->writeMessage($message, self::MESSAGE_PRODUCTION);
+				}
 			}
-		}
-		foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
-			$this->writeVessel($vessel);
-			foreach (Lemuria::Report()->getAll($vessel) as $message) {
-				$this->writeMessage($message ,self::MESSAGE_ECONOMY);
+			foreach ($region->Estate() as $construction/* @var Construction $construction */) {
+				$this->writeConstruction($construction);
+				foreach (Lemuria::Report()->getAll($construction) as $message) {
+					$this->writeMessage($message, self::MESSAGE_ECONOMY);
+				}
+			}
+			foreach ($region->Fleet() as $vessel/* @var Vessel $vessel */) {
+				$this->writeVessel($vessel);
+				foreach (Lemuria::Report()->getAll($vessel) as $message) {
+					$this->writeMessage($message, self::MESSAGE_ECONOMY);
+				}
 			}
 		}
 	}
