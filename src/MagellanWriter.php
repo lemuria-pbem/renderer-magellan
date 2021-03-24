@@ -4,6 +4,8 @@ namespace Lemuria\Renderer\Magellan;
 
 use function Lemuria\getClass;
 use Lemuria\Engine\Message;
+use Lemuria\Engine\Message\Filter;
+use Lemuria\Engine\Message\Filter\NullFilter;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Balsam;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Gem;
@@ -80,8 +82,11 @@ class MagellanWriter implements Writer
 
 	private PartyMap $map;
 
+	private Filter $filter;
+
 	public function __construct(string $path) {
-		$this->file = fopen($path, 'w');
+		$this->filter = new NullFilter();
+		$this->file   = fopen($path, 'w');
 		if (!$this->file) {
 			throw new \RuntimeException('Could not open file ' . $path . '.');
 		}
@@ -92,6 +97,11 @@ class MagellanWriter implements Writer
 		if ($this->file) {
 			$this->close();
 		}
+	}
+
+	public function setFilter(Filter $filter): Writer {
+		$this->filter = $filter;
+		return $this;
 	}
 
 	public function render(Id $party): Writer {
@@ -459,12 +469,14 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeMessage(Message $message, string $section = self::MESSAGE_DEFAULT): void {
-		$data = [
-			'MESSAGE ' . $message->Id()->Id(),
-			'type' => self::MESSAGETYPES[$section] ?? self::MESSAGETYPES[self::MESSAGE_DEFAULT],
-			'rendered' => (string)$message
-		];
-		$this->writeData($data);
+		if ($message->Level() !== Message::DEBUG) {
+			$data = [
+				'MESSAGE ' . $message->Id()->Id(),
+				'type'     => self::MESSAGETYPES[$section] ?? self::MESSAGETYPES[self::MESSAGE_DEFAULT],
+				'rendered' => (string)$message
+			];
+			$this->writeData($data);
+		}
 	}
 
 	private function writeMessagetype(): void {
