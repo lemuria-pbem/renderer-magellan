@@ -469,7 +469,7 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeMessage(Message $message, string $section = self::MESSAGE_DEFAULT): void {
-		if ($message->Level() !== Message::DEBUG) {
+		if (!$this->filter->retains($message)) {
 			$data = [
 				'MESSAGE ' . $message->Id()->Id(),
 				'type'     => self::MESSAGETYPES[$section] ?? self::MESSAGETYPES[self::MESSAGE_DEFAULT],
