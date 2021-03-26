@@ -262,11 +262,11 @@ class MagellanWriter implements Writer
 		ksort($ids);
 		foreach ($ids as $id => $visibility) {
 			$region = empty($visibility) ? $regions[$id] : $neighbours[$id];
-			$this->writeRegion($region, $visibility);
+			$this->writeRegion($region, $visibility, $party);
 		}
 	}
 
-	private function writeRegion(Region $region, string $visibility): void {
+	private function writeRegion(Region $region, string $visibility, Party $party): void {
 		$coordinates = $this->map->getCoordinates($region);
 		$resources   = $region->Resources();
 
@@ -319,9 +319,12 @@ class MagellanWriter implements Writer
 			}
 
 			foreach ($region->Residents() as $unit/* @var Unit $unit */) {
-				$this->writeUnit($unit);
-				foreach (Lemuria::Report()->getAll($unit) as $message) {
-					$this->writeMessage($message, self::MESSAGE_PRODUCTION);
+				$isOwnUnit = $unit->Party() === $party;
+				$this->writeUnit($unit, $isOwnUnit);
+				if ($isOwnUnit) {
+					foreach (Lemuria::Report()->getAll($unit) as $message) {
+						$this->writeMessage($message, self::MESSAGE_PRODUCTION);
+					}
 				}
 			}
 			foreach ($region->Estate() as $construction/* @var Construction $construction */) {
@@ -364,8 +367,8 @@ class MagellanWriter implements Writer
 		return $luxuries[$class]->Price();
 	}
 
-	private function writeUnit(Unit $unit): void {
-		$hp   = 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
+	private function writeUnit(Unit $unit, bool $isOwnUnit): void {
+		$hp   = $isOwnUnit ? 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')' : 'gut';
 		$data = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'        => $unit->Name(),
@@ -389,33 +392,39 @@ class MagellanWriter implements Writer
 		if (!$unit->IsGuarding()) {
 			unset($data['bewacht']);
 		}
+		if (!$isOwnUnit) {
+			unset($data['Kampfstatus']);
+			unset($data['weight']);
+		}
 		$this->writeData($data);
 
-		if (count($unit->Knowledge()) > 0) {
-			$data = ['TALENTE'];
-			foreach ($unit->Knowledge() as $ability /* @var Ability $ability */) {
-				$talent        = Translator::TALENT[getClass($ability->Talent())];
-				$data[$talent] = [$ability->Experience(), $ability->Level()];
+		if ($isOwnUnit) {
+			if (count($unit->Knowledge()) > 0) {
+				$data = ['TALENTE'];
+				foreach ($unit->Knowledge() as $ability/* @var Ability $ability */) {
+					$talent        = Translator::TALENT[getClass($ability->Talent())];
+					$data[$talent] = [$ability->Experience(), $ability->Level()];
+				}
+				$this->writeData($data);
 			}
-			$this->writeData($data);
-		}
 
-		if (count($unit->Inventory()) > 0) {
-			$data = ['GEGENSTAENDE'];
-			foreach ($unit->Inventory() as $quantity /* @var Quantity $quantity */) {
-				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
-				$data[$commodity] = $quantity->Count();
+			if (count($unit->Inventory()) > 0) {
+				$data = ['GEGENSTAENDE'];
+				foreach ($unit->Inventory() as $quantity/* @var Quantity $quantity */) {
+					$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
+					$data[$commodity] = $quantity->Count();
+				}
+				$this->writeData($data);
 			}
-			$this->writeData($data);
-		}
 
-		$orders = Lemuria::Orders()->getDefault($unit->Id());
-		if (count($orders)) {
-			$data = ['COMMANDS'];
-			foreach ($orders as $order) {
-				$data[] = '"' . $this->escape($order) . '"';
+			$orders = Lemuria::Orders()->getDefault($unit->Id());
+			if (count($orders)) {
+				$data = ['COMMANDS'];
+				foreach ($orders as $order) {
+					$data[] = '"' . $this->escape($order) . '"';
+				}
+				$this->writeData($data);
 			}
-			$this->writeData($data);
 		}
 	}
 
