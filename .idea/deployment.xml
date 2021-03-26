@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="Lemuria Game">
+  <component name="PublishConfigData" autoUpload="Always" serverName="Lemuria Alpha">
     <serverData>
+      <paths name="Lemuria Alpha">
+        <serverdata>
+          <mappings>
+            <mapping deploy="vendor/lemuria-pbem/renderer-magellan" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="Lemuria Game">
         <serverdata>
           <mappings>

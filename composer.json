@@ -10,7 +10,7 @@
 		"magellan",
 		"pbem"
 	],
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"time": "2021-03-26",
 	"license": "GPL-3.0",
 	"authors": [
@@ -23,6 +23,7 @@
 	"require": {
 		"php": "~8.0",
 		"lemuria-pbem/lemuria": "dev-master",
+		"lemuria-pbem/engine-fantasya": "dev-master",
 		"lemuria-pbem/model-fantasya": "dev-master"
 	},
 	"require-dev": {
@@ -32,6 +33,10 @@
 		{
 			"type": "vcs",
 			"url": "git@github.com:lemuria-pbem/lemuria.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:lemuria-pbem/engine-fantasya.git"
 		},
 		{
 			"type": "vcs",

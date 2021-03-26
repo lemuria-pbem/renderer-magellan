@@ -3,6 +3,7 @@ declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
 use function Lemuria\getClass;
+use Lemuria\Engine\Fantasya\Outlook;
 use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
@@ -249,8 +250,9 @@ class MagellanWriter implements Writer
 		}
 
 		$neighbours = [];
+		$outlook    = new Outlook($census);
 		foreach ($regions as $id => $region) {
-			foreach (Lemuria::World()->getNeighbours($region)->getAll() as $neighbour /* @var Region $neighbour */) {
+			foreach ($outlook->Panorama($region) as $neighbour /* @var Region $neighbour */) {
 				$nid = $neighbour->Id()->Id();
 				if (!isset($regions[$nid]) && !isset($neighbours[$nid])) {
 					$neighbours[$nid] = $neighbour;

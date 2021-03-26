@@ -12,6 +12,7 @@
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-ctype" />
       <path value="$PROJECT_DIR$/vendor/brick/math" />
       <path value="$PROJECT_DIR$/vendor/lemuria-pbem/model-fantasya" />
+      <path value="$PROJECT_DIR$/vendor/lemuria-pbem/engine-fantasya" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.0" />
