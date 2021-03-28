@@ -6,7 +6,7 @@ use function Lemuria\getClass;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Command\Entertain;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
-use Lemuria\Engine\Fantasya\Outlook;
+use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
 use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
@@ -26,7 +26,6 @@ use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
 use Lemuria\Model\Fantasya\Party;
-use Lemuria\Model\Fantasya\Party\Census;
 use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
@@ -247,41 +246,12 @@ class MagellanWriter implements Writer
 	}
 
 	protected function writeRegions(Party $party): void {
-		$travelled = [];
-		$round     = Lemuria::Calendar()->Round() - 1;
-		$chronicle = $party->Chronicle();
-		foreach ($party->Chronicle() as $id => $region /* @var Region $region */) {
-			if ($chronicle->getVisit($region)->Round() === $round) {
-				$travelled[$id] = $region;
-			}
-		}
-
-		$regions = [];
-		$census  = new Census($party);
-		foreach ($census->getAtlas() as $id => $region /* @var Region $region */) {
-			$regions[$id] = $region;
-		}
-
-		$neighbours = [];
-		$outlook    = new Outlook($census);
-		foreach ($regions as $id => $region) {
-			foreach ($outlook->Panorama($region) as $neighbour /* @var Region $neighbour */) {
-				$nid = $neighbour->Id()->Id();
-				if (!isset($regions[$nid]) && !isset($neighbours[$nid])) {
-					$neighbours[$nid] = $neighbour;
-				}
-			}
-		}
-
-		$ids = array_fill_keys(array_keys($regions), '')
-			 + array_fill_keys(array_keys($travelled), 'travel')
-			 + array_fill_keys(array_keys($neighbours), 'neighbour');
-		ksort($ids);
-		foreach ($ids as $id => $visibility) {
-			$region = match ($visibility) {
-				'neighbour' => $neighbours[$id],
-				'travel'    => $travelled[$id],
-				default     => $regions[$id]
+		$atlas = new TravelAtlas($party);
+		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
+			$visibility = match ($atlas->getVisibility($region)) {
+				TravelAtlas::WITH_UNIT => '',
+				TravelAtlas::TRAVELLED => 'travel',
+				default                => 'neighbour'
 			};
 			$this->writeRegion($region, $visibility, $party);
 		}
