@@ -3,6 +3,9 @@ declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
 use function Lemuria\getClass;
+use Lemuria\Engine\Fantasya\Availability;
+use Lemuria\Engine\Fantasya\Command\Entertain;
+use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Outlook;
 use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
@@ -19,6 +22,7 @@ use Lemuria\Model\Fantasya\Commodity\Peasant;
 use Lemuria\Model\Fantasya\Commodity\Silver;
 use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
+use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
 use Lemuria\Model\Fantasya\Party;
@@ -273,7 +277,9 @@ class MagellanWriter implements Writer
 		$resources   = $region->Resources();
 
 		if (empty($visibility)) {
-			$data = [
+			$availability = new Availability($region);
+			$intelligence = new Intelligence($region);
+			$data         = [
 				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
 				'id'       => $region->Id()->Id(),
 				'Name'     => $region->Name(),
@@ -282,9 +288,9 @@ class MagellanWriter implements Writer
 				'Beschr'   => $region->Description(),
 				'Bauern'   => $resources[Peasant::class]->Count(),
 				'Silber'   => $resources[Silver::class]->Count(),
-				'Unterh'   => (int)floor($resources[Silver::class]->Count() * 0.05),
-				'Rekruten' => (int)floor($resources[Peasant::class]->Count() * 0.05),
-				'Lohn'     => 11
+				'Unterh'   => (int)floor($resources[Silver::class]->Count() * Entertain::QUOTA),
+				'Rekruten' => $availability->getResource(Peasant::class)->Count(),
+				'Lohn'     => $intelligence->getWage(Subsistence::WAGE)
 			];
 		} else {
 			$data = [
