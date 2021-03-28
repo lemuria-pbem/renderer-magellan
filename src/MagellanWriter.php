@@ -247,6 +247,15 @@ class MagellanWriter implements Writer
 	}
 
 	protected function writeRegions(Party $party): void {
+		$travelled = [];
+		$round     = Lemuria::Calendar()->Round() - 1;
+		$chronicle = $party->Chronicle();
+		foreach ($party->Chronicle() as $id => $region /* @var Region $region */) {
+			if ($chronicle->getVisit($region)->Round() === $round) {
+				$travelled[$id] = $region;
+			}
+		}
+
 		$regions = [];
 		$census  = new Census($party);
 		foreach ($census->getAtlas() as $id => $region /* @var Region $region */) {
@@ -264,10 +273,16 @@ class MagellanWriter implements Writer
 			}
 		}
 
-		$ids = array_fill_keys(array_keys($regions), '') + array_fill_keys(array_keys($neighbours), 'neighbour');
+		$ids = array_fill_keys(array_keys($regions), '')
+			 + array_fill_keys(array_keys($travelled), 'travel')
+			 + array_fill_keys(array_keys($neighbours), 'neighbour');
 		ksort($ids);
 		foreach ($ids as $id => $visibility) {
-			$region = empty($visibility) ? $regions[$id] : $neighbours[$id];
+			$region = match ($visibility) {
+				'neighbour' => $neighbours[$id],
+				'travel'    => $travelled[$id],
+				default     => $regions[$id]
+			};
 			$this->writeRegion($region, $visibility, $party);
 		}
 	}
