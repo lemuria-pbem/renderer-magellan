@@ -61,6 +61,7 @@ class MagellanWriter implements Writer
 		'Basis'         => 36,
 		'noskillpoints' => 0,
 		'max_units'     => 1000,
+		'Koordinaten'   => 'Hex',
 		'Build'         => '1.0.0',
 		'date'          => '$DATE',
 		'Runde'         => '$TURN',
