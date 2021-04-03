@@ -122,9 +122,9 @@ class MagellanWriter implements Writer
 		$this->map = new PartyMap(Lemuria::World(), $party);
 		$census    = new Census($party);
 		$outlook   = new Outlook($census);
-		$this->writeParties($party, $census, $outlook);
+		$this->writeParties($outlook);
 		$this->writeIsland();
-		$this->writeRegions($party, $outlook);
+		$this->writeRegions($outlook);
 		$this->writeMessagetype();
 		$this->writeTranslations();
 
@@ -138,34 +138,6 @@ class MagellanWriter implements Writer
 	private function initVariables(): void {
 		$this->variables['$DATE'] = time();
 		$this->variables['$TURN'] = Lemuria::Calendar()->Round();
-	}
-
-	private function writeData(array $data): void {
-		$block = current($data);
-		foreach ($data as $key => $value) {
-			if (is_array($value)) {
-				if ($block === 'TALENTE') {
-					$line = implode(' ', $value) . ';' . $key;
-					fputs($this->file, $line . PHP_EOL);
-				} else {
-					$this->writeData($value);
-				}
-			} else {
-				if (is_int($key)) {
-					$line = $value;
-				} else {
-					if (is_string($value) && isset($this->variables[$value])) {
-						$value = $this->variables[$value];
-					}
-					if (is_int($value)) {
-						$line = $value . ';' . $key;
-					} else {
-						$line = '"' . $this->escape($value) . '";' . $key;
-					}
-				}
-				fputs($this->file, $line . PHP_EOL);
-			}
-		}
 	}
 
 	/**
@@ -185,15 +157,18 @@ class MagellanWriter implements Writer
 		$this->writeData(self::HEADER);
 	}
 
-	private function writeParties(Party $party, Census $census, Outlook $outlook): void {
+	private function writeParties(Outlook $outlook): void {
+		$census = $outlook->Census();
+		$party  = $census->Party();
+
 		$this->writeParty($party);
 		$acquaintances = $party->Diplomacy()->Acquaintances();
 
 		$parties = [];
 		foreach ($census->getAtlas() as $region /* @var Region $region */) {
 			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
-				$foreign = $unit->Party();
-				if ($foreign !== $party) {
+				$foreign = $census->getParty($unit);
+				if ($foreign && $foreign !== $party) {
 					$id           = $foreign->Id()->Id();
 					$parties[$id] = $foreign;
 				}
@@ -288,19 +263,19 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
-	protected function writeRegions(Party $party, Outlook $outlook): void {
-		$atlas = new TravelAtlas($party);
+	protected function writeRegions(Outlook $outlook): void {
+		$atlas = new TravelAtlas($outlook->Census()->Party());
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
 			$visibility = match ($atlas->getVisibility($region)) {
 				TravelAtlas::WITH_UNIT => '',
 				TravelAtlas::TRAVELLED => 'travel',
 				default                => 'neighbour'
 			};
-			$this->writeRegion($region, $visibility, $party, $outlook);
+			$this->writeRegion($region, $visibility, $outlook);
 		}
 	}
 
-	private function writeRegion(Region $region, string $visibility, Party $party, Outlook $outlook): void {
+	private function writeRegion(Region $region, string $visibility, Outlook $outlook): void {
 		$coordinates = $this->map->getCoordinates($region);
 		$resources   = $region->Resources();
 
@@ -354,6 +329,8 @@ class MagellanWriter implements Writer
 				}
 			}
 
+			$census = $outlook->Census();
+			$party  = $census->Party();
 			foreach ($region->Residents() as $unit /* @var Unit $unit */) {
 				if ($unit->Party() === $party) {
 					$this->writeUnit($unit);
@@ -364,7 +341,7 @@ class MagellanWriter implements Writer
 			}
 			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
 				if ($unit->Party() !== $party) {
-					$this->writeForeignUnit($unit);
+					$this->writeForeignUnit($unit, $census);
 				}
 			}
 			foreach ($region->Estate() as $construction /* @var Construction $construction */) {
@@ -396,15 +373,6 @@ class MagellanWriter implements Writer
 			];
 			$this->writeData($data);
 		}
-	}
-
-	private function getPrice(string $class, Luxuries $luxuries): int {
-		/* @var Luxury $luxury */
-		$luxury = Lemuria::Builder()->create($class);
-		if ($luxury === $luxuries->Offer()->Commodity()) {
-			return -$luxury->Value();
-		}
-		return $luxuries[$class]->Price();
 	}
 
 	private function writeUnit(Unit $unit): void {
@@ -462,12 +430,13 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	private function writeForeignUnit(Unit $unit): void {
-		$data = [
+	private function writeForeignUnit(Unit $unit, Census $census): void {
+		$party = $census->getParty($unit)?->Id()->Id();
+		$data  = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'        => $unit->Name(),
 			'Beschr'      => $unit->Description(),
-			'Partei'      => $unit->Party()->Id()->Id(),
+			'Partei'      => $party,
 			'Anzahl'      => $unit->Size(),
 			'Typ'         => Translator::RACE[getClass($unit->Race())],
 			'Burg'        => $unit->Construction()?->Id()->Id(),
@@ -475,6 +444,9 @@ class MagellanWriter implements Writer
 			'bewacht'     => $unit->IsGuarding() ? 1 : 0,
 			'hp'          => 'gut'
 		];
+		if (!$party) {
+			unset($data['Partei']);
+		}
 		if (!$unit->Construction()) {
 			unset($data['Burg']);
 		}
@@ -566,7 +538,44 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
+	private function writeData(array $data): void {
+		$block = current($data);
+		foreach ($data as $key => $value) {
+			if (is_array($value)) {
+				if ($block === 'TALENTE') {
+					$line = implode(' ', $value) . ';' . $key;
+					fputs($this->file, $line . PHP_EOL);
+				} else {
+					$this->writeData($value);
+				}
+			} else {
+				if (is_int($key)) {
+					$line = $value;
+				} else {
+					if (is_string($value) && isset($this->variables[$value])) {
+						$value = $this->variables[$value];
+					}
+					if (is_int($value)) {
+						$line = $value . ';' . $key;
+					} else {
+						$line = '"' . $this->escape($value) . '";' . $key;
+					}
+				}
+				fputs($this->file, $line . PHP_EOL);
+			}
+		}
+	}
+
 	private function escape(string $string): string {
 		return str_replace('"', '\\"', $string);
+	}
+
+	private function getPrice(string $class, Luxuries $luxuries): int {
+		/* @var Luxury $luxury */
+		$luxury = Lemuria::Builder()->create($class);
+		if ($luxury === $luxuries->Offer()->Commodity()) {
+			return -$luxury->Value();
+		}
+		return $luxuries[$class]->Price();
 	}
 }
