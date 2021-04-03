@@ -7,6 +7,7 @@ use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Command\Entertain;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
+use Lemuria\Engine\Fantasya\Outlook;
 use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
@@ -26,6 +27,7 @@ use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
 use Lemuria\Model\Fantasya\Party;
+use Lemuria\Model\Fantasya\Party\Census;
 use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
@@ -118,8 +120,11 @@ class MagellanWriter implements Writer
 
 		$party     = Party::get($party);
 		$this->map = new PartyMap(Lemuria::World(), $party);
-		$this->writeParty($party);
-		$this->writeRegions($party);
+		$census    = new Census($party);
+		$outlook   = new Outlook($census);
+		$this->writeParties($outlook);
+		$this->writeIsland();
+		$this->writeRegions($outlook);
 		$this->writeMessagetype();
 		$this->writeTranslations();
 
@@ -133,34 +138,6 @@ class MagellanWriter implements Writer
 	private function initVariables(): void {
 		$this->variables['$DATE'] = time();
 		$this->variables['$TURN'] = Lemuria::Calendar()->Round();
-	}
-
-	private function writeData(array $data): void {
-		$block = current($data);
-		foreach ($data as $key => $value) {
-			if (is_array($value)) {
-				if ($block === 'TALENTE') {
-					$line = implode(' ', $value) . ';' . $key;
-					fputs($this->file, $line . PHP_EOL);
-				} else {
-					$this->writeData($value);
-				}
-			} else {
-				if (is_int($key)) {
-					$line = $value;
-				} else {
-					if (is_string($value) && isset($this->variables[$value])) {
-						$value = $this->variables[$value];
-					}
-					if (is_int($value)) {
-						$line = $value . ';' . $key;
-					} else {
-						$line = '"' . $this->escape($value) . '";' . $key;
-					}
-				}
-				fputs($this->file, $line . PHP_EOL);
-			}
-		}
 	}
 
 	/**
@@ -178,6 +155,29 @@ class MagellanWriter implements Writer
 	 */
 	private function writeHeader(): void {
 		$this->writeData(self::HEADER);
+	}
+
+	private function writeParties(Outlook $outlook): void {
+		$census = $outlook->Census();
+		$party  = $census->Party();
+
+		$this->writeParty($party);
+		$acquaintances = $party->Diplomacy()->Acquaintances();
+
+		$parties = [];
+		foreach ($census->getAtlas() as $region /* @var Region $region */) {
+			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
+				$foreign = $census->getParty($unit);
+				if ($foreign && $foreign !== $party) {
+					$id           = $foreign->Id()->Id();
+					$parties[$id] = $foreign;
+				}
+			}
+		}
+
+		foreach ($parties as $id => $foreign) {
+			$this->writeForeignParty($foreign, $acquaintances->has(new Id($id)));
+		}
 	}
 
 	private function writeParty(Party $party): void {
@@ -203,7 +203,24 @@ class MagellanWriter implements Writer
 		foreach (Lemuria::Report()->getAll($party) as $message) {
 			$this->writeMessage($message, self::MESSAGE_EVENT);
 		}
-		$this->writeIsland();
+	}
+
+	private function writeForeignParty(Party $party, bool $isKnown): void {
+		$data = [
+			'PARTEI ' . $party->Id()->Id(),
+			'locale'     => self::HEADER['locale'],
+			'age'        => 1,
+			'Typ'        => Translator::RACE[getClass($party->Race())],
+			'Parteiname' => $party->Name(),
+			'email'      => 'lemuria@online.de',
+			'banner'     => $party->Description(),
+		];
+		if (!$isKnown) {
+			unset($data['Typ']);
+			//unset($data['Parteiname']);
+			unset($data['banner']);
+		}
+		$this->writeData($data);
 	}
 
 	private function writeAlliance(Relation $relation): void {
@@ -246,19 +263,19 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
-	protected function writeRegions(Party $party): void {
-		$atlas = new TravelAtlas($party);
+	protected function writeRegions(Outlook $outlook): void {
+		$atlas = new TravelAtlas($outlook->Census()->Party());
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
 			$visibility = match ($atlas->getVisibility($region)) {
 				TravelAtlas::WITH_UNIT => '',
 				TravelAtlas::TRAVELLED => 'travel',
 				default                => 'neighbour'
 			};
-			$this->writeRegion($region, $visibility, $party);
+			$this->writeRegion($region, $visibility, $outlook);
 		}
 	}
 
-	private function writeRegion(Region $region, string $visibility, Party $party): void {
+	private function writeRegion(Region $region, string $visibility, Outlook $outlook): void {
 		$coordinates = $this->map->getCoordinates($region);
 		$resources   = $region->Resources();
 
@@ -312,22 +329,28 @@ class MagellanWriter implements Writer
 				}
 			}
 
-			foreach ($region->Residents() as $unit/* @var Unit $unit */) {
-				$isOwnUnit = $unit->Party() === $party;
-				$this->writeUnit($unit, $isOwnUnit);
-				if ($isOwnUnit) {
+			$census = $outlook->Census();
+			$party  = $census->Party();
+			foreach ($region->Residents() as $unit /* @var Unit $unit */) {
+				if ($unit->Party() === $party) {
+					$this->writeUnit($unit);
 					foreach (Lemuria::Report()->getAll($unit) as $message) {
 						$this->writeMessage($message, self::MESSAGE_PRODUCTION);
 					}
 				}
 			}
-			foreach ($region->Estate() as $construction/* @var Construction $construction */) {
+			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
+				if ($unit->Party() !== $party) {
+					$this->writeForeignUnit($unit, $census);
+				}
+			}
+			foreach ($region->Estate() as $construction /* @var Construction $construction */) {
 				$this->writeConstruction($construction);
 				foreach (Lemuria::Report()->getAll($construction) as $message) {
 					$this->writeMessage($message, self::MESSAGE_ECONOMY);
 				}
 			}
-			foreach ($region->Fleet() as $vessel/* @var Vessel $vessel */) {
+			foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
 				$this->writeVessel($vessel);
 				foreach (Lemuria::Report()->getAll($vessel) as $message) {
 					$this->writeMessage($message, self::MESSAGE_ECONOMY);
@@ -352,17 +375,8 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	private function getPrice(string $class, Luxuries $luxuries): int {
-		/* @var Luxury $luxury */
-		$luxury = Lemuria::Builder()->create($class);
-		if ($luxury === $luxuries->Offer()->Commodity()) {
-			return -$luxury->Value();
-		}
-		return $luxuries[$class]->Price();
-	}
-
-	private function writeUnit(Unit $unit, bool $isOwnUnit): void {
-		$hp   = $isOwnUnit ? 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')' : 'gut';
+	private function writeUnit(Unit $unit): void {
+		$hp   = 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
 		$data = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'        => $unit->Name(),
@@ -386,40 +400,63 @@ class MagellanWriter implements Writer
 		if (!$unit->IsGuarding()) {
 			unset($data['bewacht']);
 		}
-		if (!$isOwnUnit) {
-			unset($data['Kampfstatus']);
-			unset($data['weight']);
-		}
 		$this->writeData($data);
 
-		if ($isOwnUnit) {
-			if (count($unit->Knowledge()) > 0) {
-				$data = ['TALENTE'];
-				foreach ($unit->Knowledge() as $ability/* @var Ability $ability */) {
-					$talent        = Translator::TALENT[getClass($ability->Talent())];
-					$data[$talent] = [$ability->Experience(), $ability->Level()];
-				}
-				$this->writeData($data);
+		if (count($unit->Knowledge()) > 0) {
+			$data = ['TALENTE'];
+			foreach ($unit->Knowledge() as $ability/* @var Ability $ability */) {
+				$talent        = Translator::TALENT[getClass($ability->Talent())];
+				$data[$talent] = [$ability->Experience(), $ability->Level()];
 			}
-
-			if (count($unit->Inventory()) > 0) {
-				$data = ['GEGENSTAENDE'];
-				foreach ($unit->Inventory() as $quantity/* @var Quantity $quantity */) {
-					$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
-					$data[$commodity] = $quantity->Count();
-				}
-				$this->writeData($data);
-			}
-
-			$orders = Lemuria::Orders()->getDefault($unit->Id());
-			if (count($orders)) {
-				$data = ['COMMANDS'];
-				foreach ($orders as $order) {
-					$data[] = '"' . $this->escape($order) . '"';
-				}
-				$this->writeData($data);
-			}
+			$this->writeData($data);
 		}
+
+		if (count($unit->Inventory()) > 0) {
+			$data = ['GEGENSTAENDE'];
+			foreach ($unit->Inventory() as $quantity/* @var Quantity $quantity */) {
+				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
+				$data[$commodity] = $quantity->Count();
+			}
+			$this->writeData($data);
+		}
+
+		$orders = Lemuria::Orders()->getDefault($unit->Id());
+		if (count($orders)) {
+			$data = ['COMMANDS'];
+			foreach ($orders as $order) {
+				$data[] = '"' . $this->escape($order) . '"';
+			}
+			$this->writeData($data);
+		}
+	}
+
+	private function writeForeignUnit(Unit $unit, Census $census): void {
+		$party = $census->getParty($unit)?->Id()->Id();
+		$data  = [
+			'EINHEIT ' . $unit->Id()->Id(),
+			'Name'        => $unit->Name(),
+			'Beschr'      => $unit->Description(),
+			'Partei'      => $party,
+			'Anzahl'      => $unit->Size(),
+			'Typ'         => Translator::RACE[getClass($unit->Race())],
+			'Burg'        => $unit->Construction()?->Id()->Id(),
+			'Schiff'      => $unit->Vessel()?->Id()->Id(),
+			'bewacht'     => $unit->IsGuarding() ? 1 : 0,
+			'hp'          => 'gut'
+		];
+		if (!$party) {
+			unset($data['Partei']);
+		}
+		if (!$unit->Construction()) {
+			unset($data['Burg']);
+		}
+		if (!$unit->Vessel()) {
+			unset($data['Schiff']);
+		}
+		if (!$unit->IsGuarding()) {
+			unset($data['bewacht']);
+		}
+		$this->writeData($data);
 	}
 
 	private function writeConstruction(Construction $construction): void {
@@ -501,7 +538,44 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
+	private function writeData(array $data): void {
+		$block = current($data);
+		foreach ($data as $key => $value) {
+			if (is_array($value)) {
+				if ($block === 'TALENTE') {
+					$line = implode(' ', $value) . ';' . $key;
+					fputs($this->file, $line . PHP_EOL);
+				} else {
+					$this->writeData($value);
+				}
+			} else {
+				if (is_int($key)) {
+					$line = $value;
+				} else {
+					if (is_string($value) && isset($this->variables[$value])) {
+						$value = $this->variables[$value];
+					}
+					if (is_int($value)) {
+						$line = $value . ';' . $key;
+					} else {
+						$line = '"' . $this->escape($value) . '";' . $key;
+					}
+				}
+				fputs($this->file, $line . PHP_EOL);
+			}
+		}
+	}
+
 	private function escape(string $string): string {
 		return str_replace('"', '\\"', $string);
+	}
+
+	private function getPrice(string $class, Luxuries $luxuries): int {
+		/* @var Luxury $luxury */
+		$luxury = Lemuria::Builder()->create($class);
+		if ($luxury === $luxuries->Offer()->Commodity()) {
+			return -$luxury->Value();
+		}
+		return $luxuries[$class]->Price();
 	}
 }
