@@ -120,8 +120,11 @@ class MagellanWriter implements Writer
 
 		$party     = Party::get($party);
 		$this->map = new PartyMap(Lemuria::World(), $party);
-		$this->writeParty($party);
-		$this->writeRegions($party);
+		$census    = new Census($party);
+		$outlook   = new Outlook($census);
+		$this->writeParties($party, $census, $outlook);
+		$this->writeIsland();
+		$this->writeRegions($party, $outlook);
 		$this->writeMessagetype();
 		$this->writeTranslations();
 
@@ -182,6 +185,26 @@ class MagellanWriter implements Writer
 		$this->writeData(self::HEADER);
 	}
 
+	private function writeParties(Party $party, Census $census, Outlook $outlook): void {
+		$this->writeParty($party);
+		$acquaintances = $party->Diplomacy()->Acquaintances();
+
+		$parties = [];
+		foreach ($census->getAtlas() as $region /* @var Region $region */) {
+			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
+				$foreign = $unit->Party();
+				if ($foreign !== $party) {
+					$id           = $foreign->Id()->Id();
+					$parties[$id] = $foreign;
+				}
+			}
+		}
+
+		foreach ($parties as $id => $foreign) {
+			$this->writeForeignParty($foreign, $acquaintances->has(new Id($id)));
+		}
+	}
+
 	private function writeParty(Party $party): void {
 		$data = [
 			'PARTEI ' . $party->Id()->Id(),
@@ -205,7 +228,24 @@ class MagellanWriter implements Writer
 		foreach (Lemuria::Report()->getAll($party) as $message) {
 			$this->writeMessage($message, self::MESSAGE_EVENT);
 		}
-		$this->writeIsland();
+	}
+
+	private function writeForeignParty(Party $party, bool $isKnown): void {
+		$data = [
+			'PARTEI ' . $party->Id()->Id(),
+			'locale'     => self::HEADER['locale'],
+			'age'        => 1,
+			'Typ'        => Translator::RACE[getClass($party->Race())],
+			'Parteiname' => $party->Name(),
+			'email'      => 'lemuria@online.de',
+			'banner'     => $party->Description(),
+		];
+		if (!$isKnown) {
+			unset($data['Typ']);
+			//unset($data['Parteiname']);
+			unset($data['banner']);
+		}
+		$this->writeData($data);
 	}
 
 	private function writeAlliance(Relation $relation): void {
@@ -248,9 +288,8 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
-	protected function writeRegions(Party $party): void {
-		$outlook = new Outlook(new Census($party));
-		$atlas   = new TravelAtlas($party);
+	protected function writeRegions(Party $party, Outlook $outlook): void {
+		$atlas = new TravelAtlas($party);
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
 			$visibility = match ($atlas->getVisibility($region)) {
 				TravelAtlas::WITH_UNIT => '',
