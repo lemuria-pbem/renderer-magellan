@@ -7,6 +7,7 @@ use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Command\Entertain;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
+use Lemuria\Engine\Fantasya\Outlook;
 use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
@@ -26,6 +27,7 @@ use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
 use Lemuria\Model\Fantasya\Party;
+use Lemuria\Model\Fantasya\Party\Census;
 use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
@@ -247,18 +249,19 @@ class MagellanWriter implements Writer
 	}
 
 	protected function writeRegions(Party $party): void {
-		$atlas = new TravelAtlas($party);
+		$outlook = new Outlook(new Census($party));
+		$atlas   = new TravelAtlas($party);
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
 			$visibility = match ($atlas->getVisibility($region)) {
 				TravelAtlas::WITH_UNIT => '',
 				TravelAtlas::TRAVELLED => 'travel',
 				default                => 'neighbour'
 			};
-			$this->writeRegion($region, $visibility, $party);
+			$this->writeRegion($region, $visibility, $party, $outlook);
 		}
 	}
 
-	private function writeRegion(Region $region, string $visibility, Party $party): void {
+	private function writeRegion(Region $region, string $visibility, Party $party, Outlook $outlook): void {
 		$coordinates = $this->map->getCoordinates($region);
 		$resources   = $region->Resources();
 
@@ -312,22 +315,26 @@ class MagellanWriter implements Writer
 				}
 			}
 
-			foreach ($region->Residents() as $unit/* @var Unit $unit */) {
-				$isOwnUnit = $unit->Party() === $party;
-				$this->writeUnit($unit, $isOwnUnit);
-				if ($isOwnUnit) {
+			foreach ($region->Residents() as $unit /* @var Unit $unit */) {
+				if ($unit->Party() === $party) {
+					$this->writeUnit($unit);
 					foreach (Lemuria::Report()->getAll($unit) as $message) {
 						$this->writeMessage($message, self::MESSAGE_PRODUCTION);
 					}
 				}
 			}
-			foreach ($region->Estate() as $construction/* @var Construction $construction */) {
+			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
+				if ($unit->Party() !== $party) {
+					$this->writeForeignUnit($unit);
+				}
+			}
+			foreach ($region->Estate() as $construction /* @var Construction $construction */) {
 				$this->writeConstruction($construction);
 				foreach (Lemuria::Report()->getAll($construction) as $message) {
 					$this->writeMessage($message, self::MESSAGE_ECONOMY);
 				}
 			}
-			foreach ($region->Fleet() as $vessel/* @var Vessel $vessel */) {
+			foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
 				$this->writeVessel($vessel);
 				foreach (Lemuria::Report()->getAll($vessel) as $message) {
 					$this->writeMessage($message, self::MESSAGE_ECONOMY);
@@ -361,8 +368,8 @@ class MagellanWriter implements Writer
 		return $luxuries[$class]->Price();
 	}
 
-	private function writeUnit(Unit $unit, bool $isOwnUnit): void {
-		$hp   = $isOwnUnit ? 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')' : 'gut';
+	private function writeUnit(Unit $unit): void {
+		$hp   = 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
 		$data = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'        => $unit->Name(),
@@ -386,40 +393,59 @@ class MagellanWriter implements Writer
 		if (!$unit->IsGuarding()) {
 			unset($data['bewacht']);
 		}
-		if (!$isOwnUnit) {
-			unset($data['Kampfstatus']);
-			unset($data['weight']);
-		}
 		$this->writeData($data);
 
-		if ($isOwnUnit) {
-			if (count($unit->Knowledge()) > 0) {
-				$data = ['TALENTE'];
-				foreach ($unit->Knowledge() as $ability/* @var Ability $ability */) {
-					$talent        = Translator::TALENT[getClass($ability->Talent())];
-					$data[$talent] = [$ability->Experience(), $ability->Level()];
-				}
-				$this->writeData($data);
+		if (count($unit->Knowledge()) > 0) {
+			$data = ['TALENTE'];
+			foreach ($unit->Knowledge() as $ability/* @var Ability $ability */) {
+				$talent        = Translator::TALENT[getClass($ability->Talent())];
+				$data[$talent] = [$ability->Experience(), $ability->Level()];
 			}
-
-			if (count($unit->Inventory()) > 0) {
-				$data = ['GEGENSTAENDE'];
-				foreach ($unit->Inventory() as $quantity/* @var Quantity $quantity */) {
-					$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
-					$data[$commodity] = $quantity->Count();
-				}
-				$this->writeData($data);
-			}
-
-			$orders = Lemuria::Orders()->getDefault($unit->Id());
-			if (count($orders)) {
-				$data = ['COMMANDS'];
-				foreach ($orders as $order) {
-					$data[] = '"' . $this->escape($order) . '"';
-				}
-				$this->writeData($data);
-			}
+			$this->writeData($data);
 		}
+
+		if (count($unit->Inventory()) > 0) {
+			$data = ['GEGENSTAENDE'];
+			foreach ($unit->Inventory() as $quantity/* @var Quantity $quantity */) {
+				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
+				$data[$commodity] = $quantity->Count();
+			}
+			$this->writeData($data);
+		}
+
+		$orders = Lemuria::Orders()->getDefault($unit->Id());
+		if (count($orders)) {
+			$data = ['COMMANDS'];
+			foreach ($orders as $order) {
+				$data[] = '"' . $this->escape($order) . '"';
+			}
+			$this->writeData($data);
+		}
+	}
+
+	private function writeForeignUnit(Unit $unit): void {
+		$data = [
+			'EINHEIT ' . $unit->Id()->Id(),
+			'Name'        => $unit->Name(),
+			'Beschr'      => $unit->Description(),
+			'Partei'      => $unit->Party()->Id()->Id(),
+			'Anzahl'      => $unit->Size(),
+			'Typ'         => Translator::RACE[getClass($unit->Race())],
+			'Burg'        => $unit->Construction()?->Id()->Id(),
+			'Schiff'      => $unit->Vessel()?->Id()->Id(),
+			'bewacht'     => $unit->IsGuarding() ? 1 : 0,
+			'hp'          => 'gut'
+		];
+		if (!$unit->Construction()) {
+			unset($data['Burg']);
+		}
+		if (!$unit->Vessel()) {
+			unset($data['Schiff']);
+		}
+		if (!$unit->IsGuarding()) {
+			unset($data['bewacht']);
+		}
+		$this->writeData($data);
 	}
 
 	private function writeConstruction(Construction $construction): void {
