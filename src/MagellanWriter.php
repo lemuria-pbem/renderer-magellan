@@ -2,6 +2,7 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
+use Lemuria\Engine\Fantasya\Calculus;
 use function Lemuria\getClass;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Command\Entertain;
@@ -403,10 +404,13 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 
 		if (count($unit->Knowledge()) > 0) {
-			$data = ['TALENTE'];
+			$calculus = new Calculus($unit);
+			$data     = ['TALENTE'];
 			foreach ($unit->Knowledge() as $ability/* @var Ability $ability */) {
+				$experience    = $ability->Experience();
+				$ability       = $calculus->knowledge($ability->Talent());
 				$talent        = Translator::TALENT[getClass($ability->Talent())];
-				$data[$talent] = [$ability->Experience(), $ability->Level()];
+				$data[$talent] = [$experience, $ability->Level()];
 			}
 			$this->writeData($data);
 		}
