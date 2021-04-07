@@ -380,17 +380,20 @@ class MagellanWriter implements Writer
 		$hp   = 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
 		$data = [
 			'EINHEIT ' . $unit->Id()->Id(),
-			'Name'        => $unit->Name(),
-			'Beschr'      => $unit->Description(),
-			'Partei'      => $unit->Party()->Id()->Id(),
-			'Anzahl'      => $unit->Size(),
-			'Typ'         => Translator::RACE[getClass($unit->Race())],
-			'Burg'        => $unit->Construction()?->Id()->Id(),
-			'Schiff'      => $unit->Vessel()?->Id()->Id(),
-			'bewacht'     => $unit->IsGuarding() ? 1 : 0,
-			'Kampfstatus' => Translator::BATTLE_ROW[$unit->BattleRow()] ?? 4,
-			'hp'          => $hp,
-			'weight'      => $unit->Weight()
+			'Name'          => $unit->Name(),
+			'Beschr'        => $unit->Description(),
+			'Partei'        => $unit->Party()->Id()->Id(),
+			'Parteitarnung' => $unit->Disguise() !== false ? 1 : 0,
+			'Anderepartei'  => $unit->Disguise()?->Id()->Id() ?? 0,
+			'Verraeter'     => 0,
+			'Anzahl'        => $unit->Size(),
+			'Typ'           => Translator::RACE[getClass($unit->Race())],
+			'Burg'          => $unit->Construction()?->Id()->Id(),
+			'Schiff'        => $unit->Vessel()?->Id()->Id(),
+			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
+			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()] ?? 4,
+			'hp'            => $hp,
+			'weight'        => $unit->Weight()
 		];
 		if (!$unit->Construction()) {
 			unset($data['Burg']);
@@ -435,18 +438,22 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeForeignUnit(Unit $unit, Census $census): void {
-		$party = $census->getParty($unit)?->Id()->Id();
-		$data  = [
+		$party    = $census->getParty($unit)?->Id()->Id() ?? 0;
+		$disguise = $unit->Party()->Diplomacy()->has(Relation::DISGUISE, $census->Party());
+		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
-			'Name'        => $unit->Name(),
-			'Beschr'      => $unit->Description(),
-			'Partei'      => $party,
-			'Anzahl'      => $unit->Size(),
-			'Typ'         => Translator::RACE[getClass($unit->Race())],
-			'Burg'        => $unit->Construction()?->Id()->Id(),
-			'Schiff'      => $unit->Vessel()?->Id()->Id(),
-			'bewacht'     => $unit->IsGuarding() ? 1 : 0,
-			'hp'          => 'gut'
+			'Name'          => $unit->Name(),
+			'Beschr'        => $unit->Description(),
+			'Partei'        => $party,
+			'Parteitarnung' => $unit->Disguise() !== false ? 1 : 0,
+			'Anderepartei'  => $unit->Disguise()?->Id()->Id() ?? 0,
+			'Verraeter'     => $unit->Disguise() === $census->Party() ? 1 : 0,
+			'Anzahl'        => $unit->Size(),
+			'Typ'           => Translator::RACE[getClass($unit->Race())],
+			'Burg'          => $unit->Construction()?->Id()->Id(),
+			'Schiff'        => $unit->Vessel()?->Id()->Id(),
+			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
+			'hp'            => 'gut'
 		];
 		if (!$party) {
 			unset($data['Partei']);
