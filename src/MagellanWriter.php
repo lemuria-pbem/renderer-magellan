@@ -2,9 +2,10 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
-use Lemuria\Engine\Fantasya\Calculus;
 use function Lemuria\getClass;
 use Lemuria\Engine\Fantasya\Availability;
+use Lemuria\Engine\Fantasya\Calculus;
+use Lemuria\Engine\Fantasya\Census;
 use Lemuria\Engine\Fantasya\Command\Entertain;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
@@ -28,7 +29,6 @@ use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
 use Lemuria\Model\Fantasya\Party;
-use Lemuria\Model\Fantasya\Party\Census;
 use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
@@ -439,15 +439,15 @@ class MagellanWriter implements Writer
 
 	private function writeForeignUnit(Unit $unit, Census $census): void {
 		$party    = $census->getParty($unit)?->Id()->Id() ?? 0;
-		$disguise = $unit->Party()->Diplomacy()->has(Relation::DISGUISE, $census->Party());
+		$disguise = $unit->Disguise();
 		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'          => $unit->Name(),
 			'Beschr'        => $unit->Description(),
 			'Partei'        => $party,
-			'Parteitarnung' => $unit->Disguise() !== false ? 1 : 0,
-			'Anderepartei'  => $unit->Disguise()?->Id()->Id() ?? 0,
-			'Verraeter'     => $unit->Disguise() === $census->Party() ? 1 : 0,
+			'Parteitarnung' => $disguise !== false ? 1 : 0,
+			'Anderepartei'  => $disguise?->Id()->Id() ?? 0,
+			'Verraeter'     => $disguise === $census->Party() ? 1 : 0,
 			'Anzahl'        => $unit->Size(),
 			'Typ'           => Translator::RACE[getClass($unit->Race())],
 			'Burg'          => $unit->Construction()?->Id()->Id(),
