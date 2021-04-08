@@ -377,14 +377,15 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeUnit(Unit $unit): void {
-		$hp   = 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
-		$data = [
+		$hp       = 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
+		$disguise = $unit->Disguise();
+		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'          => $unit->Name(),
 			'Beschr'        => $unit->Description(),
 			'Partei'        => $unit->Party()->Id()->Id(),
-			'Parteitarnung' => $unit->Disguise() !== false ? 1 : 0,
-			'Anderepartei'  => $unit->Disguise()?->Id()->Id() ?? 0,
+			'Parteitarnung' => $disguise !== false ? 1 : 0,
+			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
 			'Verraeter'     => 0,
 			'Anzahl'        => $unit->Size(),
 			'Typ'           => Translator::RACE[getClass($unit->Race())],
@@ -446,7 +447,7 @@ class MagellanWriter implements Writer
 			'Beschr'        => $unit->Description(),
 			'Partei'        => $party,
 			'Parteitarnung' => $disguise !== false ? 1 : 0,
-			'Anderepartei'  => $disguise?->Id()->Id() ?? 0,
+			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
 			'Verraeter'     => $disguise === $census->Party() ? 1 : 0,
 			'Anzahl'        => $unit->Size(),
 			'Typ'           => Translator::RACE[getClass($unit->Race())],
