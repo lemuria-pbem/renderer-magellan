@@ -386,7 +386,6 @@ class MagellanWriter implements Writer
 			'Partei'        => $unit->Party()->Id()->Id(),
 			'Parteitarnung' => $disguise !== false ? 1 : 0,
 			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
-			'Verraeter'     => 0,
 			'Anzahl'        => $unit->Size(),
 			'Typ'           => Translator::RACE[getClass($unit->Race())],
 			'Burg'          => $unit->Construction()?->Id()->Id(),
@@ -396,6 +395,10 @@ class MagellanWriter implements Writer
 			'hp'            => $hp,
 			'weight'        => $unit->Weight()
 		];
+		if ($disguise === false) {
+			unset($data['Parteitarnung']);
+			unset($data['Anderepartei']);
+		}
 		if (!$unit->Construction()) {
 			unset($data['Burg']);
 		}
@@ -458,6 +461,11 @@ class MagellanWriter implements Writer
 		];
 		if (!$party) {
 			unset($data['Partei']);
+		}
+		if ($disguise === false) {
+			unset($data['Parteitarnung']);
+			unset($data['Anderepartei']);
+			unset($data['Verraeter']);
 		}
 		if (!$unit->Construction()) {
 			unset($data['Burg']);
