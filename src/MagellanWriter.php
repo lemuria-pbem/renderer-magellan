@@ -512,6 +512,7 @@ class MagellanWriter implements Writer
 			'Name'     => $vessel->Name(),
 			'Beschr'   => $vessel->Description(),
 			'Groesse'  => $size,
+			'Schaden'  => (int)round(100.0 * (1.0 - $vessel->Completion())),
 			'cargo'    => $cargo,
 			'capacity' => $vessel->Ship()->Payload(),
 			'Kapitaen' => $captain?->Id()->Id(),
