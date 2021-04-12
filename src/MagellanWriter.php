@@ -193,7 +193,7 @@ class MagellanWriter implements Writer
 			'Rekrutierungskosten' => $party->Race()->Recruiting(),
 			'Anzahl Personen'     => $party->People()->count(),
 			'Parteiname'          => $party->Name(),
-			'email'               => 'lemuria@online.de',
+			'email'               => $party->Banner(),
 			'banner'              => $party->Description(),
 		];
 		$this->writeData($data);
