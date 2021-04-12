@@ -213,7 +213,7 @@ class MagellanWriter implements Writer
 			'age'        => 1,
 			'Typ'        => Translator::RACE[getClass($party->Race())],
 			'Parteiname' => $party->Name(),
-			'email'      => 'lemuria@online.de',
+			'email'      => $party->Banner(),
 			'banner'     => $party->Description(),
 		];
 		if (!$isKnown) {
@@ -338,6 +338,8 @@ class MagellanWriter implements Writer
 					foreach (Lemuria::Report()->getAll($unit) as $message) {
 						$this->writeMessage($message, self::MESSAGE_PRODUCTION);
 					}
+				} elseif ($unit->Construction() || $unit->Vessel()) {
+					$this->writeForeignUnit($unit, $census);
 				}
 			}
 			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
