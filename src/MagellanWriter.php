@@ -14,6 +14,7 @@ use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
 use Lemuria\Model\Fantasya\Ability;
+use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Balsam;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Gem;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Myrrh;
@@ -277,12 +278,12 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeRegion(Region $region, string $visibility, Outlook $outlook): void {
-		$coordinates = $this->map->getCoordinates($region);
-		$resources   = $region->Resources();
+		$coordinates  = $this->map->getCoordinates($region);
+		$resources    = $region->Resources();
+		$intelligence = new Intelligence($region);
 
 		if (empty($visibility)) {
 			$availability = new Availability($region);
-			$intelligence = new Intelligence($region);
 			$data         = [
 				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
 				'id'       => $region->Id()->Id(),
@@ -312,7 +313,11 @@ class MagellanWriter implements Writer
 			foreach (Lemuria::Report()->getAll($region) as $message) {
 				$this->writeMessage($message, self::MESSAGE_EVENT);
 			}
-			$this->writeMarket($region->Luxuries());
+
+			$castle = $intelligence->getGovernment();
+			if ($castle?->Size() > Site::MAX_SIZE) {
+				$this->writeMarket($region->Luxuries());
+			}
 
 			$peasant = Lemuria::Builder()->create(Peasant::class);
 			$silver  = Lemuria::Builder()->create(Silver::class);
