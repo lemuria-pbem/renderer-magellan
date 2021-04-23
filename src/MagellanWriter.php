@@ -2,6 +2,7 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
+use Lemuria\Model\World;
 use function Lemuria\getClass;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Calculus;
@@ -77,6 +78,10 @@ class MagellanWriter implements Writer
 	private const MESSAGETYPES = [
 		self::MESSAGE_DEFAULT => 1, self::MESSAGE_ECONOMY    => 2, self::MESSAGE_ERROR => 3, self::MESSAGE_EVENT => 4,
 		self::MESSAGE_MAGIC   => 5, self::MESSAGE_PRODUCTION => 6, self::MESSAGE_STUDY => 7
+	];
+
+	private const ROADS = [
+		World::NORTHWEST, World::NORTHEAST, World::EAST, World::SOUTHEAST, World::SOUTHWEST, World::WEST
 	];
 
 	/**
@@ -308,6 +313,7 @@ class MagellanWriter implements Writer
 			];
 		}
 		$this->writeData($data);
+		$this->writeRoads($region);
 
 		if (empty($visibility)) {
 			foreach (Lemuria::Report()->getAll($region) as $message) {
@@ -364,6 +370,26 @@ class MagellanWriter implements Writer
 					$this->writeMessage($message, self::MESSAGE_ECONOMY);
 				}
 			}
+		}
+	}
+
+	private function writeRoads(Region $region): void {
+		$roads = $region->Roads();
+		foreach (self::ROADS as $road => $direction) {
+			if ($region->hasRoad($direction)) {
+				$percent = 100;
+			} elseif ($roads && $roads[$direction] > 0.0) {
+				$percent = (int)round(100.0 * $roads[$direction]);
+			} else {
+				continue;
+			}
+			$data = [
+				'GRENZE ' . $region->Id()->Id() . $road,
+				'typ'      => 'Straße',
+				'richtung' => $road,
+				'prozent'  => $percent
+			];
+			$this->writeData($data);
 		}
 	}
 
