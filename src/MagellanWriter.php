@@ -315,7 +315,7 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 		$this->writeRoads($region);
 
-		if (empty($visibility)) {
+		if ($visibility !== 'neighbour') {
 			foreach (Lemuria::Report()->getAll($region) as $message) {
 				$this->writeMessage($message, self::MESSAGE_EVENT);
 			}
@@ -341,31 +341,34 @@ class MagellanWriter implements Writer
 				}
 			}
 
-			$census = $outlook->Census();
-			$party  = $census->Party();
-			foreach ($region->Residents() as $unit /* @var Unit $unit */) {
-				if ($unit->Party() === $party) {
-					$this->writeUnit($unit);
-					foreach (Lemuria::Report()->getAll($unit) as $message) {
-						$this->writeMessage($message, self::MESSAGE_PRODUCTION);
+			if (empty($visibility)) {
+				$census = $outlook->Census();
+				$party  = $census->Party();
+				foreach ($region->Residents() as $unit /* @var Unit $unit */) {
+					if ($unit->Party() === $party) {
+						$this->writeUnit($unit);
+						foreach (Lemuria::Report()->getAll($unit) as $message) {
+							$this->writeMessage($message, self::MESSAGE_PRODUCTION);
+						}
+					} elseif ($unit->Construction() || $unit->Vessel()) {
+						$this->writeForeignUnit($unit, $census);
 					}
-				} elseif ($unit->Construction() || $unit->Vessel()) {
-					$this->writeForeignUnit($unit, $census);
+				}
+				foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
+					if ($unit->Party() !== $party) {
+						$this->writeForeignUnit($unit, $census);
+					}
 				}
 			}
-			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
-				if ($unit->Party() !== $party) {
-					$this->writeForeignUnit($unit, $census);
-				}
-			}
+
 			foreach ($region->Estate() as $construction /* @var Construction $construction */) {
-				$this->writeConstruction($construction);
+				$this->writeConstruction($construction, $visibility);
 				foreach (Lemuria::Report()->getAll($construction) as $message) {
 					$this->writeMessage($message, self::MESSAGE_ECONOMY);
 				}
 			}
 			foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
-				$this->writeVessel($vessel);
+				$this->writeVessel($vessel, $visibility);
 				foreach (Lemuria::Report()->getAll($vessel) as $message) {
 					$this->writeMessage($message, self::MESSAGE_ECONOMY);
 				}
@@ -512,7 +515,7 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
-	private function writeConstruction(Construction $construction): void {
+	private function writeConstruction(Construction $construction, string $visibility): void {
 		$owner = $construction->Inhabitants()->Owner();
 		$data  = [
 			'BURG ' . $construction->Id()->Id(),
@@ -527,10 +530,13 @@ class MagellanWriter implements Writer
 			unset($data['Besitzer']);
 			unset($data['Partei']);
 		}
+		if (!empty($visibility)) {
+			unset($data['Besitzer']);
+		}
 		$this->writeData($data);
 	}
 
-	private function writeVessel(Vessel $vessel): void {
+	private function writeVessel(Vessel $vessel, string $visibility): void {
 		$captain  = $vessel->Passengers()->Owner();
 		$material = $vessel->Ship()->getMaterial();
 		$size     = (int)round($vessel->Completion() * $material[Wood::class]->Count());
@@ -555,6 +561,10 @@ class MagellanWriter implements Writer
 		if (!$captain) {
 			unset($data['Kapitaen']);
 			unset($data['Partei']);
+		}
+		if (!empty($visibility)) {
+			unset($data['cargo']);
+			unset($data['Kapitaen']);
 		}
 		if ($coast === null) {
 			unset($data['Kueste']);
