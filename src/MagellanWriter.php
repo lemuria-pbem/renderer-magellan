@@ -130,7 +130,7 @@ class MagellanWriter implements Writer
 		$this->map = new PartyMap(Lemuria::World(), $party);
 		$census    = new Census($party);
 		$outlook   = new Outlook($census);
-		$continent = Continent::get(1);
+		$continent = Continent::get(new Id(1));
 		$this->writeParties($outlook);
 		$this->writeIsland($continent);
 		$this->writeRegions($outlook);
