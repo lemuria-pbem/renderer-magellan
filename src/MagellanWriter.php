@@ -2,7 +2,6 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
-use Lemuria\Model\World;
 use function Lemuria\getClass;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Calculus;
@@ -27,6 +26,7 @@ use Lemuria\Model\Fantasya\Commodity\Peasant;
 use Lemuria\Model\Fantasya\Commodity\Silver;
 use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
+use Lemuria\Model\Fantasya\Continent;
 use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
@@ -37,6 +37,7 @@ use Lemuria\Model\Fantasya\Relation;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Model\Fantasya\Vessel;
 use Lemuria\Model\Fantasya\World\PartyMap;
+use Lemuria\Model\World;
 use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\Writer;
@@ -129,8 +130,9 @@ class MagellanWriter implements Writer
 		$this->map = new PartyMap(Lemuria::World(), $party);
 		$census    = new Census($party);
 		$outlook   = new Outlook($census);
+		$continent = Continent::get(1);
 		$this->writeParties($outlook);
-		$this->writeIsland();
+		$this->writeIsland($continent);
 		$this->writeRegions($outlook);
 		$this->writeMessagetype();
 		$this->writeTranslations();
@@ -261,11 +263,11 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	private function writeIsland(): void {
+	private function writeIsland(Continent $continent): void {
 		$data = [
-			'ISLAND 1',
-			'Name'   => 'Kontinent Lemuria',
-			'Beschr' => 'Dies ist der Hauptkontinent Lemuria.'
+			'ISLAND ' . $continent->Id()->Id(),
+			'Name'   => $continent->Name(),
+			'Beschr' => $continent->Description()
 		];
 		$this->writeData($data);
 	}
