@@ -539,23 +539,24 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeVessel(Vessel $vessel, string $visibility): void {
-		$captain  = $vessel->Passengers()->Owner();
-		$material = $vessel->Ship()->getMaterial();
-		$size     = (int)round($vessel->Completion() * $material[Wood::class]->Count());
-		$coast    = Translator::COAST[$vessel->Anchor()] ?? null;
-		$cargo    = 0;
-		foreach ($vessel->Passengers() as $unit /* @var Unit $unit */) {
+		$ship       = $vessel->Ship();
+		$size       = (int)round($vessel->Completion() * $ship->Wood());
+		$coast      = Translator::COAST[$vessel->Anchor()] ?? null;
+		$passengers = $vessel->Passengers();
+		$captain    = $passengers->Owner();
+		$cargo      = 0;
+		foreach ($passengers as $unit /* @var Unit $unit */) {
 			$cargo += $unit->Weight();
 		}
 		$data = [
 			'SCHIFF ' . $vessel->Id()->Id(),
-			'Typ'      => Translator::SHIP[getClass($vessel->Ship())],
+			'Typ'      => Translator::SHIP[getClass($ship)],
 			'Name'     => $vessel->Name(),
 			'Beschr'   => $vessel->Description(),
 			'Groesse'  => $size,
 			'Schaden'  => (int)round(100.0 * (1.0 - $vessel->Completion())),
 			'cargo'    => $cargo,
-			'capacity' => $vessel->Ship()->Payload(),
+			'capacity' => $ship->Payload(),
 			'Kapitaen' => $captain?->Id()->Id(),
 			'Partei'   => $captain->Party()->Id()->Id(),
 			'Kueste'   => $coast
