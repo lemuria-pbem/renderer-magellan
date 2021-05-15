@@ -16,6 +16,7 @@ use Lemuria\Engine\Message\Filter\NullFilter;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Balsam;
+use Lemuria\Model\Fantasya\Commodity\Luxury\Fur;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Gem;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Myrrh;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Oil;
@@ -24,7 +25,6 @@ use Lemuria\Model\Fantasya\Commodity\Luxury\Silk;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Spice;
 use Lemuria\Model\Fantasya\Commodity\Peasant;
 use Lemuria\Model\Fantasya\Commodity\Silver;
-use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
 use Lemuria\Model\Fantasya\Continent;
 use Lemuria\Model\Fantasya\Intelligence;
@@ -407,6 +407,7 @@ class MagellanWriter implements Writer
 				'Juwel'     => $this->getPrice(Gem::class, $luxuries),
 				'Myrrhe'    => $this->getPrice(Myrrh::class, $luxuries),
 				'Öl'        => $this->getPrice(Oil::class, $luxuries),
+				'Pelz'      => $this->getPrice(Fur::class, $luxuries),
 				'Seide'     => $this->getPrice(Silk::class, $luxuries),
 				'Weihrauch' => $this->getPrice(Olibanum::class, $luxuries)
 			];
