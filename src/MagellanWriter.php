@@ -59,11 +59,11 @@ class MagellanWriter implements Writer
 	private const MESSAGE_STUDY = 'study';
 
 	private const HEADER = [
-		'VERSION 67',
+		'VERSION 69',
 		'charset'       => 'UTF-8',
 		'locale'        => 'de',
 		'Spiel'         => 'Lemuria',
-		'Konfiguration' => 'Lemuria',
+		'Konfiguration' => 'Standard',
 		'Basis'         => 36,
 		'noskillpoints' => 0,
 		'max_units'     => 1000,
