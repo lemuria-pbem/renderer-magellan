@@ -2,6 +2,7 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
+use Lemuria\Engine\Message\Section;
 use Lemuria\Model\Fantasya\Combat;
 use Lemuria\Model\World;
 
@@ -159,6 +160,18 @@ final class Translator
 		'Trading'        => 'Handeln',
 		'Weaponry'       => 'Waffenbau',
 		'Woodchopping'   => 'Holzfällen'
+	];
+
+	public const SECTION = [
+		Section::EVENT      => 'events',
+		Section::ERROR      => 'errors',
+		Section::BATTLE     => 'battle',
+		Section::ECONOMY    => 'economy',
+		Section::MAGIC      => 'magic',
+		Section::MAIL       => 'mail',
+		Section::MOVEMENT   => 'movement',
+		Section::PRODUCTION => 'production',
+		Section::STUDY      => 'study'
 	];
 
 	public const TRANSLATIONS = [
