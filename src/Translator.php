@@ -45,6 +45,13 @@ final class Translator
 		'Troll'    => 'Troll'
 	];
 
+	public const HEALTH = [
+		'gesund',
+		'erschoepft',
+		'verwundet',
+		'schwer verwundet'
+	];
+
 	public const COMMODITY = [
 		'Armor'           => 'Plattenpanzer',
 		'Balsam'          => 'Balsam',
@@ -149,7 +156,7 @@ final class Translator
 		'Stamina'        => 'Ausdauer',
 		'Tactics'        => 'Taktik',
 		'Taxcollecting'  => 'Steuereintreiben',
-		'Trading'        => 'Handel',
+		'Trading'        => 'Handeln',
 		'Weaponry'       => 'Waffenbau',
 		'Woodchopping'   => 'Holzfällen'
 	];

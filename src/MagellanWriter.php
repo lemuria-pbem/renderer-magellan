@@ -416,7 +416,8 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeUnit(Unit $unit): void {
-		$hp       = 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
+		$health   = Translator::HEALTH[0];
+		$hp       = $health . ' (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
 		$disguise = $unit->Disguise();
 		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
