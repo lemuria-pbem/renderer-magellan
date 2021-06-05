@@ -212,6 +212,11 @@ class MagellanWriter implements Writer
 		foreach (Lemuria::Report()->getAll($party) as $message) {
 			$this->writeMessage($message, self::MESSAGE_EVENT);
 		}
+		foreach ($party->People() as $unit /* @var Unit $unit */) {
+			foreach (Lemuria::Report()->getAll($unit) as $message) {
+				$this->writeUnitMessage($message, $unit);
+			}
+		}
 	}
 
 	private function writeForeignParty(Party $party, bool $isKnown): void {
@@ -349,9 +354,6 @@ class MagellanWriter implements Writer
 				foreach ($region->Residents() as $unit /* @var Unit $unit */) {
 					if ($unit->Party() === $party) {
 						$this->writeUnit($unit);
-						foreach (Lemuria::Report()->getAll($unit) as $message) {
-							$this->writeMessage($message, self::MESSAGE_PRODUCTION);
-						}
 					} elseif ($unit->Construction() || $unit->Vessel()) {
 						$this->writeForeignUnit($unit, $census);
 					}
@@ -416,8 +418,6 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeUnit(Unit $unit): void {
-		$health   = Translator::HEALTH[0];
-		$hp       = $health . ' (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
 		$disguise = $unit->Disguise();
 		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
@@ -432,7 +432,7 @@ class MagellanWriter implements Writer
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
 			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()] ?? 4,
-			'hp'            => $hp,
+			'hp'            => Translator::HEALTH[0],
 			'weight'        => $unit->Weight()
 		];
 		if ($disguise === false) {
@@ -497,7 +497,7 @@ class MagellanWriter implements Writer
 			'Burg'          => $unit->Construction()?->Id()->Id(),
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
-			'hp'            => 'gut'
+			'hp'            => Translator::HEALTH[0]
 		];
 		if (!$party) {
 			unset($data['Partei']);
@@ -583,6 +583,19 @@ class MagellanWriter implements Writer
 				'MESSAGE ' . $message->Id()->Id(),
 				'type'     => self::MESSAGETYPES[$section] ?? self::MESSAGETYPES[self::MESSAGE_DEFAULT],
 				'rendered' => (string)$message
+			];
+			$this->writeData($data);
+		}
+	}
+
+	private function writeUnitMessage(Message $message, Unit $unit): void {
+		if (!$this->filter->retains($message)) {
+			$data = [
+				'MESSAGE ' . $message->Id()->Id(),
+				'type'     => self::MESSAGETYPES[self::MESSAGE_PRODUCTION],
+				'rendered' => (string)$message,
+				'unit'     => $unit->Id()->Id(),
+				'region'   => $unit->Region()->Id()->Id()
 			];
 			$this->writeData($data);
 		}
