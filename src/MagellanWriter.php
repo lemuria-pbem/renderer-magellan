@@ -13,6 +13,7 @@ use Lemuria\Engine\Fantasya\Outlook;
 use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
+use Lemuria\Engine\Message\Section;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Balsam;
@@ -44,20 +45,6 @@ use Lemuria\Renderer\Writer;
 
 class MagellanWriter implements Writer
 {
-	private const MESSAGE_DEFAULT = 'Meldungen';
-
-	private const MESSAGE_EVENT = 'events';
-
-	private const MESSAGE_ERROR = 'errors';
-
-	private const MESSAGE_PRODUCTION = 'production';
-
-	private const MESSAGE_ECONOMY = 'economy';
-
-	private const MESSAGE_MAGIC = 'magic';
-
-	private const MESSAGE_STUDY = 'study';
-
 	private const HEADER = [
 		'VERSION 69',
 		'charset'       => 'UTF-8',
@@ -74,11 +61,6 @@ class MagellanWriter implements Writer
 		'Zeitalter'     => 1,
 		'mailto'        => 'lemuria@online.de',
 		'mailcmd'       => 'Lemuria Befehle'
-	];
-
-	private const MESSAGETYPES = [
-		self::MESSAGE_DEFAULT => 1, self::MESSAGE_ECONOMY    => 2, self::MESSAGE_ERROR => 3, self::MESSAGE_EVENT => 4,
-		self::MESSAGE_MAGIC   => 5, self::MESSAGE_PRODUCTION => 6, self::MESSAGE_STUDY => 7
 	];
 
 	private const ROADS = [
@@ -210,7 +192,12 @@ class MagellanWriter implements Writer
 			$this->writeAlliance($relation);
 		}
 		foreach (Lemuria::Report()->getAll($party) as $message) {
-			$this->writeMessage($message, self::MESSAGE_EVENT);
+			$this->writeMessage($message);
+		}
+		foreach ($party->People() as $unit /* @var Unit $unit */) {
+			foreach (Lemuria::Report()->getAll($unit) as $message) {
+				$this->writeUnitMessage($message, $unit);
+			}
 		}
 	}
 
@@ -319,7 +306,7 @@ class MagellanWriter implements Writer
 
 		if ($visibility !== 'neighbour') {
 			foreach (Lemuria::Report()->getAll($region) as $message) {
-				$this->writeMessage($message, self::MESSAGE_EVENT);
+				$this->writeMessage($message);
 			}
 
 			$castle = $intelligence->getGovernment();
@@ -349,9 +336,6 @@ class MagellanWriter implements Writer
 				foreach ($region->Residents() as $unit /* @var Unit $unit */) {
 					if ($unit->Party() === $party) {
 						$this->writeUnit($unit);
-						foreach (Lemuria::Report()->getAll($unit) as $message) {
-							$this->writeMessage($message, self::MESSAGE_PRODUCTION);
-						}
 					} elseif ($unit->Construction() || $unit->Vessel()) {
 						$this->writeForeignUnit($unit, $census);
 					}
@@ -366,13 +350,13 @@ class MagellanWriter implements Writer
 			foreach ($region->Estate() as $construction /* @var Construction $construction */) {
 				$this->writeConstruction($construction, $visibility);
 				foreach (Lemuria::Report()->getAll($construction) as $message) {
-					$this->writeMessage($message, self::MESSAGE_ECONOMY);
+					$this->writeMessage($message);
 				}
 			}
 			foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
 				$this->writeVessel($vessel, $visibility);
 				foreach (Lemuria::Report()->getAll($vessel) as $message) {
-					$this->writeMessage($message, self::MESSAGE_ECONOMY);
+					$this->writeMessage($message);
 				}
 			}
 		}
@@ -416,7 +400,6 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeUnit(Unit $unit): void {
-		$hp       = 'gut (' . $unit->Race()->Hitpoints() . '/' . $unit->Race()->Hitpoints() . ')';
 		$disguise = $unit->Disguise();
 		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
@@ -431,7 +414,7 @@ class MagellanWriter implements Writer
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
 			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()] ?? 4,
-			'hp'            => $hp,
+			'hp'            => Translator::HEALTH[0],
 			'weight'        => $unit->Weight()
 		];
 		if ($disguise === false) {
@@ -496,7 +479,7 @@ class MagellanWriter implements Writer
 			'Burg'          => $unit->Construction()?->Id()->Id(),
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
-			'hp'            => 'gut'
+			'hp'            => Translator::HEALTH[0]
 		];
 		if (!$party) {
 			unset($data['Partei']);
@@ -576,23 +559,36 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
-	private function writeMessage(Message $message, string $section = self::MESSAGE_DEFAULT): void {
+	private function writeMessage(Message $message): void {
 		if (!$this->filter->retains($message)) {
 			$data = [
 				'MESSAGE ' . $message->Id()->Id(),
-				'type'     => self::MESSAGETYPES[$section] ?? self::MESSAGETYPES[self::MESSAGE_DEFAULT],
+				'type'     => $message->Section(),
 				'rendered' => (string)$message
 			];
 			$this->writeData($data);
 		}
 	}
 
-	private function writeMessagetype(): void {
-		foreach (self::MESSAGETYPES as $section => $id) {
+	private function writeUnitMessage(Message $message, Unit $unit): void {
+		if (!$this->filter->retains($message)) {
 			$data = [
-				'MESSAGETYPE ' . $id,
+				'MESSAGE ' . $message->Id()->Id(),
+				'type'     => $message->Section(),
+				'rendered' => (string)$message,
+				'unit'     => $unit->Id()->Id(),
+				'region'   => $unit->Region()->Id()->Id()
+			];
+			$this->writeData($data);
+		}
+	}
+
+	private function writeMessagetype(): void {
+		for ($section = Section::EVENT; $section <= Section::STUDY; $section++) {
+			$data = [
+				'MESSAGETYPE ' . $section,
 				'text'    => '"$rendered"',
-				'section' => $section
+				'section' => Translator::SECTION[$section]
 			];
 			$this->writeData($data);
 		}
