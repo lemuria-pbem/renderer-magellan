@@ -8,6 +8,7 @@ use Lemuria\Engine\Fantasya\Calculus;
 use Lemuria\Engine\Fantasya\Census;
 use Lemuria\Engine\Fantasya\Command\Entertain;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
+use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
 use Lemuria\Engine\Fantasya\Outlook;
 use Lemuria\Engine\Message;
@@ -35,6 +36,7 @@ use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
+use Lemuria\Model\Fantasya\Resources;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Model\Fantasya\Vessel;
 use Lemuria\Model\Fantasya\World\PartyMap;
@@ -331,18 +333,19 @@ class MagellanWriter implements Writer
 			}
 
 			if (empty($visibility)) {
-				$census = $outlook->Census();
-				$party  = $census->Party();
+				$census     = $outlook->Census();
+				$party      = $census->Party();
+				$isGuarding = $this->isGuarding($party, $intelligence);
 				foreach ($region->Residents() as $unit /* @var Unit $unit */) {
 					if ($unit->Party() === $party) {
 						$this->writeUnit($unit);
 					} elseif ($unit->Construction() || $unit->Vessel()) {
-						$this->writeForeignUnit($unit, $census);
+						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
 				}
 				foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
 					if ($unit->Party() !== $party) {
-						$this->writeForeignUnit($unit, $census);
+						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
 				}
 			}
@@ -444,14 +447,7 @@ class MagellanWriter implements Writer
 			$this->writeData($data);
 		}
 
-		if (count($unit->Inventory()) > 0) {
-			$data = ['GEGENSTAENDE'];
-			foreach ($unit->Inventory() as $quantity/* @var Quantity $quantity */) {
-				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
-				$data[$commodity] = $quantity->Count();
-			}
-			$this->writeData($data);
-		}
+		$this->writeResources($unit->Inventory());
 
 		$orders = Lemuria::Orders()->getDefault($unit->Id());
 		if (count($orders)) {
@@ -463,7 +459,7 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	private function writeForeignUnit(Unit $unit, Census $census): void {
+	private function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
 		$party    = $census->getParty($unit)?->Id()->Id() ?? 0;
 		$disguise = $unit->Disguise();
 		$data     = [
@@ -499,6 +495,10 @@ class MagellanWriter implements Writer
 			unset($data['bewacht']);
 		}
 		$this->writeData($data);
+
+		if ($seenByGuards) {
+			$this->writeResources(new Observables($unit->Inventory()));
+		}
 	}
 
 	private function writeConstruction(Construction $construction, string $visibility): void {
@@ -542,7 +542,7 @@ class MagellanWriter implements Writer
 			'cargo'    => $cargo,
 			'capacity' => $ship->Payload(),
 			'Kapitaen' => $captain?->Id()->Id(),
-			'Partei'   => $captain->Party()->Id()->Id(),
+			'Partei'   => $captain?->Party()->Id()->Id(),
 			'Kueste'   => $coast
 		];
 		if (!$captain) {
@@ -557,6 +557,17 @@ class MagellanWriter implements Writer
 			unset($data['Kueste']);
 		}
 		$this->writeData($data);
+	}
+
+	private function writeResources(Resources $resources): void {
+		if (count($resources) > 0) {
+			$data = ['GEGENSTAENDE'];
+			foreach ($resources as $quantity/* @var Quantity $quantity */) {
+				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
+				$data[$commodity] = $quantity->Count();
+			}
+			$this->writeData($data);
+		}
 	}
 
 	private function writeMessage(Message $message): void {
@@ -641,5 +652,14 @@ class MagellanWriter implements Writer
 			return -$luxury->Value();
 		}
 		return $luxuries[$class]->Price();
+	}
+
+	private function isGuarding(Party $party, Intelligence $intelligence): bool {
+		foreach ($intelligence->getGuards() as $unit /* @var Unit $unit */) {
+			if ($unit->Party() === $party) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
