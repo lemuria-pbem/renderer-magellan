@@ -17,6 +17,8 @@ use Lemuria\Engine\Message\Filter\NullFilter;
 use Lemuria\Engine\Message\Section;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Building\Site;
+use Lemuria\Model\Fantasya\Commodity\Horse;
+use Lemuria\Model\Fantasya\Commodity\Iron;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Balsam;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Fur;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Gem;
@@ -27,6 +29,8 @@ use Lemuria\Model\Fantasya\Commodity\Luxury\Silk;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Spice;
 use Lemuria\Model\Fantasya\Commodity\Peasant;
 use Lemuria\Model\Fantasya\Commodity\Silver;
+use Lemuria\Model\Fantasya\Commodity\Stone;
+use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
 use Lemuria\Model\Fantasya\Continent;
 use Lemuria\Model\Fantasya\Intelligence;
@@ -288,6 +292,10 @@ class MagellanWriter implements Writer
 				'Insel'    => 1,
 				'Beschr'   => $region->Description(),
 				'Bauern'   => $resources[Peasant::class]->Count(),
+				'Baeume'   => $resources[Wood::class]->Count(),
+				'Pferde'   => $resources[Horse::class]->Count(),
+				'Steine'   => $resources[Stone::class]->Count(),
+				'Eisen'    => $resources[Iron::class]->Count(),
 				'Silber'   => $resources[Silver::class]->Count(),
 				'Unterh'   => (int)floor($resources[Silver::class]->Count() * Entertain::QUOTA),
 				'Rekruten' => $availability->getResource(Peasant::class)->Count(),
