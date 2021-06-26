@@ -48,6 +48,7 @@ use Lemuria\Model\World;
 use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\Writer;
+use Lemuria\Version;
 use Lemuria\Version\VersionFinder;
 use Lemuria\Version\VersionTag;
 
@@ -63,7 +64,7 @@ class MagellanWriter implements Writer
 		'noskillpoints' => 0,
 		'max_units'     => 1000,
 		'Koordinaten'   => 'Hex',
-		'Build'         => '1.0.0',
+		'Build'         => '$VERSION',
 		'date'          => '$DATE',
 		'Runde'         => '$TURN',
 		'Zeitalter'     => 1,
@@ -140,8 +141,10 @@ class MagellanWriter implements Writer
 	}
 
 	private function initVariables(): void {
-		$this->variables['$DATE'] = time();
-		$this->variables['$TURN'] = Lemuria::Calendar()->Round();
+		$this->variables['$DATE']    = time();
+		$this->variables['$TURN']    = Lemuria::Calendar()->Round();
+		$version                     = Lemuria::Version();
+		$this->variables['$VERSION'] = $version[Version::GAME][0]->version ?? '1.0.0';
 	}
 
 	/**
