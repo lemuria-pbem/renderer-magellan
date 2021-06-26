@@ -48,6 +48,8 @@ use Lemuria\Model\World;
 use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\Writer;
+use Lemuria\Version\VersionFinder;
+use Lemuria\Version\VersionTag;
 
 class MagellanWriter implements Writer
 {
@@ -130,6 +132,11 @@ class MagellanWriter implements Writer
 		}
 		$this->file = null;
 		return $this;
+	}
+
+	public function getVersion(): VersionTag {
+		$versionFinder = new VersionFinder(__DIR__ . '/..');
+		return $versionFinder->get();
 	}
 
 	private function initVariables(): void {
