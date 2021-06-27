@@ -9,6 +9,7 @@ use Lemuria\Engine\Fantasya\Census;
 use Lemuria\Engine\Fantasya\Command\Entertain;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\Observables;
+use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
 use Lemuria\Engine\Fantasya\Outlook;
 use Lemuria\Engine\Message;
@@ -41,6 +42,8 @@ use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
 use Lemuria\Model\Fantasya\Resources;
+use Lemuria\Model\Fantasya\Spell;
+use Lemuria\Model\Fantasya\Talent\Magic;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Model\Fantasya\Vessel;
 use Lemuria\Model\Fantasya\World\PartyMap;
@@ -453,28 +456,9 @@ class MagellanWriter implements Writer
 		}
 		$this->writeData($data);
 
-		if (count($unit->Knowledge()) > 0) {
-			$calculus = new Calculus($unit);
-			$data     = ['TALENTE'];
-			foreach ($unit->Knowledge() as $ability/* @var Ability $ability */) {
-				$experience    = $ability->Experience();
-				$ability       = $calculus->knowledge($ability->Talent());
-				$talent        = Translator::TALENT[getClass($ability->Talent())];
-				$data[$talent] = [$experience, $ability->Level()];
-			}
-			$this->writeData($data);
-		}
-
+		$this->writeKnowledge($unit);
 		$this->writeResources($unit->Inventory());
-
-		$orders = Lemuria::Orders()->getDefault($unit->Id());
-		if (count($orders)) {
-			$data = ['COMMANDS'];
-			foreach ($orders as $order) {
-				$data[] = '"' . $this->escape($order) . '"';
-			}
-			$this->writeData($data);
-		}
+		$this->writeOrders($unit);
 	}
 
 	private function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
@@ -577,12 +561,72 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
+	private function writeKnowledge(Unit $unit): void {
+		$knowledge = $unit->Knowledge();
+		if (count($knowledge) > 0) {
+			$calculus = new Calculus($unit);
+			$data     = ['TALENTE'];
+			foreach ($knowledge as $ability/* @var Ability $ability */) {
+				$experience    = $ability->Experience();
+				$ability       = $calculus->knowledge($ability->Talent());
+				$talent        = Translator::TALENT[getClass($ability->Talent())];
+				$data[$talent] = [$experience, $ability->Level()];
+			}
+			$this->writeData($data);
+		}
+		if (isset($knowledge[Magic::class])) {
+			$this->writeSpells($unit);
+		}
+	}
+
+	private function writeSpells(Unit $unit): void {
+		$spellBook = $unit->Party()->SpellBook();
+		if (count($spellBook) > 0) {
+			$data = ['SPRUECHE'];
+			foreach ($spellBook as $spell /* @var Spell $spell */) {
+				$details = new SpellDetails($spell);
+				$data[]  = '"' . $details->Name() . '"';
+			}
+			$this->writeData($data);
+		}
+		$battleSpells = $unit->BattleSpells();
+		if ($battleSpells && $battleSpells->count() > 0) {
+			$data = [];
+			$preparation = $battleSpells->Preparation();
+			if ($preparation) {
+				$details       = new SpellDetails($preparation->Spell());
+				$data[]        = 'KAMPFZAUBER 0';
+				$data['name']  = $details->Name();
+				$data['level'] = $preparation->Level();
+			}
+			$combat = $battleSpells->Combat();
+			if ($combat) {
+				$details       = new SpellDetails($combat->Spell());
+				$data[]        = 'KAMPFZAUBER 1';
+				$data['name']  = $details->Name();
+				$data['level'] = $combat->Level();
+			}
+			$this->writeData($data);
+		}
+	}
+
 	private function writeResources(Resources $resources): void {
 		if (count($resources) > 0) {
 			$data = ['GEGENSTAENDE'];
 			foreach ($resources as $quantity/* @var Quantity $quantity */) {
 				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
 				$data[$commodity] = $quantity->Count();
+			}
+			$this->writeData($data);
+		}
+	}
+
+	private function writeOrders(Unit $unit): void {
+		$orders = Lemuria::Orders()->getDefault($unit->Id());
+		if (count($orders)) {
+			$data = ['COMMANDS'];
+			foreach ($orders as $order) {
+				$data[] = '"' . $this->escape($order) . '"';
 			}
 			$this->writeData($data);
 		}
