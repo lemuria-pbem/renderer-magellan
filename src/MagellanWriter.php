@@ -710,8 +710,9 @@ class MagellanWriter implements Writer
 	private function getPrice(string $class, Luxuries $luxuries): int {
 		/* @var Luxury $luxury */
 		$luxury = Lemuria::Builder()->create($class);
-		if ($luxury === $luxuries->Offer()->Commodity()) {
-			return -$luxury->Value();
+		$offer  = $luxuries->Offer();
+		if ($luxury === $offer->Commodity()) {
+			return -$offer->Price();
 		}
 		return $luxuries[$class]->Price();
 	}
