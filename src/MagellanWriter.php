@@ -324,6 +324,13 @@ class MagellanWriter implements Writer
 				'visibility' => $visibility
 			];
 		}
+
+		$herbage = $outlook->Census()->Party()->HerbalBook()->getHerbage($region);
+		if ($herbage) {
+			$data['herb']       = Translator::COMMODITY[getClass($herbage->Herb())];
+			$data['herbamount'] = Translator::occurrence($herbage->Occurrence());
+		}
+
 		$this->writeData($data);
 		$this->writeRoads($region);
 
