@@ -424,6 +424,7 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeUnit(Unit $unit): void {
+		$aura     = $unit->Aura();
 		$disguise = $unit->Disguise();
 		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
@@ -441,6 +442,10 @@ class MagellanWriter implements Writer
 			'hp'            => Translator::HEALTH[0],
 			'weight'        => $unit->Weight()
 		];
+		if ($aura) {
+			$data['Aura']    = $aura->Aura();
+			$data['Auramax'] = $aura->Maximum();
+		}
 		if ($disguise === false) {
 			unset($data['Parteitarnung']);
 			unset($data['Anderepartei']);
