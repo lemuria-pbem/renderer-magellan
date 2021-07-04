@@ -2,8 +2,10 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
+use JetBrains\PhpStorm\Pure;
 use Lemuria\Engine\Message\Section;
 use Lemuria\Model\Fantasya\Combat;
+use Lemuria\Model\Fantasya\Herbage;
 use Lemuria\Model\World;
 
 final class Translator
@@ -177,4 +179,14 @@ final class Translator
 	public const TRANSLATIONS = [
 		'Stangenwaffen' => 'Speerkampf'
 	];
+
+	public static function occurrence(float $occurrence): string {
+		return match (true) {
+			$occurrence <= 0.2 => 'sehr wenige',
+			$occurrence <= 0.4 => 'wenige',
+			$occurrence <= 0.6 => 'einige',
+			$occurrence <= 0.8 => 'viele',
+			$occurrence <= 1.0 => 'sehr viele'
+		};
+	}
 }
