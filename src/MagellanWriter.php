@@ -7,6 +7,8 @@ use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Calculus;
 use Lemuria\Engine\Fantasya\Census;
 use Lemuria\Engine\Fantasya\Command\Entertain;
+use Lemuria\Engine\Fantasya\Effect\PotionEffect;
+use Lemuria\Engine\Fantasya\Effect\PotionInfluence;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
@@ -16,6 +18,7 @@ use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
 use Lemuria\Engine\Message\Section;
+use Lemuria\Identifiable;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Horse;
@@ -38,6 +41,7 @@ use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
 use Lemuria\Model\Fantasya\Party;
+use Lemuria\Model\Fantasya\Potion;
 use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
@@ -360,6 +364,8 @@ class MagellanWriter implements Writer
 				}
 			}
 
+			$this->writeEffects($region);
+
 			if (empty($visibility)) {
 				$census     = $outlook->Census();
 				$party      = $census->Party();
@@ -471,6 +477,7 @@ class MagellanWriter implements Writer
 		$this->writeKnowledge($unit);
 		$this->writeResources($unit->Inventory());
 		$this->writeOrders($unit);
+		$this->writeEffects($unit);
 	}
 
 	private function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
@@ -534,6 +541,7 @@ class MagellanWriter implements Writer
 			unset($data['Besitzer']);
 		}
 		$this->writeData($data);
+		$this->writeEffects($construction);
 	}
 
 	private function writeVessel(Vessel $vessel, string $visibility): void {
@@ -571,6 +579,7 @@ class MagellanWriter implements Writer
 			unset($data['Kueste']);
 		}
 		$this->writeData($data);
+		$this->writeEffects($vessel);
 	}
 
 	private function writeKnowledge(Unit $unit): void {
@@ -639,6 +648,26 @@ class MagellanWriter implements Writer
 			$data = ['COMMANDS'];
 			foreach ($orders as $order) {
 				$data[] = '"' . $this->escape($order) . '"';
+			}
+			$this->writeData($data);
+		}
+	}
+
+	private function writeEffects(Identifiable $entity): void {
+		$effects = [];
+		foreach (Lemuria::Score()->findAll($entity) as $effect) {
+			if ($effect instanceof PotionEffect) {
+				$effects[getClass($effect->Potion())] = $effect->Count();
+			} elseif ($effect instanceof PotionInfluence) {
+				foreach ($effect->getPotions() as $potion /* @var Potion $potion */) {
+					$effects[getClass($potion)] = $effect->getCount($potion);
+				}
+			}
+		}
+		if ($effects) {
+			$data = ['EFFECTS'];
+			foreach ($effects as $effect => $count) {
+				$data[] = '"' . $count . ' ' . Translator::COMMODITY[$effect] . '"';
 			}
 			$this->writeData($data);
 		}
