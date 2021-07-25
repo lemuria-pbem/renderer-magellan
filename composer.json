@@ -10,7 +10,7 @@
 		"magellan",
 		"pbem"
 	],
-	"version": "0.6.2",
+	"version": "0.7.0",
 	"time": "2021-07-25",
 	"license": "GPL-3.0",
 	"authors": [
@@ -22,9 +22,9 @@
 
 	"require": {
 		"php": "~8.0",
-		"lemuria-pbem/lemuria": "~0.6.0",
-		"lemuria-pbem/engine-fantasya": "~0.6.0",
-		"lemuria-pbem/model-fantasya": "~0.6.0"
+		"lemuria-pbem/lemuria": "dev-feature/combat",
+		"lemuria-pbem/engine-fantasya": "dev-feature/combat",
+		"lemuria-pbem/model-fantasya": "dev-feature/combat"
 	},
 	"require-dev": {
 		"jetbrains/phpstorm-attributes": "~1.0"
