@@ -37,6 +37,7 @@ use Lemuria\Model\Fantasya\Commodity\Stone;
 use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
 use Lemuria\Model\Fantasya\Continent;
+use Lemuria\Model\Fantasya\Exception\JsonException;
 use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
@@ -86,7 +87,7 @@ class MagellanWriter implements Writer
 	/**
 	 * @var resource|null
 	 */
-	private $file;
+	protected $file;
 
 	/**
 	 * @var array(string=>mixed)
@@ -97,12 +98,8 @@ class MagellanWriter implements Writer
 
 	private Filter $filter;
 
-	public function __construct(string $path) {
+	public function __construct(protected string $path) {
 		$this->filter = new NullFilter();
-		$this->file   = fopen($path, 'w');
-		if (!$this->file) {
-			throw new \RuntimeException('Could not open file ' . $path . '.');
-		}
 		$this->initVariables();
 	}
 
@@ -117,9 +114,13 @@ class MagellanWriter implements Writer
 		return $this;
 	}
 
+	/**
+	 * @throws JsonException
+	 */
 	public function render(Id $party): Writer {
+		$this->file = fopen($this->path, 'w');
 		if (!$this->file) {
-			throw new \RuntimeException('File has been closed.');
+			throw new \RuntimeException('Could not open file ' . $this->path . '.');
 		}
 
 		$this->writeHeader();
@@ -136,7 +137,7 @@ class MagellanWriter implements Writer
 		$this->writeTranslations();
 
 		if (!fclose($this->file)) {
-			throw new \RuntimeException('Could not close file.');
+			throw new \RuntimeException('Could not close file ' . $this->path . '.');
 		}
 		$this->file = null;
 		return $this;
@@ -282,6 +283,9 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
+	/**
+	 * @throws JsonException
+	 */
 	protected function writeRegions(Outlook $outlook): void {
 		$atlas = new TravelAtlas($outlook->Census()->Party());
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
@@ -294,6 +298,9 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	/**
+	 * @throws JsonException
+	 */
 	private function writeRegion(Region $region, string $visibility, Outlook $outlook): void {
 		$coordinates  = $this->map->getCoordinates($region);
 		$resources    = $region->Resources();
@@ -436,6 +443,9 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	/**
+	 * @throws JsonException
+	 */
 	private function writeUnit(Unit $unit): void {
 		$aura     = $unit->Aura();
 		$disguise = $unit->Disguise();
@@ -582,6 +592,9 @@ class MagellanWriter implements Writer
 		$this->writeEffects($vessel);
 	}
 
+	/**
+	 * @throws JsonException
+	 */
 	private function writeKnowledge(Unit $unit): void {
 		$knowledge = $unit->Knowledge();
 		if (count($knowledge) > 0) {
@@ -600,6 +613,9 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	/**
+	 * @throws JsonException
+	 */
 	private function writeSpells(Unit $unit): void {
 		$spellBook = $unit->Party()->SpellBook();
 		if (count($spellBook) > 0) {
