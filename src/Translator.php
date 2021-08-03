@@ -2,10 +2,8 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
-use JetBrains\PhpStorm\Pure;
 use Lemuria\Engine\Message\Section;
 use Lemuria\Model\Fantasya\Combat;
-use Lemuria\Model\Fantasya\Herbage;
 use Lemuria\Model\World;
 
 final class Translator
