@@ -41,6 +41,7 @@ use Lemuria\Model\Fantasya\Exception\JsonException;
 use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
+use Lemuria\Model\Fantasya\Offer;
 use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\Potion;
 use Lemuria\Model\Fantasya\Quantity;
@@ -353,6 +354,11 @@ class MagellanWriter implements Writer
 			$castle = $intelligence->getGovernment();
 			if ($castle?->Size() > Site::MAX_SIZE) {
 				$this->writeMarket($region->Luxuries());
+			} else {
+				$offer = $region->Luxuries()?->Offer();
+				if ($offer) {
+					$this->writeOffer($offer);
+				}
 			}
 
 			$peasant = Lemuria::Builder()->create(Peasant::class);
@@ -441,6 +447,14 @@ class MagellanWriter implements Writer
 			];
 			$this->writeData($data);
 		}
+	}
+
+	private function writeOffer(Offer $offer): void {
+		$data = [
+			'PREISE',
+			Translator::COMMODITY[getClass($offer->Commodity())] => -$offer->Price()
+		];
+		$this->writeData($data);
 	}
 
 	/**
