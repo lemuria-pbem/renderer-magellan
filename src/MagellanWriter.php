@@ -7,6 +7,7 @@ use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Calculus;
 use Lemuria\Engine\Fantasya\Census;
 use Lemuria\Engine\Fantasya\Command\Entertain;
+use Lemuria\Engine\Fantasya\Effect\Hunger;
 use Lemuria\Engine\Fantasya\Effect\PotionEffect;
 use Lemuria\Engine\Fantasya\Effect\PotionInfluence;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
@@ -14,6 +15,7 @@ use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
 use Lemuria\Engine\Fantasya\Outlook;
+use Lemuria\Engine\Fantasya\State;
 use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
@@ -486,6 +488,9 @@ class MagellanWriter implements Writer
 			'hp'            => Translator::HEALTH[$healthCode],
 			'weight'        => $unit->Weight()
 		];
+		if ($this->hasHunger($unit)) {
+			$data['hunger'] = 1;
+		}
 		if ($aura) {
 			$data['Aura']    = $aura->Aura();
 			$data['Auramax'] = $aura->Maximum();
@@ -783,6 +788,11 @@ class MagellanWriter implements Writer
 
 	private function escape(string $string): string {
 		return str_replace('"', '\\"', $string);
+	}
+
+	private function hasHunger(Unit $unit): bool {
+		$effect = new Hunger(new State());
+		return Lemuria::Score()->find($effect->setUnit($unit)) instanceof Hunger;
 	}
 
 	private function getPrice(string $class, Luxuries $luxuries): int {
