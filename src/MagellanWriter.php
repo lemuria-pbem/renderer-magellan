@@ -7,6 +7,7 @@ use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Calculus;
 use Lemuria\Engine\Fantasya\Census;
 use Lemuria\Engine\Fantasya\Command\Entertain;
+use Lemuria\Engine\Fantasya\Effect\Hunger;
 use Lemuria\Engine\Fantasya\Effect\PotionEffect;
 use Lemuria\Engine\Fantasya\Effect\PotionInfluence;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
@@ -14,6 +15,7 @@ use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
 use Lemuria\Engine\Fantasya\Outlook;
+use Lemuria\Engine\Fantasya\State;
 use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
@@ -461,8 +463,15 @@ class MagellanWriter implements Writer
 	 * @throws JsonException
 	 */
 	private function writeUnit(Unit $unit): void {
-		$aura     = $unit->Aura();
-		$disguise = $unit->Disguise();
+		$aura       = $unit->Aura();
+		$disguise   = $unit->Disguise();
+		$health     = $unit->Health();
+		$healthCode = match (true) {
+			$health <= 0.35 => 3,
+			$health <= 0.7  => 2,
+			$health < 1.0   => 1,
+			default         => 0
+		};
 		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'          => $unit->Name(),
@@ -476,9 +485,12 @@ class MagellanWriter implements Writer
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
 			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()] ?? 4,
-			'hp'            => Translator::HEALTH[0],
+			'hp'            => Translator::HEALTH[$healthCode],
 			'weight'        => $unit->Weight()
 		];
+		if ($this->hasHunger($unit)) {
+			$data['hunger'] = 1;
+		}
 		if ($aura) {
 			$data['Aura']    = $aura->Aura();
 			$data['Auramax'] = $aura->Maximum();
@@ -776,6 +788,11 @@ class MagellanWriter implements Writer
 
 	private function escape(string $string): string {
 		return str_replace('"', '\\"', $string);
+	}
+
+	private function hasHunger(Unit $unit): bool {
+		$effect = new Hunger(new State());
+		return Lemuria::Score()->find($effect->setUnit($unit)) instanceof Hunger;
 	}
 
 	private function getPrice(string $class, Luxuries $luxuries): int {
