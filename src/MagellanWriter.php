@@ -14,12 +14,16 @@ use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
+use Lemuria\Engine\Fantasya\Message\LemuriaMessage;
+use Lemuria\Engine\Fantasya\Message\Region\TravelUnitMessage;
+use Lemuria\Engine\Fantasya\Message\Region\TravelVesselMessage;
 use Lemuria\Engine\Fantasya\Outlook;
 use Lemuria\Engine\Fantasya\State;
 use Lemuria\Engine\Message;
 use Lemuria\Engine\Message\Filter;
 use Lemuria\Engine\Message\Filter\NullFilter;
 use Lemuria\Engine\Message\Section;
+use Lemuria\Entity;
 use Lemuria\Identifiable;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Building\Site;
@@ -349,7 +353,15 @@ class MagellanWriter implements Writer
 		$this->writeRoads($region);
 
 		if ($visibility !== 'neighbour') {
+			$travelled = [];
+			$navigated = [];
 			foreach (Lemuria::Report()->getAll($region) as $message) {
+				if ($this->containsMessage($message, TravelUnitMessage::class)) {
+					$travelled[] = $message;
+				}
+				if ($this->containsMessage($message, TravelVesselMessage::class)) {
+					$navigated[] = $message;
+				}
 				$this->writeMessage($message);
 			}
 
@@ -380,6 +392,8 @@ class MagellanWriter implements Writer
 			}
 
 			$this->writeEffects($region);
+			$this->writeTravelled($travelled);
+			$this->writeNavigated($navigated);
 
 			if (empty($visibility)) {
 				$census     = $outlook->Census();
@@ -715,6 +729,32 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	/**
+	 * @param LemuriaMessage[] $travelled
+	 */
+	private function writeTravelled(array $travelled): void {
+		if (!empty($travelled)) {
+			$data = ['DURCHREISE'];
+			foreach ($travelled as $message) {
+				$data[] = '"' . $this->getTravelMessageEntity($message) . '"';
+			}
+			$this->writeData($data);
+		}
+	}
+
+	/**
+	 * @param LemuriaMessage[] $navigated
+	 */
+	private function writeNavigated(array $navigated): void {
+		if (!empty($navigated)) {
+			$data = ['DURCHSCHIFFUNG'];
+			foreach ($navigated as $message) {
+				$data[] = '"' . $this->getTravelMessageEntity($message) . '"';
+			}
+			$this->writeData($data);
+		}
+	}
+
 	private function writeMessage(Message $message): void {
 		if (!$this->filter->retains($message)) {
 			$data = [
@@ -812,5 +852,17 @@ class MagellanWriter implements Writer
 			}
 		}
 		return false;
+	}
+
+	private function containsMessage(LemuriaMessage $message, string $class): bool {
+		if ($message->MessageClass() === $class) {
+			return !$this->filter->retains($message);
+		}
+		return false;
+	}
+
+	private function getTravelMessageEntity(LemuriaMessage $message): string {
+		$entity = Entity::from($message->getParameter());
+		return $entity->Name() . ' (' . $entity->Id() . ')';
 	}
 }
