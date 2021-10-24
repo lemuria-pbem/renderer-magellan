@@ -534,9 +534,10 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
-		$party    = $census->getParty($unit)?->Id()->Id() ?? 0;
-		$disguise = $unit->Disguise();
-		$data     = [
+		$party     = $census->getParty($unit)?->Id()->Id() ?? 0;
+		$isMonster = $unit->Party()->Type() === Party::MONSTER;
+		$disguise  = $unit->Disguise();
+		$data      = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'          => $unit->Name(),
 			'Beschr'        => $unit->Description(),
@@ -551,10 +552,10 @@ class MagellanWriter implements Writer
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
 			'hp'            => Translator::HEALTH[0]
 		];
-		if (!$party) {
+		if (!$party || $isMonster) {
 			unset($data['Partei']);
 		}
-		if ($disguise === false) {
+		if ($disguise === false || $isMonster) {
 			unset($data['Parteitarnung']);
 			unset($data['Anderepartei']);
 			unset($data['Verraeter']);
@@ -570,7 +571,9 @@ class MagellanWriter implements Writer
 		}
 		$this->writeData($data);
 
-		if ($seenByGuards) {
+		if ($isMonster) {
+			$this->writeResources($unit->Inventory());
+		} elseif ($seenByGuards) {
 			$this->writeResources(new Observables($unit->Inventory()));
 		}
 	}
