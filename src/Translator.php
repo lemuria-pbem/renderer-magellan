@@ -8,8 +8,9 @@ use Lemuria\Model\World;
 
 final class Translator
 {
-	public const BATTLE_ROW = [Combat::AGGRESSIVE => 0, Combat::BYSTANDER => 1, Combat::BACK  => 2,
-		                       Combat::DEFENSIVE  => 3, Combat::REFUGEE   => 5, Combat::FRONT => 0];
+	public const BATTLE_ROW = [Combat::AGGRESSIVE => 0, Combat::FRONT     => 1, Combat::CAREFUL => 1,
+		                       Combat::BACK       => 2, Combat::DEFENSIVE => 3,
+		                       Combat::BYSTANDER  => 4, Combat::REFUGEE   => 5];
 
 	public const COAST = [World::NORTH => 1, World::NORTHEAST => 1, World::EAST => 2, World::SOUTHEAST => 3,
 		                  World::SOUTH => 4, World::SOUTHWEST => 4, World::WEST => 5, World::NORTHWEST => 0];
