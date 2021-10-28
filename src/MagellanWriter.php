@@ -311,6 +311,7 @@ class MagellanWriter implements Writer
 	private function writeRegion(Region $region, string $visibility, Outlook $outlook): void {
 		$coordinates  = $this->map->getCoordinates($region);
 		$resources    = $region->Resources();
+		$peasants     = $resources[Peasant::class]->Count();
 		$intelligence = new Intelligence($region);
 
 		if (empty($visibility)) {
@@ -322,7 +323,7 @@ class MagellanWriter implements Writer
 				'Terrain'  => Translator::LANDSCAPE[getClass($region->Landscape())],
 				'Insel'    => 1,
 				'Beschr'   => $region->Description(),
-				'Bauern'   => $resources[Peasant::class]->Count(),
+				'Bauern'   => $peasants,
 				'Baeume'   => $resources[Wood::class]->Count(),
 				'Pferde'   => $resources[Horse::class]->Count(),
 				'Steine'   => $resources[Stone::class]->Count(),
@@ -365,13 +366,15 @@ class MagellanWriter implements Writer
 				$this->writeMessage($message);
 			}
 
-			$castle = $intelligence->getGovernment();
-			if ($castle?->Size() > Site::MAX_SIZE) {
-				$this->writeMarket($region->Luxuries());
-			} else {
-				$offer = $region->Luxuries()?->Offer();
-				if ($offer) {
-					$this->writeOffer($offer);
+			if ($peasants > 0) {
+				$castle = $intelligence->getGovernment();
+				if ($castle?->Size() > Site::MAX_SIZE) {
+					$this->writeMarket($region->Luxuries());
+				} else {
+					$offer = $region->Luxuries()?->Offer();
+					if ($offer) {
+						$this->writeOffer($offer);
+					}
 				}
 			}
 
