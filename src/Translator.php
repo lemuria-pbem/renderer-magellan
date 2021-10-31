@@ -39,12 +39,19 @@ final class Translator
 
 	public const RACE = [
 		'Aquan'    => 'Aquaner',
+		'Bear'     => 'Bär',
 		'Dwarf'    => 'Zwerg',
 		'Elf'      => 'Elf',
+		'Ent'      => 'Baumhirte',
+		'Ghoul'    => 'Ghoul',
+		'Goblin'   => 'Kobold',
 		'Halfling' => 'Halbling',
+		'Kraken'   => 'Krake',
 		'Human'    => 'Mensch',
 		'Orc'      => 'Ork',
-		'Troll'    => 'Troll'
+		'Skeleton' => 'Skelett',
+		'Troll'    => 'Troll',
+		'Zombie'   => 'Zombie'
 	];
 
 	public const HEALTH = [
@@ -64,6 +71,7 @@ final class Translator
 		'Bubblemorel'     => 'Blasenmorchel',
 		'Bugleweed'       => 'Gurgelkraut',
 		'Camel'           => 'Kamel',
+		'Carnassial'      => 'Reißzahn',
 		'Carriage'        => 'Wagen',
 		'Catapult'        => 'Katapult',
 		'CaveLichen'      => 'Höhlenglimm',
@@ -79,10 +87,12 @@ final class Translator
 		'Fur'             => 'Pelz',
 		'Gapgrowth'       => 'Spaltwachs',
 		'Gem'             => 'Juwel',
+		'GoblinEar'       => 'Koboldohr',
 		'Gold'            => 'Gold',
 		'GoliathWater'    => 'Goliathwasser',
 		'Griffin'         => 'Greif',
 		'Griffinegg'      => 'Greifenei',
+		'GriffinFeather'  => 'Greifenfeder',
 		'HealingPotion'   => 'Heiltrank',
 		'Horse'           => 'Pferd',
 		'HorseBliss'      => 'Pferdeglück',
@@ -105,6 +115,7 @@ final class Translator
 		'SevenLeagueTea'  => 'Siebenmeilentee',
 		'Silk'            => 'Seide',
 		'Silver'          => 'Silber',
+		'Skull'           => 'Totenschädel',
 		'Snowcrystal'     => 'Schneekristall',
 		'Spear'           => 'Speer',
 		'Spice'           => 'Gewürz',
