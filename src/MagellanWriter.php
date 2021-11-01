@@ -10,6 +10,7 @@ use Lemuria\Engine\Fantasya\Command\Entertain;
 use Lemuria\Engine\Fantasya\Effect\Hunger;
 use Lemuria\Engine\Fantasya\Effect\PotionEffect;
 use Lemuria\Engine\Fantasya\Effect\PotionInfluence;
+use Lemuria\Engine\Fantasya\Effect\TravelEffect;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
@@ -412,6 +413,13 @@ class MagellanWriter implements Writer
 				foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
 					if ($unit->Party() !== $party) {
 						$this->writeForeignUnit($unit, $census, $isGuarding);
+					}
+				}
+			} elseif ($visibility === 'travel') {
+				$census = $outlook->Census();
+				foreach ($region->Residents() as $unit /* @var Unit $unit */) {
+					if (!$unit->IsHiding() && !$unit->Construction() && !$unit->Vessel() && !$this->hasTravelled($unit)) {
+						$this->writeForeignUnit($unit, $census, false);
 					}
 				}
 			}
@@ -839,6 +847,11 @@ class MagellanWriter implements Writer
 	private function hasHunger(Unit $unit): bool {
 		$effect = new Hunger(new State());
 		return Lemuria::Score()->find($effect->setUnit($unit)) instanceof Hunger;
+	}
+
+	private function hasTravelled(Unit $unit): bool {
+		$effect = new TravelEffect(State::getInstance());
+		return Lemuria::Score()->find($effect->setUnit($unit)) instanceof TravelEffect;
 	}
 
 	private function getPrice(string $class, Luxuries $luxuries): int {
