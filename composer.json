@@ -22,9 +22,9 @@
 
 	"require": {
 		"php": "~8.0",
-		"lemuria-pbem/lemuria": "dev-feature/monster",
-		"lemuria-pbem/engine-fantasya": "dev-feature/monster",
-		"lemuria-pbem/model-fantasya": "dev-feature/monster"
+		"lemuria-pbem/lemuria": "dev-dev",
+		"lemuria-pbem/engine-fantasya": "dev-dev",
+		"lemuria-pbem/model-fantasya": "dev-dev"
 	},
 	"require-dev": {
 		"jetbrains/phpstorm-attributes": "~1.0"
