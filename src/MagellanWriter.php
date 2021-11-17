@@ -513,6 +513,9 @@ class MagellanWriter implements Writer
 			'hp'            => Translator::HEALTH[$healthCode],
 			'weight'        => $unit->Weight()
 		];
+		if (!$unit->IsLooting()) {
+			$data['privat'] = Translator::MISC['isNotLooting'];
+		}
 		if ($this->hasHunger($unit)) {
 			$data['hunger'] = 1;
 		}
