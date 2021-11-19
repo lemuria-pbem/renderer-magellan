@@ -190,6 +190,10 @@ final class Translator
 		'Stangenwaffen' => 'Speerkampf'
 	];
 
+	public const MISC = [
+		'isNotLooting' => 'sammelt keine Beute'
+	];
+
 	public static function occurrence(float $occurrence): string {
 		return match (true) {
 			$occurrence <= 0.2 => 'sehr wenige',
