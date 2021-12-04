@@ -15,6 +15,25 @@ final class Translator
 	public const COAST = [World::NORTH => 1, World::NORTHEAST => 1, World::EAST => 2, World::SOUTHEAST => 3,
 		                  World::SOUTH => 4, World::SOUTHWEST => 4, World::WEST => 5, World::NORTHWEST => 0];
 
+	public const MONSTER_RESOURCE = [
+		'herb'           => true,
+		'potion'         => true,
+		'Balsam'         => true,
+		'Carnassial'     => true,
+		'Fur'            => true,
+		'Gem'            => true,
+		'Goblinear'      => true,
+		'Gold'           => true,
+		'Griffinfeather' => true,
+		'Myrrh'          => true,
+		'Oil'            => true,
+		'Olibanum'       => true,
+		'Silk'           => true,
+		'Silver'         => true,
+		'Skull'          => true,
+		'Spice'          => true
+	];
+
 	public const BUILDING = [
 		'Cabin'      => 'Holzfällerhütte',
 		'Citadel'    => 'Zitadelle',
@@ -62,6 +81,8 @@ final class Translator
 	];
 
 	public const COMMODITY = [
+		'herb'            => 'Kräuter',
+		'potion'          => 'Trank',
 		'Armor'           => 'Plattenpanzer',
 		'Balsam'          => 'Balsam',
 		'Battleaxe'       => 'Streitaxt',
