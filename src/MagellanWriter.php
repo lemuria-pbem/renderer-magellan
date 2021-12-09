@@ -45,6 +45,7 @@ use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
 use Lemuria\Model\Fantasya\Continent;
 use Lemuria\Model\Fantasya\Exception\JsonException;
+use Lemuria\Model\Fantasya\Herb;
 use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
@@ -583,7 +584,7 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 
 		if ($isMonster) {
-			$this->writeResources($unit->Inventory());
+			$this->writeMonsterResources($unit->Inventory());
 		} elseif ($seenByGuards) {
 			$this->writeResources(new Observables($unit->Inventory()));
 		}
@@ -707,9 +708,26 @@ class MagellanWriter implements Writer
 	private function writeResources(Resources $resources): void {
 		if (count($resources) > 0) {
 			$data = ['GEGENSTAENDE'];
-			foreach ($resources as $quantity/* @var Quantity $quantity */) {
+			foreach ($resources as $quantity /* @var Quantity $quantity */) {
 				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
 				$data[$commodity] = $quantity->Count();
+			}
+			$this->writeData($data);
+		}
+	}
+
+	private function writeMonsterResources(Resources $resources): void {
+		if (count($resources) > 0) {
+			$data = ['GEGENSTAENDE'];
+			foreach ($resources as $quantity /* @var Quantity $quantity */) {
+				$commodity = $quantity->Commodity();
+				$class     = match (true) {
+					$commodity instanceof Herb   => 'herb',
+					$commodity instanceof Potion => 'potion',
+					default                      => getClass($commodity)
+				};
+				$commodity        = Translator::COMMODITY[$class];
+				$data[$commodity] = isset(Translator::MONSTER_RESOURCE[$class]) ? 0 : $quantity->Count();
 			}
 			$this->writeData($data);
 		}
