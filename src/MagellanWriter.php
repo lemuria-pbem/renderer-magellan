@@ -299,9 +299,10 @@ class MagellanWriter implements Writer
 		$atlas = new TravelAtlas($outlook->Census()->Party());
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
 			$visibility = match ($atlas->getVisibility($region)) {
-				TravelAtlas::WITH_UNIT => '',
-				TravelAtlas::TRAVELLED => 'travel',
-				default                => 'neighbour'
+				TravelAtlas::WITH_UNIT  => '',
+				TravelAtlas::TRAVELLED  => 'travel',
+				TravelAtlas::LIGHTHOUSE => 'lighthouse',
+				default                 => 'neighbour'
 			};
 			$this->writeRegion($region, $visibility, $outlook);
 		}
@@ -355,7 +356,7 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 		$this->writeRoads($region);
 
-		if ($visibility !== 'neighbour') {
+		if (!in_array($visibility, ['neighbour', 'lighthouse'])) {
 			$travelled = [];
 			$navigated = [];
 			foreach (Lemuria::Report()->getAll($region) as $message) {
