@@ -796,7 +796,7 @@ class MagellanWriter implements Writer
 		if (!$this->filter->retains($message)) {
 			$data = [
 				'MESSAGE ' . $message->Id()->Id(),
-				'type'     => $message->Section(),
+				'type'     => $message->Section()->value,
 				'rendered' => (string)$message
 			];
 			$this->writeData($data);
@@ -807,7 +807,7 @@ class MagellanWriter implements Writer
 		if (!$this->filter->retains($message)) {
 			$data = [
 				'MESSAGE ' . $message->Id()->Id(),
-				'type'     => $message->Section(),
+				'type'     => $message->Section()->value,
 				'rendered' => (string)$message,
 				'unit'     => $unit->Id()->Id(),
 				'region'   => $unit->Region()->Id()->Id()
