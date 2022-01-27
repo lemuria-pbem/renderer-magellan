@@ -104,7 +104,7 @@ class MagellanWriter implements Writer
 	 */
 	private array $variables = [];
 
-	private PartyMap $map;
+	private readonly PartyMap $map;
 
 	private Filter $filter;
 

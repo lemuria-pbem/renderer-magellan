@@ -4,11 +4,11 @@ namespace Lemuria\Renderer\Magellan;
 
 final class Translator
 {
-	public const BATTLE_ROW = [5, 4, 3, 2, 1, 1, 0];
+	public final const BATTLE_ROW = [5, 4, 3, 2, 1, 1, 0];
 
-	public const COAST = ['N' => 1, 'NE' => 1, 'E' => 2, 'SE' => 3, 'S' => 4, 'SW' => 4, 'W' => 5, 'NW' => 0];
+	public final const COAST = ['N' => 1, 'NE' => 1, 'E' => 2, 'SE' => 3, 'S' => 4, 'SW' => 4, 'W' => 5, 'NW' => 0];
 
-	public const MONSTER_RESOURCE = [
+	public final const MONSTER_RESOURCE = [
 		'herb'           => true,
 		'potion'         => true,
 		'Balsam'         => true,
@@ -27,7 +27,7 @@ final class Translator
 		'Spice'          => true
 	];
 
-	public const BUILDING = [
+	public final const BUILDING = [
 		'Blacksmith' => 'Schmiede',
 		'Cabin'      => 'Holzfällerhütte',
 		'Citadel'    => 'Zitadelle',
@@ -52,7 +52,7 @@ final class Translator
 		'Workshop'   => 'Werkstatt'
 	];
 
-	public const LANDSCAPE = [
+	public final const LANDSCAPE = [
 		'Desert'   => 'Wüste',
 		'Forest'   => 'Wald',
 		'Glacier'  => 'Gletscher',
@@ -63,7 +63,7 @@ final class Translator
 		'Swamp'    => 'Sumpf'
 	];
 
-	public const RACE = [
+	public final const RACE = [
 		'Aquan'    => 'Aquaner',
 		'Bear'     => 'Bär',
 		'Dwarf'    => 'Zwerg',
@@ -80,14 +80,14 @@ final class Translator
 		'Zombie'   => 'Zombie'
 	];
 
-	public const HEALTH = [
+	public final const HEALTH = [
 		'gesund',
 		'erschoepft',
 		'verwundet',
 		'schwer verwundet'
 	];
 
-	public const COMMODITY = [
+	public final const COMMODITY = [
 		'herb'                 => 'Kräuter',
 		'potion'               => 'Trank',
 		'Armor'                => 'Plattenpanzer',
@@ -175,7 +175,7 @@ final class Translator
 		'Woundshut'            => 'Wundsalbe'
 	];
 
-	public const SHIP = [
+	public final const SHIP = [
 		'Boat'       => 'Boot',
 		'Caravel'    => 'Karavelle',
 		'Dragonship' => 'Drachenschiff',
@@ -184,7 +184,7 @@ final class Translator
 		'Trireme'    => 'Trireme'
 	];
 
-	public const TALENT = [
+	public final const TALENT = [
 		'Alchemy'        => 'Alchemie',
 		'Archery'        => 'Bogenschießen',
 		'Armory'         => 'Rüstungsbau',
@@ -216,7 +216,7 @@ final class Translator
 		'Woodchopping'   => 'Holzfällen'
 	];
 
-	public const SECTION = [
+	public final const SECTION = [
 		1 => 'battle',
 		2 => 'economy',
 		3 => 'errors',
@@ -228,11 +228,11 @@ final class Translator
 		9 => 'study'
 	];
 
-	public const TRANSLATIONS = [
+	public final const TRANSLATIONS = [
 		'Stangenwaffen' => 'Speerkampf'
 	];
 
-	public const MISC = [
+	public final const MISC = [
 		'isNotLooting' => 'sammelt keine Beute'
 	];
 
