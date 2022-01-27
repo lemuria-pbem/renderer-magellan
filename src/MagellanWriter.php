@@ -51,6 +51,7 @@ use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
 use Lemuria\Model\Fantasya\Offer;
 use Lemuria\Model\Fantasya\Party;
+use Lemuria\Model\Fantasya\Party\Type;
 use Lemuria\Model\Fantasya\Potion;
 use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
@@ -61,7 +62,7 @@ use Lemuria\Model\Fantasya\Talent\Magic;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Model\Fantasya\Vessel;
 use Lemuria\Model\Fantasya\World\PartyMap;
-use Lemuria\Model\World;
+use Lemuria\Model\World\Direction;
 use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\Writer;
@@ -90,7 +91,7 @@ class MagellanWriter implements Writer
 	];
 
 	private const ROADS = [
-		World::NORTHWEST, World::NORTHEAST, World::EAST, World::SOUTHEAST, World::SOUTHWEST, World::WEST
+		Direction::NORTHWEST, Direction::NORTHEAST, Direction::EAST, Direction::SOUTHEAST, Direction::SOUTHWEST, Direction::WEST
 	];
 
 	/**
@@ -190,7 +191,7 @@ class MagellanWriter implements Writer
 
 		$parties = [];
 		foreach ($census->getAtlas() as $region /* @var Region $region */) {
-			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
+			foreach ($outlook->getApparitions($region) as $unit /* @var Unit $unit */) {
 				$foreign = $census->getParty($unit);
 				if ($foreign && $foreign !== $party) {
 					$id           = $foreign->Id()->Id();
@@ -412,7 +413,7 @@ class MagellanWriter implements Writer
 						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
 				}
-				foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
+				foreach ($outlook->getApparitions($region) as $unit /* @var Unit $unit */) {
 					if ($unit->Party() !== $party) {
 						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
@@ -511,7 +512,7 @@ class MagellanWriter implements Writer
 			'Burg'          => $unit->Construction()?->Id()->Id(),
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
-			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()] ?? 4,
+			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()->value] ?? 4,
 			'hp'            => Translator::HEALTH[$healthCode],
 			'weight'        => $unit->Weight()
 		];
@@ -548,7 +549,7 @@ class MagellanWriter implements Writer
 
 	private function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
 		$party     = $census->getParty($unit)?->Id()->Id() ?? 0;
-		$isMonster = $unit->Party()->Type() === Party::MONSTER;
+		$isMonster = $unit->Party()->Type() === Type::MONSTER;
 		$disguise  = $unit->Disguise();
 		$data      = [
 			'EINHEIT ' . $unit->Id()->Id(),
@@ -616,7 +617,7 @@ class MagellanWriter implements Writer
 	private function writeVessel(Vessel $vessel, string $visibility): void {
 		$ship       = $vessel->Ship();
 		$size       = (int)round($vessel->Completion() * $ship->Wood());
-		$coast      = Translator::COAST[$vessel->Anchor()] ?? null;
+		$coast      = Translator::COAST[$vessel->Anchor()->value] ?? null;
 		$passengers = $vessel->Passengers();
 		$captain    = $passengers->Owner();
 		$cargo      = 0;
@@ -816,11 +817,11 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeMessagetype(): void {
-		for ($section = Section::EVENT; $section <= Section::STUDY; $section++) {
+		foreach (Section::cases() as $section) {
 			$data = [
-				'MESSAGETYPE ' . $section,
+				'MESSAGETYPE ' . $section->value,
 				'text'    => '"$rendered"',
-				'section' => Translator::SECTION[$section]
+				'section' => Translator::SECTION[$section->value]
 			];
 			$this->writeData($data);
 		}

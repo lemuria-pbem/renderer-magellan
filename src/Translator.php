@@ -2,18 +2,11 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
-use Lemuria\Engine\Message\Section;
-use Lemuria\Model\Fantasya\Combat;
-use Lemuria\Model\World;
-
 final class Translator
 {
-	public const BATTLE_ROW = [Combat::AGGRESSIVE => 0, Combat::FRONT     => 1, Combat::CAREFUL => 1,
-		                       Combat::BACK       => 2, Combat::DEFENSIVE => 3,
-		                       Combat::BYSTANDER  => 4, Combat::REFUGEE   => 5];
+	public const BATTLE_ROW = [5, 4, 3, 2, 1, 1, 0];
 
-	public const COAST = [World::NORTH => 1, World::NORTHEAST => 1, World::EAST => 2, World::SOUTHEAST => 3,
-		                  World::SOUTH => 4, World::SOUTHWEST => 4, World::WEST => 5, World::NORTHWEST => 0];
+	public const COAST = ['N' => 1, 'NE' => 1, 'E' => 2, 'SE' => 3, 'S' => 4, 'SW' => 4, 'W' => 5, 'NW' => 0];
 
 	public const MONSTER_RESOURCE = [
 		'herb'           => true,
@@ -224,15 +217,15 @@ final class Translator
 	];
 
 	public const SECTION = [
-		Section::EVENT      => 'events',
-		Section::ERROR      => 'errors',
-		Section::BATTLE     => 'battle',
-		Section::ECONOMY    => 'economy',
-		Section::MAGIC      => 'magic',
-		Section::MAIL       => 'mail',
-		Section::MOVEMENT   => 'movement',
-		Section::PRODUCTION => 'production',
-		Section::STUDY      => 'study'
+		1 => 'battle',
+		2 => 'economy',
+		3 => 'errors',
+		4 => 'events',
+		5 => 'magic',
+		6 => 'mail',
+		7 => 'movement',
+		8 => 'production',
+		9 => 'study'
 	];
 
 	public const TRANSLATIONS = [
