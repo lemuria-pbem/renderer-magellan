@@ -10,14 +10,14 @@
 			"email": "lemuria@online.de"
 		}
 	],
-	"version": "0.9.1",
-	"time": "2021-12-28",
+	"version": "0.10.0",
+	"time": "2022-01-27",
 
 	"require": {
-		"php": "~8.0",
-		"lemuria-pbem/lemuria": "dev-dev",
-		"lemuria-pbem/engine-fantasya": "dev-dev",
-		"lemuria-pbem/model-fantasya": "dev-dev"
+		"php": "~8.1",
+		"lemuria-pbem/lemuria": "dev-feature/unicum",
+		"lemuria-pbem/engine-fantasya": "dev-feature/unicum",
+		"lemuria-pbem/model-fantasya": "dev-feature/unicum"
 	},
 	"require-dev": {
 		"jetbrains/phpstorm-attributes": "~1.0"
