@@ -15,6 +15,7 @@ use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
+use Lemuria\Engine\Fantasya\Factory\Model\Visibility;
 use Lemuria\Engine\Fantasya\Message\LemuriaMessage;
 use Lemuria\Engine\Fantasya\Message\Region\TravelUnitMessage;
 use Lemuria\Engine\Fantasya\Message\Region\TravelVesselMessage;
@@ -300,10 +301,10 @@ class MagellanWriter implements Writer
 		$atlas = new TravelAtlas($outlook->Census()->Party());
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
 			$visibility = match ($atlas->getVisibility($region)) {
-				TravelAtlas::WITH_UNIT  => '',
-				TravelAtlas::TRAVELLED  => 'travel',
-				TravelAtlas::LIGHTHOUSE => 'lighthouse',
-				default                 => 'neighbour'
+				Visibility::WITH_UNIT  => '',
+				Visibility::TRAVELLED  => 'travel',
+				Visibility::LIGHTHOUSE => 'lighthouse',
+				default                => 'neighbour'
 			};
 			$this->writeRegion($region, $visibility, $outlook);
 		}
