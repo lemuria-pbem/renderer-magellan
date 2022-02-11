@@ -60,6 +60,8 @@ use Lemuria\Model\Fantasya\Relation;
 use Lemuria\Model\Fantasya\Resources;
 use Lemuria\Model\Fantasya\Spell;
 use Lemuria\Model\Fantasya\Talent\Magic;
+use Lemuria\Model\Fantasya\Treasury;
+use Lemuria\Model\Fantasya\Unicum;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Model\Fantasya\Vessel;
 use Lemuria\Model\Fantasya\World\PartyMap;
@@ -504,7 +506,7 @@ class MagellanWriter implements Writer
 		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'          => $unit->Name(),
-			'Beschr'        => $unit->Description(),
+			'Beschr'        => $this->compileDescription($unit),
 			'Partei'        => $unit->Party()->Id()->Id(),
 			'Parteitarnung' => $disguise !== false ? 1 : 0,
 			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
@@ -543,7 +545,7 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 
 		$this->writeKnowledge($unit);
-		$this->writeResources($unit->Inventory());
+		$this->writeResources($unit->Inventory(), $unit->Treasury());
 		$this->writeOrders($unit);
 		$this->writeEffects($unit);
 	}
@@ -708,12 +710,18 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	private function writeResources(Resources $resources): void {
+	private function writeResources(Resources $resources, ?Treasury $treasury = null): void {
 		if (count($resources) > 0) {
 			$data = ['GEGENSTAENDE'];
 			foreach ($resources as $quantity /* @var Quantity $quantity */) {
 				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
 				$data[$commodity] = $quantity->Count();
+			}
+			if ($treasury) {
+				foreach ($treasury as $unicum /* @var Unicum $unicum */) {
+					$composition        = Translator::COMPOSITION[getClass($unicum->Composition())];
+					$data[$composition] = 1;
+				}
 			}
 			$this->writeData($data);
 		}
@@ -907,5 +915,34 @@ class MagellanWriter implements Writer
 	private function getTravelMessageEntity(LemuriaMessage $message): string {
 		$entity = Entity::from($message->getParameter());
 		return $entity->Name() . ' (' . $entity->Id() . ')';
+	}
+
+	private function compileDescription(Unit $unit): string {
+		$compilation = $unit->Description();
+		$treasury    = $unit->Treasury();
+		if ($treasury->count() > 0) {
+			$compilation .= ' ' . Translator::MISC['specialItems'] . ':';
+		}
+		$next = false;
+		foreach ($treasury as $unicum /* @var Unicum $unicum */) {
+			if ($next) {
+				$compilation .= ',';
+			}
+			$id           = $unicum->Id();
+			$name         = $this->escape($unicum->Name());
+			$description  = $this->escape($unicum->Description());
+			$composition  = Translator::COMPOSITION[getClass($unicum->Composition())];
+			if ($name) {
+				$unicumName = $name . ' [' . $id . '] (' . $composition . ')';
+			} else {
+				$unicumName = $composition . ' [' . $id . '] (' . Translator::MISC['unnamed'] . ')';
+			}
+			if ($description) {
+				$unicumName .= ': ' . $description;
+			}
+			$compilation .= ' ' . $unicumName;
+			$next         = !str_ends_with($description, '.');
+		}
+		return $compilation;
 	}
 }

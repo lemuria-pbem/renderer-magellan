@@ -175,6 +175,11 @@ final class Translator
 		'Woundshut'            => 'Wundsalbe'
 	];
 
+	public final const COMPOSITION = [
+		'Scroll'    => "Schriftrolle",
+		"Spellbook" => "Zauberbuch"
+	];
+
 	public final const SHIP = [
 		'Boat'       => 'Boot',
 		'Caravel'    => 'Karavelle',
@@ -233,7 +238,9 @@ final class Translator
 	];
 
 	public final const MISC = [
-		'isNotLooting' => 'sammelt keine Beute'
+		'isNotLooting' => 'sammelt keine Beute',
+		'specialItems' => 'Besondere Gegenstände',
+		'unnamed'      => 'unbenannt'
 	];
 
 	public static function occurrence(float $occurrence): string {
