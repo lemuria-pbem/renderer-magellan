@@ -11,13 +11,13 @@
 		}
 	],
 	"version": "0.10.0",
-	"time": "2022-02-11",
+	"time": "2022-02-12",
 
 	"require": {
 		"php": "~8.1",
-		"lemuria-pbem/lemuria": "dev-feature/unicum",
-		"lemuria-pbem/engine-fantasya": "dev-feature/unicum",
-		"lemuria-pbem/model-fantasya": "dev-feature/unicum"
+		"lemuria-pbem/lemuria": "dev-dev",
+		"lemuria-pbem/engine-fantasya": "dev-dev",
+		"lemuria-pbem/model-fantasya": "dev-dev"
 	},
 	"require-dev": {
 		"jetbrains/phpstorm-attributes": "~1.0"
