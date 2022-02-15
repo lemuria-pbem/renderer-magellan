@@ -2,20 +2,13 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
-use Lemuria\Engine\Message\Section;
-use Lemuria\Model\Fantasya\Combat;
-use Lemuria\Model\World;
-
 final class Translator
 {
-	public const BATTLE_ROW = [Combat::AGGRESSIVE => 0, Combat::FRONT     => 1, Combat::CAREFUL => 1,
-		                       Combat::BACK       => 2, Combat::DEFENSIVE => 3,
-		                       Combat::BYSTANDER  => 4, Combat::REFUGEE   => 5];
+	public final const BATTLE_ROW = [5, 4, 3, 2, 1, 1, 0];
 
-	public const COAST = [World::NORTH => 1, World::NORTHEAST => 1, World::EAST => 2, World::SOUTHEAST => 3,
-		                  World::SOUTH => 4, World::SOUTHWEST => 4, World::WEST => 5, World::NORTHWEST => 0];
+	public final const COAST = ['N' => 1, 'NE' => 1, 'E' => 2, 'SE' => 3, 'S' => 4, 'SW' => 4, 'W' => 5, 'NW' => 0];
 
-	public const MONSTER_RESOURCE = [
+	public final const MONSTER_RESOURCE = [
 		'herb'           => true,
 		'potion'         => true,
 		'Balsam'         => true,
@@ -34,7 +27,7 @@ final class Translator
 		'Spice'          => true
 	];
 
-	public const BUILDING = [
+	public final const BUILDING = [
 		'Blacksmith' => 'Schmiede',
 		'Cabin'      => 'Holzfällerhütte',
 		'Citadel'    => 'Zitadelle',
@@ -59,7 +52,7 @@ final class Translator
 		'Workshop'   => 'Werkstatt'
 	];
 
-	public const LANDSCAPE = [
+	public final const LANDSCAPE = [
 		'Desert'   => 'Wüste',
 		'Forest'   => 'Wald',
 		'Glacier'  => 'Gletscher',
@@ -70,7 +63,7 @@ final class Translator
 		'Swamp'    => 'Sumpf'
 	];
 
-	public const RACE = [
+	public final const RACE = [
 		'Aquan'    => 'Aquaner',
 		'Bear'     => 'Bär',
 		'Dwarf'    => 'Zwerg',
@@ -87,14 +80,14 @@ final class Translator
 		'Zombie'   => 'Zombie'
 	];
 
-	public const HEALTH = [
+	public final const HEALTH = [
 		'gesund',
 		'erschoepft',
 		'verwundet',
 		'schwer verwundet'
 	];
 
-	public const COMMODITY = [
+	public final const COMMODITY = [
 		'herb'                 => 'Kräuter',
 		'potion'               => 'Trank',
 		'Armor'                => 'Plattenpanzer',
@@ -182,7 +175,12 @@ final class Translator
 		'Woundshut'            => 'Wundsalbe'
 	];
 
-	public const SHIP = [
+	public final const COMPOSITION = [
+		'Scroll'    => "Schriftrolle",
+		"Spellbook" => "Zauberbuch"
+	];
+
+	public final const SHIP = [
 		'Boat'       => 'Boot',
 		'Caravel'    => 'Karavelle',
 		'Dragonship' => 'Drachenschiff',
@@ -191,7 +189,7 @@ final class Translator
 		'Trireme'    => 'Trireme'
 	];
 
-	public const TALENT = [
+	public final const TALENT = [
 		'Alchemy'        => 'Alchemie',
 		'Archery'        => 'Bogenschießen',
 		'Armory'         => 'Rüstungsbau',
@@ -223,24 +221,26 @@ final class Translator
 		'Woodchopping'   => 'Holzfällen'
 	];
 
-	public const SECTION = [
-		Section::EVENT      => 'events',
-		Section::ERROR      => 'errors',
-		Section::BATTLE     => 'battle',
-		Section::ECONOMY    => 'economy',
-		Section::MAGIC      => 'magic',
-		Section::MAIL       => 'mail',
-		Section::MOVEMENT   => 'movement',
-		Section::PRODUCTION => 'production',
-		Section::STUDY      => 'study'
+	public final const SECTION = [
+		1 => 'battle',
+		2 => 'economy',
+		3 => 'errors',
+		4 => 'events',
+		5 => 'magic',
+		6 => 'mail',
+		7 => 'movement',
+		8 => 'production',
+		9 => 'study'
 	];
 
-	public const TRANSLATIONS = [
+	public final const TRANSLATIONS = [
 		'Stangenwaffen' => 'Speerkampf'
 	];
 
-	public const MISC = [
-		'isNotLooting' => 'sammelt keine Beute'
+	public final const MISC = [
+		'isNotLooting' => 'sammelt keine Beute',
+		'specialItems' => 'Besondere Gegenstände',
+		'unnamed'      => 'unbenannt'
 	];
 
 	public static function occurrence(float $occurrence): string {

@@ -15,6 +15,7 @@ use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
+use Lemuria\Engine\Fantasya\Factory\Model\Visibility;
 use Lemuria\Engine\Fantasya\Message\LemuriaMessage;
 use Lemuria\Engine\Fantasya\Message\Region\TravelUnitMessage;
 use Lemuria\Engine\Fantasya\Message\Region\TravelVesselMessage;
@@ -51,6 +52,7 @@ use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Luxury;
 use Lemuria\Model\Fantasya\Offer;
 use Lemuria\Model\Fantasya\Party;
+use Lemuria\Model\Fantasya\Party\Type;
 use Lemuria\Model\Fantasya\Potion;
 use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
@@ -58,10 +60,12 @@ use Lemuria\Model\Fantasya\Relation;
 use Lemuria\Model\Fantasya\Resources;
 use Lemuria\Model\Fantasya\Spell;
 use Lemuria\Model\Fantasya\Talent\Magic;
+use Lemuria\Model\Fantasya\Treasury;
+use Lemuria\Model\Fantasya\Unicum;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Model\Fantasya\Vessel;
 use Lemuria\Model\Fantasya\World\PartyMap;
-use Lemuria\Model\World;
+use Lemuria\Model\World\Direction;
 use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\Writer;
@@ -90,7 +94,7 @@ class MagellanWriter implements Writer
 	];
 
 	private const ROADS = [
-		World::NORTHWEST, World::NORTHEAST, World::EAST, World::SOUTHEAST, World::SOUTHWEST, World::WEST
+		Direction::NORTHWEST, Direction::NORTHEAST, Direction::EAST, Direction::SOUTHEAST, Direction::SOUTHWEST, Direction::WEST
 	];
 
 	/**
@@ -103,7 +107,7 @@ class MagellanWriter implements Writer
 	 */
 	private array $variables = [];
 
-	private PartyMap $map;
+	private readonly PartyMap $map;
 
 	private Filter $filter;
 
@@ -190,7 +194,7 @@ class MagellanWriter implements Writer
 
 		$parties = [];
 		foreach ($census->getAtlas() as $region /* @var Region $region */) {
-			foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
+			foreach ($outlook->getApparitions($region) as $unit /* @var Unit $unit */) {
 				$foreign = $census->getParty($unit);
 				if ($foreign && $foreign !== $party) {
 					$id           = $foreign->Id()->Id();
@@ -299,10 +303,10 @@ class MagellanWriter implements Writer
 		$atlas = new TravelAtlas($outlook->Census()->Party());
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
 			$visibility = match ($atlas->getVisibility($region)) {
-				TravelAtlas::WITH_UNIT  => '',
-				TravelAtlas::TRAVELLED  => 'travel',
-				TravelAtlas::LIGHTHOUSE => 'lighthouse',
-				default                 => 'neighbour'
+				Visibility::WITH_UNIT  => '',
+				Visibility::TRAVELLED  => 'travel',
+				Visibility::LIGHTHOUSE => 'lighthouse',
+				default                => 'neighbour'
 			};
 			$this->writeRegion($region, $visibility, $outlook);
 		}
@@ -412,7 +416,7 @@ class MagellanWriter implements Writer
 						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
 				}
-				foreach ($outlook->Apparitions($region) as $unit /* @var Unit $unit */) {
+				foreach ($outlook->getApparitions($region) as $unit /* @var Unit $unit */) {
 					if ($unit->Party() !== $party) {
 						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
@@ -502,7 +506,7 @@ class MagellanWriter implements Writer
 		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'          => $unit->Name(),
-			'Beschr'        => $unit->Description(),
+			'Beschr'        => $this->compileDescription($unit),
 			'Partei'        => $unit->Party()->Id()->Id(),
 			'Parteitarnung' => $disguise !== false ? 1 : 0,
 			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
@@ -511,7 +515,7 @@ class MagellanWriter implements Writer
 			'Burg'          => $unit->Construction()?->Id()->Id(),
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
-			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()] ?? 4,
+			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()->value] ?? 4,
 			'hp'            => Translator::HEALTH[$healthCode],
 			'weight'        => $unit->Weight()
 		];
@@ -541,14 +545,14 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 
 		$this->writeKnowledge($unit);
-		$this->writeResources($unit->Inventory());
+		$this->writeResources($unit->Inventory(), $unit->Treasury());
 		$this->writeOrders($unit);
 		$this->writeEffects($unit);
 	}
 
 	private function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
 		$party     = $census->getParty($unit)?->Id()->Id() ?? 0;
-		$isMonster = $unit->Party()->Type() === Party::MONSTER;
+		$isMonster = $unit->Party()->Type() === Type::MONSTER;
 		$disguise  = $unit->Disguise();
 		$data      = [
 			'EINHEIT ' . $unit->Id()->Id(),
@@ -616,7 +620,7 @@ class MagellanWriter implements Writer
 	private function writeVessel(Vessel $vessel, string $visibility): void {
 		$ship       = $vessel->Ship();
 		$size       = (int)round($vessel->Completion() * $ship->Wood());
-		$coast      = Translator::COAST[$vessel->Anchor()] ?? null;
+		$coast      = Translator::COAST[$vessel->Anchor()->value] ?? null;
 		$passengers = $vessel->Passengers();
 		$captain    = $passengers->Owner();
 		$cargo      = 0;
@@ -706,12 +710,18 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	private function writeResources(Resources $resources): void {
+	private function writeResources(Resources $resources, ?Treasury $treasury = null): void {
 		if (count($resources) > 0) {
 			$data = ['GEGENSTAENDE'];
 			foreach ($resources as $quantity /* @var Quantity $quantity */) {
 				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
 				$data[$commodity] = $quantity->Count();
+			}
+			if ($treasury) {
+				foreach ($treasury as $unicum /* @var Unicum $unicum */) {
+					$composition        = Translator::COMPOSITION[getClass($unicum->Composition())];
+					$data[$composition] = 1;
+				}
 			}
 			$this->writeData($data);
 		}
@@ -795,7 +805,7 @@ class MagellanWriter implements Writer
 		if (!$this->filter->retains($message)) {
 			$data = [
 				'MESSAGE ' . $message->Id()->Id(),
-				'type'     => $message->Section(),
+				'type'     => $message->Section()->value,
 				'rendered' => (string)$message
 			];
 			$this->writeData($data);
@@ -806,7 +816,7 @@ class MagellanWriter implements Writer
 		if (!$this->filter->retains($message)) {
 			$data = [
 				'MESSAGE ' . $message->Id()->Id(),
-				'type'     => $message->Section(),
+				'type'     => $message->Section()->value,
 				'rendered' => (string)$message,
 				'unit'     => $unit->Id()->Id(),
 				'region'   => $unit->Region()->Id()->Id()
@@ -816,11 +826,11 @@ class MagellanWriter implements Writer
 	}
 
 	private function writeMessagetype(): void {
-		for ($section = Section::EVENT; $section <= Section::STUDY; $section++) {
+		foreach (Section::cases() as $section) {
 			$data = [
-				'MESSAGETYPE ' . $section,
+				'MESSAGETYPE ' . $section->value,
 				'text'    => '"$rendered"',
-				'section' => Translator::SECTION[$section]
+				'section' => Translator::SECTION[$section->value]
 			];
 			$this->writeData($data);
 		}
@@ -905,5 +915,34 @@ class MagellanWriter implements Writer
 	private function getTravelMessageEntity(LemuriaMessage $message): string {
 		$entity = Entity::from($message->getParameter());
 		return $entity->Name() . ' (' . $entity->Id() . ')';
+	}
+
+	private function compileDescription(Unit $unit): string {
+		$compilation = $unit->Description();
+		$treasury    = $unit->Treasury();
+		if ($treasury->count() > 0) {
+			$compilation .= ' ' . Translator::MISC['specialItems'] . ':';
+		}
+		$next = false;
+		foreach ($treasury as $unicum /* @var Unicum $unicum */) {
+			if ($next) {
+				$compilation .= ',';
+			}
+			$id           = $unicum->Id();
+			$name         = $this->escape($unicum->Name());
+			$description  = $this->escape($unicum->Description());
+			$composition  = Translator::COMPOSITION[getClass($unicum->Composition())];
+			if ($name) {
+				$unicumName = $name . ' [' . $id . '] (' . $composition . ')';
+			} else {
+				$unicumName = $composition . ' [' . $id . '] (' . Translator::MISC['unnamed'] . ')';
+			}
+			if ($description) {
+				$unicumName .= ': ' . $description;
+			}
+			$compilation .= ' ' . $unicumName;
+			$next         = !str_ends_with($description, '.');
+		}
+		return $compilation;
 	}
 }
