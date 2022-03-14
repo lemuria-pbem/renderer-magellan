@@ -3,9 +3,11 @@ declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
 use function Lemuria\getClass;
+use Lemuria\Engine\Combat\Battle;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Calculus;
 use Lemuria\Engine\Fantasya\Census;
+use Lemuria\Engine\Fantasya\Combat\Log\Message as BattleMessage;
 use Lemuria\Engine\Fantasya\Command\Entertain;
 use Lemuria\Engine\Fantasya\Effect\Hunger;
 use Lemuria\Engine\Fantasya\Effect\PotionEffect;
@@ -27,6 +29,7 @@ use Lemuria\Engine\Message\Filter\NullFilter;
 use Lemuria\Engine\Message\Section;
 use Lemuria\Entity;
 use Lemuria\Identifiable;
+use Lemuria\Model\Coordinates;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Horse;
@@ -236,6 +239,9 @@ class MagellanWriter implements Writer
 				$this->writeUnitMessage($message, $unit);
 			}
 		}
+		foreach (Lemuria::Hostilities()->findFor($party) as $battleLog) {
+			$this->writeBattle($battleLog);
+		}
 	}
 
 	private function writeForeignParty(Party $party, bool $isKnown): void {
@@ -324,7 +330,7 @@ class MagellanWriter implements Writer
 		if (empty($visibility)) {
 			$availability = new Availability($region);
 			$data         = [
-				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
+				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0',
 				'id'       => $region->Id()->Id(),
 				'Name'     => $region->Name(),
 				'Terrain'  => Translator::LANDSCAPE[getClass($region->Landscape())],
@@ -370,7 +376,7 @@ class MagellanWriter implements Writer
 				if ($this->containsMessage($message, TravelVesselMessage::class)) {
 					$navigated[] = $message;
 				}
-				$this->writeMessage($message);
+				$this->writeRegionMessage($message, $region);
 			}
 
 			if ($peasants > 0) {
@@ -775,6 +781,16 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	private function writeBattle(Battle $battle): void {
+		if ($battle->count()) {
+			$coordinates = $this->map->getCoordinates($battle->Location());
+			$this->writeData(['BATTLE ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0']);
+			foreach ($battle as $message /* @var BattleMessage $message */) {
+				$this->writeBattleMessage($message, $coordinates);
+			}
+		}
+	}
+
 	/**
 	 * @param LemuriaMessage[] $travelled
 	 */
@@ -812,14 +828,38 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	private function writeBattleMessage(BattleMessage $message, Coordinates $coordinates): void {
+		$data = [
+			'MESSAGE ' . $message->Id()->Id(),
+			'type'     => Section::BATTLE->value,
+			'rendered' => (string)$message,
+			'region'   => $coordinates->X() . ' ' . $coordinates->Y() . ' 0'
+		];
+		$this->writeData($data);
+	}
+
+	private function writeRegionMessage(Message $message, Region $region): void {
+		if (!$this->filter->retains($message)) {
+			$coordinates = $this->map->getCoordinates($region);
+			$data        = [
+				'MESSAGE ' . $message->Id()->Id(),
+				'type'     => $message->Section()->value,
+				'rendered' => (string)$message,
+				'region'   => $coordinates->X() . ' ' . $coordinates->Y() . ' 0'
+			];
+			$this->writeData($data);
+		}
+	}
+
 	private function writeUnitMessage(Message $message, Unit $unit): void {
 		if (!$this->filter->retains($message)) {
-			$data = [
+			$coordinates = $this->map->getCoordinates($unit->Region());
+			$data        = [
 				'MESSAGE ' . $message->Id()->Id(),
 				'type'     => $message->Section()->value,
 				'rendered' => (string)$message,
 				'unit'     => $unit->Id()->Id(),
-				'region'   => $unit->Region()->Id()->Id()
+				'region'   => $coordinates->X() . ' ' . $coordinates->Y() . ' 0'
 			];
 			$this->writeData($data);
 		}
