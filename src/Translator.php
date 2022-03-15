@@ -233,6 +233,12 @@ final class Translator
 		9 => 'study'
 	];
 
+	public final const SPELL = [
+		'' => 'normal',
+		0  => 'precombat',
+		1  => 'combat'
+	];
+
 	public final const TRANSLATIONS = [
 		'Stangenwaffen' => 'Speerkampf'
 	];

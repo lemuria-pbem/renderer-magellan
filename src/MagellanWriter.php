@@ -18,6 +18,7 @@ use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
 use Lemuria\Engine\Fantasya\Factory\Model\Visibility;
+use Lemuria\Engine\Fantasya\Factory\SpellParser;
 use Lemuria\Engine\Fantasya\Message\LemuriaMessage;
 use Lemuria\Engine\Fantasya\Message\Region\TravelUnitMessage;
 use Lemuria\Engine\Fantasya\Message\Region\TravelVesselMessage;
@@ -31,6 +32,7 @@ use Lemuria\Entity;
 use Lemuria\Identifiable;
 use Lemuria\Model\Coordinates;
 use Lemuria\Model\Fantasya\Ability;
+use Lemuria\Model\Fantasya\BattleSpell;
 use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Horse;
 use Lemuria\Model\Fantasya\Commodity\Iron;
@@ -147,6 +149,7 @@ class MagellanWriter implements Writer
 		$outlook   = new Outlook($census);
 		$continent = Continent::get(new Id(1));
 		$this->writeParties($outlook);
+		$this->writeMagic($party);
 		$this->writeIsland($continent);
 		$this->writeRegions($outlook);
 		$this->writeMessagetype();
@@ -288,6 +291,38 @@ class MagellanWriter implements Writer
 				'ALLIANZ ' . $relation->Party()->Id()->Id(),
 				'Parteiname' => $relation->Party()->Name(),
 				'Status'     => $status
+			];
+			$this->writeData($data);
+		}
+	}
+
+	/**
+	 * @throws JsonException
+	 */
+	private function writeMagic(Party $party): void {
+		$id = 1;
+		foreach ($party->SpellBook() as $spell /* @var Spell $spell */) {
+			$details = new SpellDetails($spell);
+			$data = [
+				'ZAUBER ' . $id++,
+				'name'  => $details->Name(),
+				'level' => $spell->Difficulty(),
+				'rank'  => $spell->Order(),
+				'info'  => implode(' ', $details->Description())
+			];
+			if ($spell instanceof BattleSpell) {
+				$data['class'] = Translator::SPELL[$spell->Phase()->value];
+			} else {
+				$data['class'] = Translator::SPELL[''];
+			}
+			if (SpellParser::getSyntax($spell) === SpellParser::LEVEL_AND_TARGET) {
+				$data['syntax'] = 'u';
+			}
+			$this->writeData($data);
+
+			$data = [
+				'KOMPONENTEN',
+				'aura' => $spell->Aura() . ' ' . (int)$spell->IsIncremental()
 			];
 			$this->writeData($data);
 		}
