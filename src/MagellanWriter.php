@@ -45,6 +45,7 @@ use Lemuria\Model\Fantasya\Commodity\Luxury\Olibanum;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Silk;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Spice;
 use Lemuria\Model\Fantasya\Commodity\Peasant;
+use Lemuria\Model\Fantasya\Commodity\Potion\AbstractPotion;
 use Lemuria\Model\Fantasya\Commodity\Silver;
 use Lemuria\Model\Fantasya\Commodity\Stone;
 use Lemuria\Model\Fantasya\Commodity\Wood;
@@ -64,6 +65,7 @@ use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
 use Lemuria\Model\Fantasya\Resources;
 use Lemuria\Model\Fantasya\Spell;
+use Lemuria\Model\Fantasya\Talent\Alchemy;
 use Lemuria\Model\Fantasya\Talent\Magic;
 use Lemuria\Model\Fantasya\Treasury;
 use Lemuria\Model\Fantasya\Unicum;
@@ -150,6 +152,7 @@ class MagellanWriter implements Writer
 		$continent = Continent::get(new Id(1));
 		$this->writeParties($outlook);
 		$this->writeMagic($party);
+		$this->writeAlchemy($party);
 		$this->writeIsland($continent);
 		$this->writeRegions($outlook);
 		$this->writeMessagetype();
@@ -324,6 +327,41 @@ class MagellanWriter implements Writer
 				'KOMPONENTEN',
 				'aura' => $spell->Aura() . ' ' . (int)$spell->IsIncremental()
 			];
+			$this->writeData($data);
+		}
+	}
+
+	private function writeAlchemy(Party $party): void {
+		$alchemy = Lemuria::Builder()->create(Alchemy::class);
+		$level   = 0;
+		foreach ($party->People() as $unit /* @var Unit $unit */) {
+			$calculus  = new Calculus($unit);
+			$level = max($level, $calculus->knowledge($alchemy)->Level());
+		}
+		$level = (int)floor($level / 2);
+
+		$id = 1;
+		foreach (AbstractPotion::all() as $potion /* @var Potion $potion */) {
+			$difficulty = $potion->Level();
+			if ($difficulty > $level) {
+				continue;
+			}
+
+			$class = getClass($potion);
+			$data  = [
+				'TRANK ' . $id++,
+				'Name'   => Translator::COMMODITY[$class],
+				'Stufe'  => $potion->Level(),
+				'Beschr' => Translator::ALCHEMY[$class]
+			];
+			$this->writeData($data);
+
+			$data = [
+				'ZUTATEN'
+			];
+			foreach ($potion->getMaterial() as $quantity /* @var Quantity $quantity */) {
+				$data[] = '"' . Translator::COMMODITY[getClass($quantity->Commodity())] . '"';
+			}
 			$this->writeData($data);
 		}
 	}
