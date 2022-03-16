@@ -32,6 +32,7 @@ final class Translator
 		'AlchemyKitchen' => 'Alchemistenküche',
 		'Blacksmith'     => 'Schmiede',
 		'Cabin'          => 'Holzfällerhütte',
+		'Canal'          => 'Kanal',
 		'CamelBreeding'  => 'Kamelzucht',
 		'Citadel'        => 'Zitadelle',
 		'Dockyard'       => 'Schiffswerft',
