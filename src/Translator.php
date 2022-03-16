@@ -28,6 +28,7 @@ final class Translator
 	];
 
 	public final const BUILDING = [
+		'Acropolis'  => 'Akropolis',
 		'Blacksmith' => 'Schmiede',
 		'Cabin'      => 'Holzfällerhütte',
 		'Citadel'    => 'Zitadelle',
