@@ -3,9 +3,11 @@ declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
 use function Lemuria\getClass;
+use Lemuria\Engine\Combat\Battle;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Calculus;
 use Lemuria\Engine\Fantasya\Census;
+use Lemuria\Engine\Fantasya\Combat\Log\Message as BattleMessage;
 use Lemuria\Engine\Fantasya\Command\Entertain;
 use Lemuria\Engine\Fantasya\Effect\Hunger;
 use Lemuria\Engine\Fantasya\Effect\PotionEffect;
@@ -16,6 +18,7 @@ use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
 use Lemuria\Engine\Fantasya\Factory\Model\Visibility;
+use Lemuria\Engine\Fantasya\Factory\SpellParser;
 use Lemuria\Engine\Fantasya\Message\LemuriaMessage;
 use Lemuria\Engine\Fantasya\Message\Region\TravelUnitMessage;
 use Lemuria\Engine\Fantasya\Message\Region\TravelVesselMessage;
@@ -27,7 +30,9 @@ use Lemuria\Engine\Message\Filter\NullFilter;
 use Lemuria\Engine\Message\Section;
 use Lemuria\Entity;
 use Lemuria\Identifiable;
+use Lemuria\Model\Coordinates;
 use Lemuria\Model\Fantasya\Ability;
+use Lemuria\Model\Fantasya\BattleSpell;
 use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Horse;
 use Lemuria\Model\Fantasya\Commodity\Iron;
@@ -40,6 +45,7 @@ use Lemuria\Model\Fantasya\Commodity\Luxury\Olibanum;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Silk;
 use Lemuria\Model\Fantasya\Commodity\Luxury\Spice;
 use Lemuria\Model\Fantasya\Commodity\Peasant;
+use Lemuria\Model\Fantasya\Commodity\Potion\AbstractPotion;
 use Lemuria\Model\Fantasya\Commodity\Silver;
 use Lemuria\Model\Fantasya\Commodity\Stone;
 use Lemuria\Model\Fantasya\Commodity\Wood;
@@ -59,6 +65,7 @@ use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
 use Lemuria\Model\Fantasya\Resources;
 use Lemuria\Model\Fantasya\Spell;
+use Lemuria\Model\Fantasya\Talent\Alchemy;
 use Lemuria\Model\Fantasya\Talent\Magic;
 use Lemuria\Model\Fantasya\Treasury;
 use Lemuria\Model\Fantasya\Unicum;
@@ -144,6 +151,8 @@ class MagellanWriter implements Writer
 		$outlook   = new Outlook($census);
 		$continent = Continent::get(new Id(1));
 		$this->writeParties($outlook);
+		$this->writeMagic($party);
+		$this->writeAlchemy($party);
 		$this->writeIsland($continent);
 		$this->writeRegions($outlook);
 		$this->writeMessagetype();
@@ -236,6 +245,9 @@ class MagellanWriter implements Writer
 				$this->writeUnitMessage($message, $unit);
 			}
 		}
+		foreach (Lemuria::Hostilities()->findFor($party) as $battleLog) {
+			$this->writeBattle($battleLog);
+		}
 	}
 
 	private function writeForeignParty(Party $party, bool $isKnown): void {
@@ -287,6 +299,73 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	/**
+	 * @throws JsonException
+	 */
+	private function writeMagic(Party $party): void {
+		$id = 1;
+		foreach ($party->SpellBook() as $spell /* @var Spell $spell */) {
+			$details = new SpellDetails($spell);
+			$data = [
+				'ZAUBER ' . $id++,
+				'name'  => $details->Name(),
+				'level' => $spell->Difficulty(),
+				'rank'  => $spell->Order(),
+				'info'  => implode(' ', $details->Description())
+			];
+			if ($spell instanceof BattleSpell) {
+				$data['class'] = Translator::SPELL[$spell->Phase()->value];
+			} else {
+				$data['class'] = Translator::SPELL[''];
+			}
+			if (SpellParser::getSyntax($spell) === SpellParser::LEVEL_AND_TARGET) {
+				$data['syntax'] = 'u';
+			}
+			$this->writeData($data);
+
+			$data = [
+				'KOMPONENTEN',
+				'aura' => $spell->Aura() . ' ' . (int)$spell->IsIncremental()
+			];
+			$this->writeData($data);
+		}
+	}
+
+	private function writeAlchemy(Party $party): void {
+		$alchemy = Lemuria::Builder()->create(Alchemy::class);
+		$level   = 0;
+		foreach ($party->People() as $unit /* @var Unit $unit */) {
+			$calculus  = new Calculus($unit);
+			$level = max($level, $calculus->knowledge($alchemy)->Level());
+		}
+		$level = (int)floor($level / 2);
+
+		$id = 1;
+		foreach (AbstractPotion::all() as $potion /* @var Potion $potion */) {
+			$difficulty = $potion->Level();
+			if ($difficulty > $level) {
+				continue;
+			}
+
+			$class = getClass($potion);
+			$data  = [
+				'TRANK ' . $id++,
+				'Name'   => Translator::COMMODITY[$class],
+				'Stufe'  => $potion->Level(),
+				'Beschr' => Translator::ALCHEMY[$class]
+			];
+			$this->writeData($data);
+
+			$data = [
+				'ZUTATEN'
+			];
+			foreach ($potion->getMaterial() as $quantity /* @var Quantity $quantity */) {
+				$data[] = '"' . Translator::COMMODITY[getClass($quantity->Commodity())] . '"';
+			}
+			$this->writeData($data);
+		}
+	}
+
 	private function writeIsland(Continent $continent): void {
 		$data = [
 			'ISLAND ' . $continent->Id()->Id(),
@@ -324,7 +403,7 @@ class MagellanWriter implements Writer
 		if (empty($visibility)) {
 			$availability = new Availability($region);
 			$data         = [
-				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
+				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0',
 				'id'       => $region->Id()->Id(),
 				'Name'     => $region->Name(),
 				'Terrain'  => Translator::LANDSCAPE[getClass($region->Landscape())],
@@ -370,7 +449,7 @@ class MagellanWriter implements Writer
 				if ($this->containsMessage($message, TravelVesselMessage::class)) {
 					$navigated[] = $message;
 				}
-				$this->writeMessage($message);
+				$this->writeRegionMessage($message, $region);
 			}
 
 			if ($peasants > 0) {
@@ -775,6 +854,16 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	private function writeBattle(Battle $battle): void {
+		if ($battle->count()) {
+			$coordinates = $this->map->getCoordinates($battle->Location());
+			$this->writeData(['BATTLE ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0']);
+			foreach ($battle as $message /* @var BattleMessage $message */) {
+				$this->writeBattleMessage($message, $coordinates);
+			}
+		}
+	}
+
 	/**
 	 * @param LemuriaMessage[] $travelled
 	 */
@@ -812,14 +901,38 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	private function writeBattleMessage(BattleMessage $message, Coordinates $coordinates): void {
+		$data = [
+			'MESSAGE ' . $message->Id()->Id(),
+			'type'     => Section::BATTLE->value,
+			'rendered' => (string)$message,
+			'region'   => $coordinates->X() . ' ' . $coordinates->Y() . ' 0'
+		];
+		$this->writeData($data);
+	}
+
+	private function writeRegionMessage(Message $message, Region $region): void {
+		if (!$this->filter->retains($message)) {
+			$coordinates = $this->map->getCoordinates($region);
+			$data        = [
+				'MESSAGE ' . $message->Id()->Id(),
+				'type'     => $message->Section()->value,
+				'rendered' => (string)$message,
+				'region'   => $coordinates->X() . ' ' . $coordinates->Y() . ' 0'
+			];
+			$this->writeData($data);
+		}
+	}
+
 	private function writeUnitMessage(Message $message, Unit $unit): void {
 		if (!$this->filter->retains($message)) {
-			$data = [
+			$coordinates = $this->map->getCoordinates($unit->Region());
+			$data        = [
 				'MESSAGE ' . $message->Id()->Id(),
 				'type'     => $message->Section()->value,
 				'rendered' => (string)$message,
 				'unit'     => $unit->Id()->Id(),
-				'region'   => $unit->Region()->Id()->Id()
+				'region'   => $coordinates->X() . ' ' . $coordinates->Y() . ' 0'
 			];
 			$this->writeData($data);
 		}

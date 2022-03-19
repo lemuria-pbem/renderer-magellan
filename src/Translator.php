@@ -28,28 +28,33 @@ final class Translator
 	];
 
 	public final const BUILDING = [
-		'Blacksmith' => 'Schmiede',
-		'Cabin'      => 'Holzfällerhütte',
-		'Citadel'    => 'Zitadelle',
-		'Dockyard'   => 'Schiffswerft',
-		'Fort'       => 'Befestigung',
-		'Lighthouse' => 'Leuchtturm',
-		'Magespire'  => 'Magierturm',
-		'Mine'       => 'Bergwerk',
-		'Palace'     => 'Schloss',
-		'Pit'        => 'Mine',
-		'Port'       => 'Hafen',
-		'Quarry'     => 'Steinbruch',
-		'Quay'       => 'Steg',
-		'Saddlery'   => 'Sattlerei',
-		'Sawmill'    => 'Sägewerk',
-		'Shack'      => 'Steingrube',
-		'Signpost'   => 'Wegweiser',
-		'Site'       => 'Baustelle',
-		'Stronghold' => 'Festung',
-		'Tavern'     => 'Taverne',
-		'Tower'      => 'Turm',
-		'Workshop'   => 'Werkstatt'
+		'Acropolis'      => 'Akropolis',
+		'AlchemyKitchen' => 'Alchemistenküche',
+		'Blacksmith'     => 'Schmiede',
+		'Cabin'          => 'Holzfällerhütte',
+		'Canal'          => 'Kanal',
+		'CamelBreeding'  => 'Kamelzucht',
+		'Citadel'        => 'Zitadelle',
+		'Dockyard'       => 'Schiffswerft',
+		'Fort'           => 'Befestigung',
+		'HorseBreeding'  => 'Pferdezucht',
+		'Lighthouse'     => 'Leuchtturm',
+		'Magespire'      => 'Magierturm',
+		'Mine'           => 'Bergwerk',
+		'Palace'         => 'Schloss',
+		'Pit'            => 'Mine',
+		'Port'           => 'Hafen',
+		'Quarry'         => 'Steinbruch',
+		'Quay'           => 'Steg',
+		'Saddlery'       => 'Sattlerei',
+		'Sawmill'        => 'Sägewerk',
+		'Shack'          => 'Steingrube',
+		'Signpost'       => 'Wegweiser',
+		'Site'           => 'Baustelle',
+		'Stronghold'     => 'Festung',
+		'Tavern'         => 'Taverne',
+		'Tower'          => 'Turm',
+		'Workshop'       => 'Werkstatt'
 	];
 
 	public final const LANDSCAPE = [
@@ -231,6 +236,27 @@ final class Translator
 		7 => 'movement',
 		8 => 'production',
 		9 => 'study'
+	];
+
+	public final const SPELL = [
+		'' => 'normal',
+		0  => 'precombat',
+		1  => 'combat'
+	];
+
+	public final const ALCHEMY = [
+		'BerserkBlood'    => '10 Personen erhalten im Kampf einen Angriffsbonus',
+		'Brainpower'      => 'erhöhte Lernchance für 10 Personen',
+		'DrinkOfCreation' => 'verdoppelt Produktivität von 10 Leuten bei MACHEN',
+		'DrinkOfTruth'    => 'Anwender durchschaut Illusionen',
+		'ElixirOfPower'   => '10 Personen erhalten zusätzliche Trefferpunkte',
+		'GoliathWater'    => '10 Leute Tragkraft wie Pferde',
+		'HealingPotion'   => '1 Person überlebt sonst tödlichen Schaden',
+		'HorseBliss'      => '50 Pferde vermehren sich bis zu vier mal',
+		'PeasantJoy'      => '1.000 Bauern in der Region erhalten die zehnfache Chance, sich zu vermehren',
+		'SevenLeagueTea'  => '10 Leute schnell wie Pferde',
+		'WaterOfLife'     => 'macht aus einem Stück Holz oder Mallorn 10 Schößlinge/Mallornschößlinge',
+		'Woundshut'       => 'bringt den Personen der Einheit bis zu 400 Trefferpunkte zurück',
 	];
 
 	public final const TRANSLATIONS = [
