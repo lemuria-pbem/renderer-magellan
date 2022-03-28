@@ -408,7 +408,7 @@ class MagellanWriter implements Writer
 				'Name'     => $region->Name(),
 				'Terrain'  => Translator::LANDSCAPE[getClass($region->Landscape())],
 				'Insel'    => 1,
-				'Beschr'   => $region->Description(),
+				'Beschr'   => $this->compileRegionDescription($region),
 				'Bauern'   => $peasants,
 				'Baeume'   => $resources[Wood::class]->Count(),
 				'Pferde'   => $resources[Horse::class]->Count(),
@@ -478,6 +478,15 @@ class MagellanWriter implements Writer
 					];
 					$this->writeData($data);
 				}
+			}
+			foreach ($region->Treasury() as $unicum /* @var Unicum $unicum */) {
+				$data = [
+					'RESOURCE ' . $hash++,
+					'type'   => Translator::COMPOSITION[getClass($unicum->Composition())] . ' ' . $unicum->Id(),
+					'skill'  => 0,
+					'number' => 1
+				];
+				$this->writeData($data);
 			}
 
 			$this->writeEffects($region);
@@ -585,7 +594,7 @@ class MagellanWriter implements Writer
 		$data     = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'          => $unit->Name(),
-			'Beschr'        => $this->compileDescription($unit),
+			'Beschr'        => $this->compileUnitDescription($unit),
 			'Partei'        => $unit->Party()->Id()->Id(),
 			'Parteitarnung' => $disguise !== false ? 1 : 0,
 			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
@@ -680,7 +689,7 @@ class MagellanWriter implements Writer
 			'BURG ' . $construction->Id()->Id(),
 			'Typ'      => Translator::BUILDING[getClass($construction->Building())],
 			'Name'     => $construction->Name(),
-			'Beschr'   => $construction->Description(),
+			'Beschr'   => $this->compileCostructionDescription($construction),
 			'Groesse'  => $construction->Size(),
 			'Besitzer' => $owner?->Id()->Id(),
 			'Partei'   => $owner?->Party()->Id()->Id()
@@ -710,7 +719,7 @@ class MagellanWriter implements Writer
 			'SCHIFF ' . $vessel->Id()->Id(),
 			'Typ'      => Translator::SHIP[getClass($ship)],
 			'Name'     => $vessel->Name(),
-			'Beschr'   => $vessel->Description(),
+			'Beschr'   => $this->compileVesselDescription($vessel),
 			'Groesse'  => $size,
 			'Schaden'  => (int)round(100.0 * (1.0 - $vessel->Completion())),
 			'cargo'    => $cargo,
@@ -1030,11 +1039,29 @@ class MagellanWriter implements Writer
 		return $entity->Name() . ' (' . $entity->Id() . ')';
 	}
 
-	private function compileDescription(Unit $unit): string {
-		$compilation = $unit->Description();
-		$treasury    = $unit->Treasury();
+	private function compileUnitDescription(Unit $unit): string {
+		return $this->compileFullTreasuryDescription($unit->Description(), $unit->Treasury());
+	}
+
+	private function compileRegionDescription(Region $region): string {
+		return $this->compileShortTreasuryDescription($region->Description(), $region->Treasury());
+	}
+
+	private function compileCostructionDescription(Construction $construction): string {
+		return $this->compileShortTreasuryDescription($construction->Description(), $construction->Treasury());
+	}
+
+	private function compileVesselDescription(Vessel $vessel): string {
+		return $this->compileShortTreasuryDescription($vessel->Description(), $vessel->Treasury());
+	}
+
+	private function compileFullTreasuryDescription(string $compilation, Treasury $treasury): string {
+		$compilation = trim($compilation);
 		if ($treasury->count() > 0) {
-			$compilation .= ' ' . Translator::MISC['specialItems'] . ':';
+			if (!empty($compilation)) {
+				$compilation .= str_ends_with($compilation, '.') ? ' ' : '. ';
+			}
+			$compilation .= Translator::MISC['specialItems'] . ':';
 		}
 		$next = false;
 		foreach ($treasury as $unicum /* @var Unicum $unicum */) {
@@ -1055,6 +1082,28 @@ class MagellanWriter implements Writer
 			}
 			$compilation .= ' ' . $unicumName;
 			$next         = !str_ends_with($description, '.');
+		}
+		return $compilation;
+	}
+
+	private function compileShortTreasuryDescription(string $compilation, Treasury $treasury): string {
+		$compilation = trim($compilation);
+		if ($treasury->count() > 0) {
+			if (!empty($compilation)) {
+				$compilation .= str_ends_with($compilation, '.') ? ' ' : '. ';
+			}
+			$compilation .= Translator::MISC['specialItems'] . ':';
+		}
+		$next = false;
+		foreach ($treasury as $unicum /* @var Unicum $unicum */) {
+			if ($next) {
+				$compilation .= ',';
+			}
+			$id           = $unicum->Id();
+			$composition  = Translator::COMPOSITION[getClass($unicum->Composition())];
+			$unicumName   = $composition . ' [' . $id . ']';
+			$compilation .= ' ' . $unicumName;
+			$next         = true;
 		}
 		return $compilation;
 	}
