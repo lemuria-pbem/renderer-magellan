@@ -482,7 +482,7 @@ class MagellanWriter implements Writer
 			foreach ($region->Treasury() as $unicum /* @var Unicum $unicum */) {
 				$data = [
 					'RESOURCE ' . $hash++,
-					'type'   => Translator::COMPOSITION[getClass($unicum->Composition())] . ' ' . $unicum->Id(),
+					'type'   => Translator::COMPOSITION[getClass($unicum->Composition())],
 					'skill'  => 0,
 					'number' => 1
 				];
