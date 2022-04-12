@@ -10,15 +10,14 @@
 			"email": "lemuria@online.de"
 		}
 	],
-	"version": "0.12.0",
-	"time": "2022-04-03",
+	"version": "0.11.3",
+	"time": "2022-04-12",
 
 	"require": {
 		"php": "~8.1",
-		"lemuria-pbem/lemuria": "dev-feature/statistics",
-		"lemuria-pbem/engine-fantasya": "dev-feature/statistics",
-		"lemuria-pbem/model-fantasya": "dev-feature/statistics",
-		"lemuria-pbem/statistics-fantasya": "dev-feature/statistics"
+		"lemuria-pbem/lemuria": "dev-dev",
+		"lemuria-pbem/engine-fantasya": "dev-dev",
+		"lemuria-pbem/model-fantasya": "dev-dev"
 	},
 	"require-dev": {
 		"jetbrains/phpstorm-attributes": "~1.0"

@@ -10,7 +10,6 @@
       <path value="$PROJECT_DIR$/vendor/ramsey/uuid" />
       <path value="$PROJECT_DIR$/vendor/lemuria-pbem/lemuria" />
       <path value="$PROJECT_DIR$/vendor/lemuria-pbem/model-fantasya" />
-      <path value="$PROJECT_DIR$/vendor/lemuria-pbem/statistics-fantasya" />
       <path value="$PROJECT_DIR$/vendor/lemuria-pbem/engine-fantasya" />
     </include_path>
   </component>
