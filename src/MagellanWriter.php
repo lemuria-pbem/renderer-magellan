@@ -118,8 +118,11 @@ class MagellanWriter implements Writer
 
 	private Filter $filter;
 
+	private Statistics $statistics;
+
 	public function __construct(protected string $path) {
-		$this->filter = new NullFilter();
+		$this->filter     = new NullFilter();
+		$this->statistics = new Statistics();
 		$this->initVariables();
 	}
 
@@ -749,13 +752,16 @@ class MagellanWriter implements Writer
 	private function writeKnowledge(Unit $unit): void {
 		$knowledge = $unit->Knowledge();
 		if (count($knowledge) > 0) {
-			$calculus = new Calculus($unit);
-			$data     = ['TALENTE'];
+			$calculus   = new Calculus($unit);
+			$statistics = $this->statistics->getTalents($unit);
+			$data       = ['TALENTE'];
 			foreach ($knowledge as $ability/* @var Ability $ability */) {
+				$talent        = $ability->Talent();
 				$experience    = $ability->Experience();
-				$ability       = $calculus->knowledge($ability->Talent());
-				$talent        = Translator::TALENT[getClass($ability->Talent())];
-				$data[$talent] = [$experience, $ability->Level()];
+				$ability       = $calculus->knowledge($talent);
+				$change        = $statistics[getClass($talent)]?->change ?? 0;
+				$talent        = Translator::TALENT[getClass($talent)];
+				$data[$talent] = [$experience, $ability->Level(), $change];
 			}
 			$this->writeData($data);
 		}
