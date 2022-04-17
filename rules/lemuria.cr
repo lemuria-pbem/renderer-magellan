@@ -7,7 +7,6 @@ MAGELLAN
 
 ORDER "COMMENT"
 "// Text1*";syntax
-"KOMMENTAR Text1*";syntax
 "//";locale_de
 "KOMMENTAR";locale_de
 
@@ -16,7 +15,10 @@ ORDER "PCOMMENT"
 1;internal
 
 ORDER "ATTACK"
-"ATTACKIERE u1";syntax
+"ATTACKIEREN u1";syntax
+"ANGREIFEN";locale_de
+"ANGRIFF";locale_de
+"ATTACKE"; locale_de
 "ATTACKIERE";locale_de
 "ATTACKIEREN";locale_de
 
@@ -25,41 +27,49 @@ ORDER "BANNER"
 "BANNER";locale_de
 
 ORDER "STEAL"
-"BEKLAUE u1";syntax
-"BEKLAUE";locale_de
-"BEKLAUEN";locale_de
+"STEHLEN u1";syntax
+"BEKLAUE"; locale_de
+"BEKLAUEN"; locale_de
+"BESTEHLE";locale_de
+"BESTEHLEN";locale_de
+"DIEBSTAHL"; locale_de
+"STEHLE";locale_de
+"STEHLEN";locale_de
 
 ORDER "SIEGE"
-"BELAGERE b1";syntax
+"BELAGERN b1";syntax
 "BELAGERE";locale_de
+"BELAGERN";locale_de
+"BELAGERUNG";locale_de
 
 ORDER "NAME"
-"BENENNE EINHEIT | PARTEI | GEBÄUDE | BURG | SCHIFF | REGION | (FREMDE EINHEIT u1) | (FREMDES SCHIFF s1) | (FREMDES GEBÄUDE b1) | (FREMDE BURG b1) | (FREMDE PARTEI f1) Text";syntax
+"NAME [EINHEIT] | PARTEI | GEBÄUDE | BURG | SCHIFF | REGION Text";syntax
 "BENENNE";locale_de
 "BENENNEN";locale_de
+"NAME";locale_de
 
 ORDER "USE"
-"BENUTZE [1] Ding";syntax
+"BENUTZEN [1] Ding";syntax
 "BENUTZE";locale_de
 "BENUTZEN";locale_de
 
 ORDER "DESCRIBE"
-"BESCHREIBE REGION | SCHIFF | GEBÄUDE | BURG | EINHEIT | PRIVAT  Text";syntax
+"TEXT [EINHEIT] | PARTEI | GEBÄUDE | BURG | SCHIFF | REGION Text";syntax
 "BESCHREIBE";locale_de
 "BESCHREIBEN";locale_de
 "TEXT";locale_de
 
 ORDER "ENTER"
-"BETRETE (b1 | s1 | BURG b1 | SCHIFF s1 | Ding x1)";syntax
+"BETRETEN (b1 | s1 | BURG b1 | GEBÄUDE b1 | SCHIFF s1)";syntax
 "BETRETE";locale_de
 "BETRETEN";locale_de
 "BESTEIGE";locale_de
 "BESTEIGEN";locale_de
 
 ORDER "GUARD"
-"BEWACHE [NICHT]";syntax
-"BEWACHE";locale_de
+"BEWACHEN [NICHT]";syntax
 "BEWACHEN";locale_de
+"BEWACHE";locale_de
 
 ORDER "MESSAGE"
 "BOTSCHAFT REGION | (SCHIFF s1) | (GEBÄUDE b2) | (BURG b3) | (EINHEIT u4) | (PARTEI f5)  Text";syntax
@@ -85,7 +95,7 @@ ORDER "FOLLOW"
 "FOLGEN";locale_de
 
 ORDER "RESEARCH"
-"FORSCHE KRÄUTER";syntax
+"ERFORSCHEN";syntax
 "FORSCHE";locale_de
 "FORSCHEN";locale_de
 "ERFORSCHEN";locale_de
@@ -101,31 +111,31 @@ ORDER "HELP"
 "HELFEN";locale_de
 
 ORDER "COMBAT"
-"KÄMPFE [AGGRESSIV|HINTEN|DEFENSIV|NICHT|FLIEHE|(HELFE [NICHT])]";syntax
-"KÄMPFE";locale_de
+"KÄMPFEN [AGGRESSIV|HINTEN|DEFENSIV|NICHT|FLIEHE|(HELFE [NICHT])]";syntax
 "KÄMPFEN";locale_de
+"KÄMPFE";locale_de
 
 ORDER "COMBATSPELL"
 "KAMPFZAUBER [STUFE 1] Zauber [NICHT]";syntax
 "KAMPFZAUBER";locale_de
 
 ORDER "BUY"
-"KAUFE 1 Luxus";syntax
+"KAUFEN 1 Luxus";syntax
 "KAUFE";locale_de
 "KAUFEN";locale_de
 
 ORDER "CONTACT"
-"KONTAKTIERE (EINHEIT)|(FACTION) u1";syntax
+"KONTAKTIEREN (EINHEIT)|(FACTION) u1";syntax
 "KONTAKTIERE";locale_de
 "KONTAKTIEREN";locale_de
 
 ORDER "TEACH"
-"LEHRE u1+";syntax
+"LEHREN u1+";syntax
 "LEHRE";locale_de
 "LEHREN";locale_de
 
 ORDER "LEARN"
-"LERNE (Talent [1])|(AUTO Talent)";syntax
+"LERNEN (Talent [1])|(AUTO Talent)";syntax
 "LERNE";locale_de
 "LERNEN";locale_de
 
@@ -135,7 +145,7 @@ ORDER "LOCALE"
 1;internal
 
 ORDER "MAKE"
-"MACHE [(TEMP u1 [Name]) | ([1] Ding [s1|b1]) | ([1] STRAßE Richtung)]";syntax
+"MACHEN [(TEMP u1 [Name]) | ([1] Ding [s1|b1]) | ([1] STRAßE Richtung)]";syntax
 "MACHE";locale_de
 "MACHEN";locale_de
 
@@ -152,6 +162,7 @@ ORDER "NEXT"
 
 ORDER "NUMBER"
 "NUMMER (EINHEIT) | (SCHIFF) | (GEBÄUDE) | (BURG) | (PARTEI) [x1]";syntax
+"ID";locale_de
 "NUMMER";locale_de
 
 ORDER "FACTION"
@@ -165,12 +176,12 @@ ORDER "REGION"
 1;internal
 
 ORDER "RECRUIT"
-"REKRUTIERE 1";syntax
+"REKRUTIEREN 1";syntax
 "REKRUTIERE";locale_de
 "REKRUTIEREN";locale_de
 
 ORDER "RESERVE"
-"RESERVIERE (1) | (ALLES) | (JE 2) Gegenstand";syntax
+"RESERVIEREN (1) | (ALLES) | (JE 2) Gegenstand";syntax
 "RESERVIERE";locale_de
 "RESERVIEREN";locale_de
 
@@ -179,27 +190,27 @@ ORDER "ROUTE"
 "ROUTE";locale_de
 
 ORDER "SORT"
-"SORTIERE (VOR) | (HINTER) u1";syntax
+"SORTIEREN (VOR) | (HINTER) u1";syntax
 "SORTIERE";locale_de
 "SORTIEREN";locale_de
 
 ORDER "SPY"
-"SPIONIERE u1";syntax
+"SPIONIEREN u1";syntax
 "SPIONIERE";locale_de
 "SPIONIEREN";locale_de
 
 ORDER "HIDE"
-"TARNE ([1]) | (Rasse) | (PARTEI [NICHT]) | (PARTEI NUMMER f1)";syntax
+"TARNEN ([1]) | (Rasse) | (PARTEI [NICHT]) | (PARTEI NUMMER f1)";syntax
 "TARNE";locale_de
 "TARNEN";locale_de
 
 ORDER "TAX"
-"TREIBE [1]";syntax
+"TREIBEN [1]";syntax
 "TREIBE";locale_de
 "TREIBEN";locale_de
 
 ORDER "ENTERTAIN"
-"UNTERHALTE [1]";syntax
+"UNTERHALTEN [1]";syntax
 "UNTERHALTE";locale_de
 "UNTERHALTEN";locale_de
 
@@ -208,28 +219,24 @@ ORDER "ORIGIN"
 "URSPRUNG";locale_de
 
 ORDER "SELL"
-"VERKAUFE 1 | ALLES  Luxus";syntax
+"VERKAUFEN 1 | ALLES  Luxus";syntax
 "VERKAUFE";locale_de
 "VERKAUFEN";locale_de
 
 ORDER "LEAVE"
-"VERLASSE";syntax
+"VERLASSEN";syntax
 "VERLASSE";locale_de
 "VERLASSEN";locale_de
 
 ORDER "CAST"
-"ZAUBERE [REGION 1 2] [STUFE 3] Zauber Parameter1*";syntax
+"ZAUBERN [REGION 1 2] [STUFE 3] Zauber Parameter1*";syntax
 "ZAUBERE";locale_de
+"ZAUBERN";locale_de
 
 ORDER "DESTROY"
-"ZERSTÖRE [1] [STRASSE richtung]";syntax
+"ZERSTÖREN [1] [STRASSE richtung]";syntax
 "ZERSTÖRE";locale_de
 "ZERSTÖREN";locale_de
-
-ORDER "GROW"
-"(ZÜCHTE PFERDE)|(ZÜCHTE [1] KRÄUTER)";syntax
-"ZÜCHTE";locale_de
-"ZÜCHTEN";locale_de
 
 ORDER "PERSISTENT"
 "";locale_de
@@ -1090,6 +1097,13 @@ ITEM "Steine"
 "resources";category
 0;storeinbonw
 
+ITEM "Gold"
+"Gold";name
+5;weight
+"Bergbau";makeskill
+"resources";category
+0;storeinbonw
+
 ITEM "Pferd"
 "Pferd";name
 50;weight
@@ -1449,52 +1463,50 @@ SHIPTYPE "Boot"
 SHIPTYPE "Langboot"
 "Langboot";name
 50;size
-1;level
+2;level
 3;range
 500;capacity
-1;captainlevel
+2;captainlevel
 10;sailorlevel
 
 SHIPTYPE "Drachenschiff"
 "Drachenschiff";name
 100;size
-2;level
+3;level
 5;range
-"$range + max(0, log_3(($currentcaptainlevel / $captainlevel)))";rangeformula
 1000;capacity
-2;captainlevel
+3;captainlevel
 50;sailorlevel
 
 SHIPTYPE "Karavelle"
 "Karavelle";name
 250;size
-3;level
-5;range
+4;level
+6;range
 3000;capacity
-3;captainlevel
+4;captainlevel
 30;sailorlevel
 
 SHIPTYPE "Trireme"
 "Trireme";name
 200;size
-4;level
-7;range
+5;level
+8;range
 2000;capacity
-4;captainlevel
+5;captainlevel
 120;sailorlevel
 
 SHIPTYPE "Galeone"
 "Galeone";name
-2000;size
-5;level
-5;range
-20000;capacity
-5;captainlevel
-250;sailorlevel
-2;minSailorlevel
+350;size
+6;level
+4;range
+6000;capacity
+6;captainlevel
+80;sailorlevel
 
-CASTLETYPE "Grundmauern"
-"Grundmauern";name
+CASTLETYPE "Baustelle"
+"Baustelle";name
 1;level
 1;minsize
 1;maxsize
@@ -1503,75 +1515,85 @@ CASTLETYPE "Grundmauern"
 RAWMATERIALS
 1;Stein
 
-CASTLETYPE "Handelsposten"
-"Handelsposten";name
-1;level
-2;minsize
-9;maxsize
-11;wage
-0;tradetax
-RAWMATERIALS
-1;Stein
-
 CASTLETYPE "Befestigung"
 "Befestigung";name
 2;level
-10;minsize
-49;maxsize
+2;minsize
+9;maxsize
 12;wage
-6;tradetax
+0;tradetax
 RAWMATERIALS
 1;Stein
 
 CASTLETYPE "Turm"
 "Turm";name
 3;level
-50;minsize
-249;maxsize
+10;minsize
+49;maxsize
 13;wage
-12;tradetax
+0;tradetax
 RAWMATERIALS
 1;Stein
 
-CASTLETYPE "Burg"
-"Burg";name
+CASTLETYPE "Schloss"
+"Schloss";name
 4;level
-250;minsize
-1249;maxsize
+50;minsize
+249;maxsize
 14;wage
-18;tradetax
+0;tradetax
 RAWMATERIALS
 1;Stein
 
 CASTLETYPE "Festung"
 "Festung";name
 5;level
-1250;minsize
-6249;maxsize
+250;minsize
+1249;maxsize
 15;wage
-24;tradetax
+0;tradetax
 RAWMATERIALS
 1;Stein
 
 CASTLETYPE "Zitadelle"
 "Zitadelle";name
-6;level
-6250;minsize
+7;level
+1250;minsize
+6249;maxsize
 16;wage
-30;tradetax
+0;tradetax
 RAWMATERIALS
 1;Stein
 
-BUILDINGTYPE "Leuchtturm"
-"Leuchtturm";name
-3;level
-MAINTENANCE
-100;Silber
+CASTLETYPE "Zitadelle"
+"Zitadelle";name
+7;level
+1250;minsize
+6249;maxsize
+16;wage
+0;tradetax
 RAWMATERIALS
+1;Stein
+
+CASTLETYPE "Akropolis"
+"Akropolis";name
+10;level
+6250;minsize
+17;wage
+0;tradetax
+RAWMATERIALS
+1;Stein
+
+BUILDINGTYPE "Holzfällerhütte"
+"Holzfällerhütte";name
+3;level
+RAWMATERIALS
+5;Holz
 2;Stein
-1;Holz
 1;Eisen
 100;Silber
+TALENTBONI
+1;Holzfällen
 REGIONTYPES
 "Berge"
 "Ebene"
@@ -1580,21 +1602,19 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
 
-BUILDINGTYPE "Bergwerk"
-"Bergwerk";name
-4;level
+BUILDINGTYPE "Sägewerk"
+"Sägewerk";name
+5;level
 MAINTENANCE
-500;Silber
+100;Silber
 RAWMATERIALS
-5;Stein
-10;Holz
-1;Eisen
+6;Holz
+3;Stein
+5;Eisen
 250;Silber
 TALENTBONI
-1;Bergbau
+1;Holzfällen
 REGIONTYPES
 "Berge"
 "Ebene"
@@ -1603,18 +1623,35 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
+
+BUILDINGTYPE "Steingrube"
+"Steingrube";name
+3;level
+RAWMATERIALS
+2;Holz
+3;Stein
+2;Eisen
+100;Silber
+TALENTBONI
+1;Steinbau
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
 
 BUILDINGTYPE "Steinbruch"
 "Steinbruch";name
-2;level
+5;level
 MAINTENANCE
-250;Silber
+100;Silber
 RAWMATERIALS
-1;Stein
 5;Holz
-1;Eisen
+4;Stein
+4;Eisen
 250;Silber
 TALENTBONI
 1;Steinbau
@@ -1626,21 +1663,17 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
 
-BUILDINGTYPE "Sägewerk"
-"Sägewerk";name
+BUILDINGTYPE "Mine"
+"Mine";name
 3;level
-MAINTENANCE
-250;Silber
 RAWMATERIALS
-5;Stein
-5;Holz
-3;Eisen
-200;Silber
+3;Holz
+3;Stein
+1;Eisen
+100;Silber
 TALENTBONI
-1;Holzfällen
+1;Bergbau
 REGIONTYPES
 "Berge"
 "Ebene"
@@ -1649,24 +1682,62 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
+
+BUILDINGTYPE "Bergwerk"
+"Bergwerk";name
+5;level
+MAINTENANCE
+100;Silber
+RAWMATERIALS
+6;Holz
+3;Stein
+4;Eisen
+250;Silber
+TALENTBONI
+1;Bergbau
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Werkstatt"
+"Werkstatt";name
+4;level
+MAINTENANCE
+100;Silber
+TALENTBONI
+1;Wagenbau
+RAWMATERIALS
+6;Holz
+2;Stein
+2;Eisen
+250;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
 
 BUILDINGTYPE "Schmiede"
 "Schmiede";name
-3;level
+4;level
 MAINTENANCE
-300;Silber
-MAINTENANCE
-1;Holz
+100;Silber
 TALENTBONI
-1;Rüstungsbau
 1;Waffenbau
+1;Bogenbau
 RAWMATERIALS
-5;Stein
-5;Holz
-2;Eisen
-200;Silber
+2;Holz
+6;Stein
+4;Eisen
+250;Silber
 REGIONTYPES
 "Berge"
 "Ebene"
@@ -1675,18 +1746,80 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
+
+BUILDINGTYPE "Sattlerei"
+"Sattlerei";name
+4;level
+MAINTENANCE
+100;Silber
+TALENTBONI
+1;Rüstungsbau
+RAWMATERIALS
+4;Holz
+2;Stein
+6;Eisen
+250;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Schiffswerft"
+"Schiffswerft";name
+5;level
+MAINTENANCE
+100;Silber
+TALENTBONI
+1;Schiffbau
+RAWMATERIALS
+10;Holz
+15;Stein
+10;Eisen
+500;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Alchemistenküche"
+"Alchemistenküche";name
+6;level
+MAINTENANCE
+300;Silber
+TALENTBONI
+1;Alchemie
+RAWMATERIALS
+3;Holz
+5;Stein
+3;Eisen
+1;Gold
+300;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
 
 BUILDINGTYPE "Pferdezucht"
 "Pferdezucht";name
-2;level
+3;level
 MAINTENANCE
-150;Silber
+100;Silber
 RAWMATERIALS
-2;Stein
-4;Holz
-1;Eisen
+5;Holz
+3;Stein
+2;Eisen
 100;Silber
 REGIONTYPES
 "Berge"
@@ -1696,19 +1829,17 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
 
-BUILDINGTYPE "Hafen"
-"Hafen";name
+BUILDINGTYPE "Kamelzucht"
+"Kamelzucht";name
 3;level
-25;maxsize
 MAINTENANCE
-250;Silber
+100;Silber
 RAWMATERIALS
-5;Stein
 5;Holz
-250;Silber
+3;Stein
+2;Eisen
+100;Silber
 REGIONTYPES
 "Berge"
 "Ebene"
@@ -1717,18 +1848,16 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
 
 BUILDINGTYPE "Taverne"
 "Taverne";name
-2;level
+3;level
 MAINTENANCE
-5;Silber pro Größenpunkt
+50;Silber
 RAWMATERIALS
-1;Eisen
-4;Stein
 3;Holz
+4;Stein
+1;Eisen
 200;Silber
 REGIONTYPES
 "Berge"
@@ -1738,8 +1867,117 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
+
+BUILDINGTYPE "Magierturm"
+"Magierturm";name
+5;level
+MAINTENANCE
+500;Silber
+RAWMATERIALS
+3;Holz
+5;Stein
+3;Eisen
+500;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Steg"
+"Steg";name
+2;level
+MAINTENANCE
+30;Silber
+RAWMATERIALS
+2;Holz
+1;Eisen
+50;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Hafen"
+"Hafen";name
+5;level
+MAINTENANCE
+200;Silber
+RAWMATERIALS
+5;Holz
+10;Stein
+4;Eisen
+300;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Kanal"
+"Kanal";name
+3;level
+MAINTENANCE
+100;Silber
+RAWMATERIALS
+1;Holz
+3;Stein
+1;Eisen
+250;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Leuchtturm"
+"Leuchtturm";name
+3;level
+MAINTENANCE
+100;Silber
+RAWMATERIALS
+1;Holz
+2;Stein
+2;Eisen
+100;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Wegweiser"
+"Wegweiser";name
+1;level
+RAWMATERIALS
+1;Holz
+1;Stein
+1;Eisen
+50;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
 
 BUILDINGTYPE "Akademie"
 "Akademie";name
@@ -1760,79 +1998,6 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
-
-BUILDINGTYPE "Magierturm"
-"Magierturm";name
-5;level
-50;maxsize
-MAINTENANCE
-1000;Silber
-RAWMATERIALS
-5;Stein
-3;Holz
-2;Mallorn
-3;Eisen
-2;Laen
-500;Silber
-TALENTBONI
-1;Magie
-REGIONTYPES
-"Berge"
-"Ebene"
-"Gletscher"
-"Hochland"
-"Sumpf"
-"Wüste"
-"Wald"
-"Vulkan"
-"Aktiver Vulkan"
-
-BUILDINGTYPE "Karawanserei"
-"Karawanserei";name
-2;level
-10;maxsize
-MAINTENANCE
-3000;Silber
-2;Pferd
-RAWMATERIALS
-1;Stein
-5;Holz
-1;Eisen
-500;Silber
-REGIONTYPES
-"Wüste"
-
-BUILDINGTYPE "Damm"
-"Damm";name
-4;level
-50;maxsize
-MAINTENANCE
-1000;Silber
-3;Holz
-RAWMATERIALS
-5;Stein
-10;Holz
-1;Eisen
-500;Silber
-REGIONTYPES
-"Sumpf"
-
-BUILDINGTYPE "Tunnel"
-"Tunnel";name
-6;level
-100;maxsize
-MAINTENANCE
-100;Silber
-2;Stein
-RAWMATERIALS
-10;Stein
-5;Holz
-1;Eisen
-300;Silber
-REGIONTYPES
-"Gletscher"
 
 BUILDINGTYPE "Monument"
 "Monument";name
@@ -1850,8 +2015,6 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
 
 BUILDINGTYPE "Steinkreis"
 "Steinkreis";name
@@ -1868,13 +2031,11 @@ REGIONTYPES
 "Sumpf"
 "Wüste"
 "Wald"
-"Vulkan"
-"Aktiver Vulkan"
 
 REGIONTYPE "Berge"
 "Berge";name
 1000;maxworkers
-250;roadstones
+200;roadstones
 "true";isAstralVisible
 "true";isLand
 
@@ -1888,8 +2049,7 @@ REGIONTYPE "Ebene"
 REGIONTYPE "Gletscher"
 "Gletscher";name
 100;maxworkers
-250;roadstones
-"Tunnel";roadsupportbuilding
+350;roadstones
 "true";isAstralVisible
 "true";isLand
 
@@ -1903,16 +2063,14 @@ REGIONTYPE "Hochland"
 REGIONTYPE "Sumpf"
 "Sumpf";name
 2000;maxworkers
-75;roadstones
-"Damm";roadsupportbuilding
+250;roadstones
 "true";isAstralVisible
 "true";isLand
 
 REGIONTYPE "Wüste"
 "Wüste";name
 500;maxworkers
-100;roadstones
-"Karawanserei";roadsupportbuilding
+150;roadstones
 "true";isAstralVisible
 "true";isLand
 
