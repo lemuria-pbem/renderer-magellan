@@ -827,6 +827,7 @@ RACE "Zwerge"
 10;weight
 5.0;capacity
 TALENTBONI
+2;Alchemie
 2;Bergbau
 -1;Bogenschießen
 2;Burgenbau
@@ -870,7 +871,6 @@ TALENTBONI
 1;Rüstungsbau
 -1;Schiffbau
 -1;Segeln
--1;Spionage
 1;Steinbau
 1;Steuereintreiben
 1;Taktik
@@ -886,6 +886,7 @@ RACE "Elfen"
 TALENTBONI
 -1;Alchemie
 -2;Bergbau
+2;Bogenbau
 2;Bogenschießen
 -1;Burgenbau
 -2;Katapultbedienung
@@ -900,9 +901,9 @@ TALENTBONI
 1;Tarnung
 1;Wahrnehmung
 TALENTBONI "Wald"
+2;Taktik
 1;Tarnung
 1;Wahrnehmung
-2;Taktik
 
 RACE "Halblinge"
 "Halblinge";name
@@ -922,8 +923,7 @@ TALENTBONI
 -1;Reiten
 -1;Schiffbau
 -2;Segeln
-1;Spionage
--1;Stangenwaffen
+1;Stangenwaffen
 -1;Steuereintreiben
 1;Straßenbau
 1;Tarnung
@@ -937,10 +937,6 @@ RACE "Menschen"
 10;weight
 5.0;capacity
 TALENTBONI
-1;Handeln
--1;Kräuterkunde
-1;Schiffbau
-1;Segeln
 
 RACE "Trolle"
 "Trolle";name
@@ -959,7 +955,6 @@ TALENTBONI
 2;Rüstungsbau
 -1;Schiffbau
 -1;Segeln
--3;Spionage
 2;Steinbau
 1;Steuereintreiben
 2;Straßenbau
@@ -974,13 +969,20 @@ RACE "Aquaner"
 10;weight
 5.0;capacity
 TALENTBONI
--2;Bergbau
--1;Burgenbau
+-1;Armbrustschießen
+-1;Bergbau
 2;Handeln
--1;Rüstungsbau
-3;Schiffbau
-3;Segeln
--1;Straßenbau
+-1;Hiebwaffen
+1;Holzfällen
+-2;Katapultbedienung
+-1;Pferdedressur
+-1;Reiten
+-2;Rüstungsbau
+2;Schiffbau
+2;Segeln
+1;Stangenwaffen
+-2;Straßenbau
+-1;Wagenbau
 SPECIALS
 1;shiprange
 
@@ -988,24 +990,40 @@ RACE "Bauern"
 "Bauern";name
 10;weight
 
+RACE "Bären"
+"Bären";name
+0;maintenance
+40;weight
+
 RACE "Ents"
 "Ents";name
-50;weight
-
-RACE "Zombies"
-"Zombies";name
 0;maintenance
-10;weight
+240;weight
+
+RACE "Ghoule"
+"Ghoule";name
+0;maintenance
+5;weight
+
+RACE "Kobolde"
+"Kobolde";name
+0;maintenance
+6;weight
+
+RACE "Kraken"
+"Kraken";name
+0;maintenance
+320;weight
 
 RACE "Skelette"
 "Skelette";name
 0;maintenance
 5;weight
 
-RACE "Ghoule"
-"Ghoule";name
+RACE "Zombies"
+"Zombies";name
 0;maintenance
-10;weight
+5;weight
 
 ITEM "Silber"
 "Silber";name
@@ -1013,21 +1031,21 @@ ITEM "Silber"
 "silver";category
 1;storeinbonw
 
-ITEM "Juwel"
-"Juwel";name
+ITEM "Öl"
+"Öl";name
 1;weight
 "luxuries";category
 1;storeinbonw
 RESOURCES
-7;Silber
+3;Silber
 
-ITEM "Weihrauch"
-"Weihrauch";name
+ITEM "Öle"
+"Öle";name
 1;weight
 "luxuries";category
 1;storeinbonw
 RESOURCES
-4;Silber
+3;Silber
 
 ITEM "Balsam"
 "Balsam";name
@@ -1037,8 +1055,24 @@ ITEM "Balsam"
 RESOURCES
 4;Silber
 
-ITEM "Gewürz"
-"Gewürz";name
+ITEM "Balsame"
+"Balsame";name
+1;weight
+"luxuries";category
+1;storeinbonw
+RESOURCES
+4;Silber
+
+ITEM "Weihrauch"
+"Weihrauch";name
+1;weight
+"luxuries";category
+1;storeinbonw
+RESOURCES
+5;Silber
+
+ITEM "Weihrauche"
+"Weihrauche";name
 1;weight
 "luxuries";category
 1;storeinbonw
@@ -1053,13 +1087,29 @@ ITEM "Myrrhe"
 RESOURCES
 5;Silber
 
-ITEM "Öl"
-"Öl";name
+ITEM "Myrrhen"
+"Myrrhen";name
 1;weight
 "luxuries";category
 1;storeinbonw
 RESOURCES
-3;Silber
+5;Silber
+
+ITEM "Gewürz"
+"Gewürz";name
+1;weight
+"luxuries";category
+1;storeinbonw
+RESOURCES
+6;Silber
+
+ITEM "Gewürze"
+"Gewürze";name
+1;weight
+"luxuries";category
+1;storeinbonw
+RESOURCES
+6;Silber
 
 ITEM "Seide"
 "Seide";name
@@ -1069,12 +1119,45 @@ ITEM "Seide"
 RESOURCES
 6;Silber
 
-ITEM "Eisen"
-"Eisen";name
-5;weight
-"Bergbau";makeskill
-"resources";category
+ITEM "Seiden"
+"Seiden";name
+1;weight
+"luxuries";category
 1;storeinbonw
+RESOURCES
+6;Silber
+
+ITEM "Pelz"
+"Pelz";name
+1;weight
+"luxuries";category
+1;storeinbonw
+RESOURCES
+7;Silber
+
+ITEM "Pelze"
+"Pelze";name
+1;weight
+"luxuries";category
+1;storeinbonw
+RESOURCES
+7;Silber
+
+ITEM "Juwel"
+"Juwel";name
+1;weight
+"luxuries";category
+1;storeinbonw
+RESOURCES
+8;Silber
+
+ITEM "Juwelen"
+"Juwelen";name
+1;weight
+"luxuries";category
+1;storeinbonw
+RESOURCES
+8;Silber
 
 ITEM "Holz"
 "Holz";name
@@ -1096,6 +1179,13 @@ ITEM "Steine"
 "Steinbau";makeskill
 "resources";category
 0;storeinbonw
+
+ITEM "Eisen"
+"Eisen";name
+5;weight
+"Bergbau";makeskill
+"resources";category
+1;storeinbonw
 
 ITEM "Gold"
 "Gold";name
@@ -1122,12 +1212,77 @@ ITEM "Pferde"
 0;storeinbonw
 1;ishorse
 
-ITEM "Kräuter"
-"Kräuter";name
-0.01;weight
-"Kräuterkunde";makeskill
+ITEM "Kamel"
+"Kamel";name
+50;weight
+"Pferdedressur";makeskill
 1;makeskilllevel
 "resources";category
+0;storeinbonw
+1;ishorse
+
+ITEM "Kamele"
+"Kamele";name
+50;weight
+"Pferdedressur";makeskill
+1;makeskilllevel
+"resources";category
+0;storeinbonw
+1;ishorse
+
+ITEM "Elefant"
+"Elefant";name
+240;weight
+"Pferdedressur";makeskill
+1;makeskilllevel
+"resources";category
+0;storeinbonw
+1;ishorse
+
+ITEM "Elefanten"
+"Elefanten";name
+240;weight
+"Pferdedressur";makeskill
+1;makeskilllevel
+"resources";category
+0;storeinbonw
+1;ishorse
+
+ITEM "Pegasus"
+"Pegasus";name
+50;weight
+"Pferdedressur";makeskill
+1;makeskilllevel
+"resources";category
+0;storeinbonw
+1;ishorse
+
+ITEM "Pegasi"
+"Pegasi";name
+50;weight
+"Pferdedressur";makeskill
+1;makeskilllevel
+"resources";category
+0;storeinbonw
+1;ishorse
+
+ITEM "Greif"
+"Greif";name
+120;weight
+"Pferdedressur";makeskill
+1;makeskilllevel
+"resources";category
+0;storeinbonw
+1;ishorse
+
+ITEM "Greife"
+"Greife";name
+120;weight
+"Pferdedressur";makeskill
+1;makeskilllevel
+"resources";category
+0;storeinbonw
+1;ishorse
 
 ITEM "Wagen"
 "Wagen";name
@@ -1139,34 +1294,25 @@ ITEM "Wagen"
 RESOURCES
 5;Holz
 
-ITEM "Katapult"
-"Katapult";name
-100;weight
+ITEM "Wagenwrack"
+"Wagenwrack";name
+40;weight
 "Wagenbau";makeskill
-"Katapultbedienung";useskill
-5;makeskilllevel
-"distance weapons";category
+1;makeskilllevel
+"resources";category
 0;storeinbonw
 RESOURCES
-10;Holz
+1;Holz
 
-ITEM "Schwert"
-"Schwert";name
-1;weight
-"Waffenbau";makeskill
-"Hiebwaffen";useskill
-2;makeskilllevel
-"weapons";category
-1;storeinbonw
+ITEM "Wagenwracks"
+"Wagenwracks";name
+40;weight
+"Wagenbau";makeskill
+1;makeskilllevel
+"resources";category
+0;storeinbonw
 RESOURCES
-1;Eisen
-
-ITEM "Schartiges Schwert"
-"Schartiges Schwert";name
-1;weight
-"Hiebwaffen";useskill
-"weapons";category
-1;storeinbonw
+1;
 
 ITEM "Speer"
 "Speer";name
@@ -1179,12 +1325,130 @@ ITEM "Speer"
 RESOURCES
 1;Holz
 
-ITEM "Rostige Hellebarde"
-"Rostige Hellebarde";name
-2;weight
+ITEM "Speere"
+"Speere";name
+1;weight
+"Waffenbau";makeskill
 "Stangenwaffen";useskill
+1;makeskilllevel
 "weapons";category
 1;storeinbonw
+RESOURCES
+1;Holz
+
+ITEM "Stumpfer Speer"
+"Stumpfer Speer";name
+1;weight
+"Waffenbau";makeskill
+"Stangenwaffen";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Stumpfer Speer
+
+ITEM "Stumpfe Speere"
+"Stumpfe Speere";name
+1;weight
+"Waffenbau";makeskill
+"Stangenwaffen";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Stumpfer Speer
+
+ITEM "Schwert"
+"Schwert";name
+1;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+2;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Eisen
+
+ITEM "Schwerter"
+"Schwerter";name
+1;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+2;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Eisen
+
+ITEM "Rostiges Schwert"
+"Rostiges Schwert";name
+1;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Rostiges Schwert
+
+ITEM "Rostige Schwerter"
+"Rostige Schwerter";name
+1;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Rostiges Schwert
+
+ITEM "Kriegshammer"
+"Kriegshammer";name
+2;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+4;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Holz
+1;Stein
+2;Eisen
+
+ITEM "Kriegshämmer"
+"Kriegshämmer";name
+2;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+4;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Holz
+1;Stein
+2;Eisen
+
+ITEM "Lockerer Kriegshammer"
+"Lockerer Kriegshammer";name
+2;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Lockerer Kriegshammer
+
+ITEM "Lockere Kriegshämmer"
+"Lockere Kriegshämmer";name
+2;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Lockerer Kriegshammer
 
 ITEM "Streitaxt"
 "Streitaxt";name
@@ -1195,20 +1459,91 @@ ITEM "Streitaxt"
 "weapons";category
 1;storeinbonw
 RESOURCES
-3;Eisen
 2;Holz
+3;Eisen
 
-ITEM "Rostige Kriegsaxt"
-"Rostige Kriegsaxt";name
+ITEM "Streitäxte"
+"Streitäxte";name
 2;weight
+"Waffenbau";makeskill
 "Hiebwaffen";useskill
+5;makeskilllevel
 "weapons";category
 1;storeinbonw
+RESOURCES
+2;Holz
+3;Eisen
+
+ITEM "Rostige Streitaxt"
+"Rostige Streitaxt";name
+2;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Rostige Streitaxt
+
+ITEM "Rostige Streitäxte"
+"Rostige Streitäxte";name
+2;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Rostige Streitaxt
+
+ITEM "Bogen"
+"Bogen";name
+1;weight
+"Bogenbau";makeskill
+"Bogenschießen";useskill
+2;makeskilllevel
+"distance weapons";category
+1;storeinbonw
+RESOURCES
+1;Holz
+
+ITEM "Bögen"
+"Bögen";name
+1;weight
+"Bogenbau";makeskill
+"Bogenschießen";useskill
+2;makeskilllevel
+"distance weapons";category
+1;storeinbonw
+RESOURCES
+1;Holz
+
+ITEM "Schlaffer Bogen"
+"Schlaffer Bogen";name
+1;weight
+"Bogenbau";makeskill
+"Bogenschießen";useskill
+1;makeskilllevel
+"distance weapons";category
+1;storeinbonw
+RESOURCES
+1;Schlaffer Bogen
+
+ITEM "Schlaffe Bögen"
+"Schlaffe Bögen";name
+1;weight
+"Bogenbau";makeskill
+"Bogenschießen";useskill
+1;makeskilllevel
+"distance weapons";category
+1;storeinbonw
+RESOURCES
+1;Schlaffer Bogen
 
 ITEM "Armbrust"
 "Armbrust";name
 2;weight
-"Waffenbau";makeskill
+"Bogenbau";makeskill
 "Armbrustschießen";useskill
 3;makeskilllevel
 "distance weapons";category
@@ -1216,16 +1551,122 @@ ITEM "Armbrust"
 RESOURCES
 1;Holz
 
-ITEM "Bogen"
-"Bogen";name
-1;weight
-"Waffenbau";makeskill
-"Bogenschießen";useskill
-2;makeskilllevel
+ITEM "Armbrüste"
+"Armbrüste";name
+2;weight
+"Bogenbau";makeskill
+"Armbrustschießen";useskill
+3;makeskilllevel
 "distance weapons";category
 1;storeinbonw
 RESOURCES
 1;Holz
+
+ITEM "Schlaffe Armbrust"
+"Schlaffe Armbrust";name
+2;weight
+"Bogenbau";makeskill
+"Armbrustschießen";useskill
+1;makeskilllevel
+"distance weapons";category
+1;storeinbonw
+RESOURCES
+1;Schlaffe Armbrust
+
+ITEM "Schlaffe Armbrüste"
+"Schlaffe Armbrüste";name
+2;weight
+"Bogenbau";makeskill
+"Armbrustschießen";useskill
+1;makeskilllevel
+"distance weapons";category
+1;storeinbonw
+RESOURCES
+1;Schlaffe Armbrust
+
+ITEM "Katapult"
+"Katapult";name
+100;weight
+"Wagenbau";makeskill
+"Katapultbedienung";useskill
+3;makeskilllevel
+"distance weapons";category
+0;storeinbonw
+RESOURCES
+10;Holz
+
+ITEM "Katapulte"
+"Katapulte";name
+100;weight
+"Wagenbau";makeskill
+"Katapultbedienung";useskill
+3;makeskilllevel
+"distance weapons";category
+0;storeinbonw
+RESOURCES
+10;Holz
+
+ITEM "Marodes Katapult"
+"Marodes Katapult";name
+100;weight
+"Wagenbau";makeskill
+"Katapultbedienung";useskill
+1;makeskilllevel
+"distance weapons";category
+0;storeinbonw
+RESOURCES
+1;Marodes Katapult
+
+ITEM "Marode Katapulte"
+"Marode Katapulte";name
+100;weight
+"Wagenbau";makeskill
+"Katapultbedienung";useskill
+1;makeskilllevel
+"distance weapons";category
+0;storeinbonw
+RESOURCES
+1;Marodes Katapult
+
+ITEM "Lederrüstung"
+"Lederrüstung";name
+1;weight
+"Rüstungsbau";makeskill
+3;makeskilllevel
+"armour";category
+1;storeinbonw
+RESOURCES
+1;Elefant
+
+ITEM "Lederrüstungen"
+"Lederrüstungen";name
+1;weight
+"Rüstungsbau";makeskill
+3;makeskilllevel
+"armour";category
+1;storeinbonw
+RESOURCES
+1;Elefant
+
+ITEM "Zerrissene Lederrüstung"
+"Zerrissene Lederrüstung";name
+1;weight
+"Rüstungsbau";makeskill
+1;makeskilllevel
+"armour";category
+1;storeinbonw
+RESOURCES
+1;Zerrissene Lederrüstung
+
+ITEM "Zerrissene Lederrüstungen"
+"Zerrissene Lederrüstungen";name
+1;weight
+"Rüstungsbau";makeskill
+1;makeskilllevel
+"armour";category
+1;storeinbonw
+RESOURCES
+1;Zerrissene Lederrüstung
 
 ITEM "Kettenhemd"
 "Kettenhemd";name
@@ -1237,11 +1678,35 @@ ITEM "Kettenhemd"
 RESOURCES
 3;Eisen
 
+ITEM "Kettenhemden"
+"Kettenhemden";name
+2;weight
+"Rüstungsbau";makeskill
+3;makeskilllevel
+"armour";category
+1;storeinbonw
+RESOURCES
+3;Eisen
+
 ITEM "Rostiges Kettenhemd"
 "Rostiges Kettenhemd";name
-"armour";category
 2;weight
+"Rüstungsbau";makeskill
+1;makeskilllevel
+"armour";category
 1;storeinbonw
+RESOURCES
+1;Rostiges Kettenhemd
+
+ITEM "Rostige Kettenhemden"
+"Rostige Kettenhemden";name
+2;weight
+"Rüstungsbau";makeskill
+1;makeskilllevel
+"armour";category
+1;storeinbonw
+RESOURCES
+1;Rostiges Kettenhemd
 
 ITEM "Plattenpanzer"
 "Plattenpanzer";name
@@ -1253,15 +1718,29 @@ ITEM "Plattenpanzer"
 RESOURCES
 5;Eisen
 
-ITEM "Rostiger Plattenpanzer"
-"Rostiger Plattenpanzer";name
+ITEM "Verbeulte Rüstung"
+"Verbeulte Rüstung";name
 4;weight
+"Rüstungsbau";makeskill
+1;makeskilllevel
 "armour";category
 1;storeinbonw
+RESOURCES
+1;Verbeulte Rüstung
+
+ITEM "Verbeulte Rüstungen"
+"Verbeulte Rüstungen";name
+4;weight
+"Rüstungsbau";makeskill
+1;makeskilllevel
+"armour";category
+1;storeinbonw
+RESOURCES
+1;Verbeulte Rüstung
 
 ITEM "Holzschild"
-"Holzchild";name
-1;weight
+"Holzschild";name
+2;weight
 "Rüstungsbau";makeskill
 2;makeskilllevel
 "shield";category
@@ -1269,27 +1748,82 @@ ITEM "Holzschild"
 RESOURCES
 1;Holz
 
-ITEM "Eisenschild"
-"Eisenschild";name
-1;weight
+ITEM "Holzschilde"
+"Holzschilde";name
+2;weight
 "Rüstungsbau";makeskill
 2;makeskilllevel
 "shield";category
 1;storeinbonw
 RESOURCES
+1;Holz
+
+ITEM "Gespaltener Holzschild"
+"Gespaltener Holzschild";name
+2;weight
+"Rüstungsbau";makeskill
+1;makeskilllevel
+"shield";category
+1;storeinbonw
+RESOURCES
+1;Gespaltener Holzschild
+
+ITEM "Gespaltene Holzschilde"
+"Gespaltene Holzschilde";name
+2;weight
+"Rüstungsbau";makeskill
+1;makeskilllevel
+"shield";category
+1;storeinbonw
+RESOURCES
+1;Gespaltener Holzschild
+
+ITEM "Eisenschild"
+"Eisenschild";name
+1;weight
+"Rüstungsbau";makeskill
+3;makeskilllevel
+"shield";category
+1;storeinbonw
+RESOURCES
 1;Eisen
 
-ITEM "Rostiges Schild"
-"Rostiges Schild";name
-"shield";category
+ITEM "Eisenschilde"
+"Eisenschilde";name
 1;weight
+"Rüstungsbau";makeskill
+3;makeskilllevel
+"shield";category
 1;storeinbonw
+RESOURCES
+1;Eisen
 
-ITEM "Rostiger Schild"
-"Rostiger Schild";name
-"shield";category
+ITEM "Verbeulter Eisenschild"
+"Verbeulter Eisenschild";name
 1;weight
+"Rüstungsbau";makeskill
+3;makeskilllevel
+"shield";category
 1;storeinbonw
+RESOURCES
+1;Verbeulter Eisenschild
+
+ITEM "Verbeulte Eisenschilde"
+"Verbeulte Eisenschilde";name
+1;weight
+"Rüstungsbau";makeskill
+3;makeskilllevel
+"shield";category
+1;storeinbonw
+RESOURCES
+1;Verbeulter Eisenschild
+
+ITEM "Kräuter"
+"Kräuter";name
+0.01;weight
+"Kräuterkunde";makeskill
+1;makeskilllevel
+"resources";category
 
 ITEM "Siebenmeilentee"
 "Siebenmeilentee";name
@@ -1306,19 +1840,8 @@ ITEM "Goliathwasser"
 "potions";category
 2;makeskilllevel
 RESOURCES
-1;Gurgelkraut
+1;Blasenmorchel
 1;Fjordwuchs
-
-
-ITEM "Wasser des Lebens"
-"Wasser des Lebens";name
-"Alchemie";makeskill
-"potions";category
-2;makeskilllevel
-RESOURCES
-1;Elfenlieb
-1;Knotiger Saugwurz
-
 
 ITEM "Trank der Wahrheit"
 "Trank der Wahrheit";name
@@ -1329,38 +1852,57 @@ RESOURCES
 1;Flachwurz
 1;Fjordwuchs
 
-
 ITEM "Schaffenstrunk"
 "Schaffenstrunk";name
 "Alchemie";makeskill
 4;makeskilllevel
 "potions";category
 RESOURCES
-1;Alraune
+1;Eisblume
+1;Sandfäule
 1;Spaltwachs
-1;Würziger Wagemut
-
-
-ITEM "Wundsalbe"
-"Wundsalbe";name
-"Alchemie";makeskill
-4;makeskilllevel
-"potions";category
-RESOURCES
-1;Weißer Wüterich
-1;Blauer Baumringel
-1;Würziger Wagemut
 
 ITEM "Gehirnschmalz"
 "Gehirnschmalz";name
 "Alchemie";makeskill
+4;makeskilllevel
+"potions";category
+RESOURCES
+1;Steinbeißer
+1;Wasserfinder
+1;Windbeutel
+
+ITEM "Wasser des Lebens"
+"Wasser des Lebens";name
+"Alchemie";makeskill
+"potions";category
+4;makeskilllevel
+RESOURCES
+1;Grüner Spinnerich
+1;Knotiger Saugwurz
+1;Steinbeißer
+
+ITEM "Wundsalbe"
+"Wundsalbe";name
+"Alchemie";makeskill
 6;makeskilllevel
 "potions";category
 RESOURCES
-1;Wasserfinder
-1;Steinbeißer
-1;Windbeutel
-1;Gurgelkraut
+1;Höhlenglimm
+1;Kakteenschwitz
+1;Weißer Wüterich
+1;Würziger Wagemut
+
+ITEM "Bauernlieb"
+"Bauernlieb";name
+"Alchemie";makeskill
+6;makeskilllevel
+"potions";category
+RESOURCES
+1;Alraune
+1;Blasenmorchel
+1;Elfenlieb
+1;Schneekristall
 
 ITEM "Pferdeglück"
 "Pferdeglück";name
@@ -1369,32 +1911,21 @@ ITEM "Pferdeglück"
 "potions";category
 RESOURCES
 1;Blauer Baumringel
-1;Sandfäule
 1;Kakteenschwitz
 1;Knotiger Saugwurz
+1;Würziger Wagemut
 
 ITEM "Berserkerblut"
 "Berserkerblut";name
-"Alchemie";makeskill
-6;makeskilllevel
-"potions";category
-RESOURCES
-1;Weißer Wüterich
-1;Alraune
-1;Flachwurz
-1;Sandfäule
-
-ITEM "Bauernlieb"
-"Bauernlieb";name
 "Alchemie";makeskill
 8;makeskilllevel
 "potions";category
 RESOURCES
 1;Alraune
-1;Schneekristall
-1;Steinbeißer
-1;Blasenmorchel
-1;Elfenlieb
+1;Eulenauge
+1;Gurgelkraut
+1;Sandfäule
+1;Weißer Wüterich
 
 ITEM "Elixier der Macht"
 "Elixier der Macht";name
@@ -1402,12 +1933,11 @@ ITEM "Elixier der Macht"
 8;makeskilllevel
 "potions";category
 RESOURCES
-1;Elfenlieb
-1;Wasserfinder
-1;Windbeutel
+1;Eulenauge
 1;Grüner Spinnerich
-1;Blasenmorchel
-1;Drachenblut
+1;Schneekristall
+1;Spaltwachs
+1;Wasserfinder
 
 ITEM "Heiltrank"
 "Heiltrank";name
@@ -1415,40 +1945,64 @@ ITEM "Heiltrank"
 8;makeskilllevel
 "potions";category
 RESOURCES
-1;Gurgelkraut
-1;Windbeutel
 1;Eisblume
 1;Elfenlieb
-1;Spaltwachs
+1;Flachwurz
+1;Gurgelkraut
+1;Höhlenglimm
 
-ITEM "Goblinkopf"
-"Goblinkopf";name
-"trophies";category
-0.01;weight
-1;storeinbonw
-
-ITEM "Zauberbeutel"
-"Zauberbeutel";name
+ITEM "Schriftrolle"
+"Schriftrolle";name
 "misc";category
 1;weight
 0;storeinbonw
 
-ITEM "Seeschlangenkopf"
-"Seeschlangenkopf";name
-5;weight
-"misc";category
-1;storeinbonw
-
-ITEM "Ring der Macht"
-"Ring der Macht";name
-0;weight
-"misc";category
-1;storeinbonw
-
-ITEM "Drachenblut"
-"Drachenblut";name
+ITEM "Zauberbuch"
+"Zauberbuch";name
 "misc";category
 1;weight
+0;storeinbonw
+
+ITEM "Goblinohr"
+"Goblinohr";name
+"trophies";category
+0.01;weight
+1;storeinbonw
+
+ITEM "Goblinohren"
+"Goblinohren";name
+"trophies";category
+0.01;weight
+1;storeinbonw
+
+ITEM "Greifenfeder"
+"Greifenfeder";name
+"trophies";category
+0.01;weight
+1;storeinbonw
+
+ITEM "Greifenfedern"
+"Greifenfedern";name
+"trophies";category
+0.01;weight
+1;storeinbonw
+
+ITEM "Totenschädel"
+"Totenschädel";name
+"trophies";category
+0.5;weight
+1;storeinbonw
+
+ITEM "Reißzahn"
+"Reißzahn";name
+"trophies";category
+0.01;weight
+1;storeinbonw
+
+ITEM "Reißzähne"
+"Reißzähne";name
+"trophies";category
+0.01;weight
 1;storeinbonw
 
 SHIPTYPE "Boot"
