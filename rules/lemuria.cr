@@ -1496,6 +1496,54 @@ ITEM "Rostige Streitäxte"
 RESOURCES
 1;Rostige Streitaxt
 
+ITEM "Kriegselefant"
+"Kriegselefant";name
+300;weight
+"Waffenbau";makeskill
+"Reiten";useskill
+5;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+2;Holz
+1;Elefantenpanzer
+1;Elefant
+
+ITEM "Kriegselefanten"
+"Kriegselefanten";name
+300;weight
+"Waffenbau";makeskill
+"Reiten";useskill
+5;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+2;Holz
+1;Elefantenpanzer
+1;Elefant
+
+ITEM "Lahmender Kriegselefant"
+"Lahmender Kriegselefant";name
+300;weight
+"Waffenbau";makeskill
+"Reiten";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Elefant
+
+ITEM "Lahmendee Kriegselefanten"
+"Lahmende Kriegselefanten";name
+300;weight
+"Waffenbau";makeskill
+"Reiten";useskill
+1;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Elefant
+
 ITEM "Bogen"
 "Bogen";name
 1;weight
@@ -1737,6 +1785,16 @@ ITEM "Verbeulte Rüstungen"
 1;storeinbonw
 RESOURCES
 1;Verbeulte Rüstung
+
+ITEM "Elefantenpanzer"
+"Elefantenpanzer";name
+50;weight
+"Rüstungsbau";makeskill
+5;makeskilllevel
+"armour";category
+1;storeinbonw
+RESOURCES
+10;Eisen
 
 ITEM "Holzschild"
 "Holzschild";name
