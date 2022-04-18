@@ -1,9 +1,6 @@
-/rules
 /vendor
 
 /.idea/deployment.xml
 /.idea/encodings.xml
 /.idea/workspace.xml
 /composer.lock
-
-!/rules/lemuria.cr
