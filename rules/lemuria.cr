@@ -555,53 +555,11 @@ SKILLCATEGORY "misc"
 "Sonstiges";name
 6;naturalorder
 
-HERB "Flachwurz"
-"Flachwurz";name
-"Ebene";region
+HERB "Alraune"
+"Alraune";name
+"Hochland";region
 "herbs";category
-"flatroot";iconname
-
-HERB "Würziger Wagemut"
-"Würziger Wagemut";name
-"Ebene";region
-"herbs";category
-"tangy temerity";iconname
-
-HERB "Eulenauge"
-"Eulenauge";name
-"Ebene";region
-"herbs";category
-"owlsgaze";iconname
-
-HERB "Grüner Spinnerich"
-"Grüner Spinnerich";name
-"Wald";region
-"herbs";category
-"spider ivy";iconname
-
-HERB "Blauer Baumringel"
-"Blauer Baumringel";name
-"Wald";region
-"herbs";category
-"cobalt fungus";iconname
-
-HERB "Elfenlieb"
-"Elfenlieb";name
-"Wald";region
-"herbs";category
-"elvendear";iconname
-
-HERB "Gurgelkraut"
-"Gurgelkraut";name
-"Sumpf";region
-"herbs";category
-"bugleweed";iconname
-
-HERB "Knotiger Saugwurz"
-"Knotiger Saugwurz";name
-"Sumpf";region
-"herbs";category
-"knotroot";iconname
+"mandrake";iconname
 
 HERB "Blasenmorchel"
 "Blasenmorchel";name
@@ -609,59 +567,11 @@ HERB "Blasenmorchel"
 "herbs";category
 "bubblemorel";iconname
 
-HERB "Wasserfinder"
-"Wasserfinder";name
-"Wüste";region
+HERB "Blauer Baumringel"
+"Blauer Baumringel";name
+"Wald";region
 "herbs";category
-"waterfinder";iconname
-
-HERB "Kakteenschwitz"
-"Kakteenschwitz";name
-"Wüste";region
-"herbs";category
-"peyote";iconname
-
-HERB "Sandfäule"
-"Sandfäule";name
-"Wüste";region
-"herbs";category
-"sandreeker";iconname
-
-HERB "Windbeutel"
-"Windbeutel";name
-"Hochland";region
-"herbs";category
-"windbag";iconname
-
-HERB "Fjordwuchs"
-"Fjordwuchs";name
-"Hochland";region
-"herbs";category
-"fjord fungus";iconname
-
-HERB "Alraune"
-"Alraune";name
-"Hochland";region
-"herbs";category
-"mandrake";iconname
-
-HERB "Steinbeißer"
-"Steinbeißer";name
-"Berge";region
-"herbs";category
-"rockweed";iconname
-
-HERB "Spaltwachs"
-"Spaltwachs";name
-"Berge";region
-"herbs";category
-"gapgrowth";iconname
-
-HERB "Höhlenglimm"
-"Höhlenglimm";name
-"Berge";region
-"herbs";category
-"cavelichen";iconname
+"cobalt fungus";iconname
 
 HERB "Eisblume"
 "Eisblume";name
@@ -669,17 +579,107 @@ HERB "Eisblume"
 "herbs";category
 "ice begonia";iconname
 
-HERB "Weißer Wüterich"
-"Weißer Wüterich";name
-"Gletscher";region
+HERB "Elfenlieb"
+"Elfenlieb";name
+"Wald";region
 "herbs";category
-"white hemlock";iconname
+"elvendear";iconname
+
+HERB "Eulenauge"
+"Eulenauge";name
+"Ebene";region
+"herbs";category
+"owlsgaze";iconname
+
+HERB "Fjordwuchs"
+"Fjordwuchs";name
+"Hochland";region
+"herbs";category
+"fjord fungus";iconname
+
+HERB "Flachwurz"
+"Flachwurz";name
+"Ebene";region
+"herbs";category
+"flatroot";iconname
+
+HERB "Grüner Spinnerich"
+"Grüner Spinnerich";name
+"Wald";region
+"herbs";category
+"spider ivy";iconname
+
+HERB "Gurgelkraut"
+"Gurgelkraut";name
+"Sumpf";region
+"herbs";category
+"bugleweed";iconname
+
+HERB "Höhlenglimm"
+"Höhlenglimm";name
+"Berge";region
+"herbs";category
+"cavelichen";iconname
+
+HERB "Kakteenschwitz"
+"Kakteenschwitz";name
+"Wüste";region
+"herbs";category
+"peyote";iconname
+
+HERB "Knotiger Saugwurz"
+"Knotiger Saugwurz";name
+"Sumpf";region
+"herbs";category
+"knotroot";iconname
+
+HERB "Sandfäule"
+"Sandfäule";name
+"Wüste";region
+"herbs";category
+"sandreeker";iconname
 
 HERB "Schneekristall"
 "Schneekristall";name
 "Gletscher";region
 "herbs";category
 "snowcrystal petal";iconname
+
+HERB "Spaltwachs"
+"Spaltwachs";name
+"Berge";region
+"herbs";category
+"gapgrowth";iconname
+
+HERB "Steinbeißer"
+"Steinbeißer";name
+"Berge";region
+"herbs";category
+"rockweed";iconname
+
+HERB "Wasserfinder"
+"Wasserfinder";name
+"Wüste";region
+"herbs";category
+"waterfinder";iconname
+
+HERB "Weißer Wüterich"
+"Weißer Wüterich";name
+"Gletscher";region
+"herbs";category
+"white hemlock";iconname
+
+HERB "Windbeutel"
+"Windbeutel";name
+"Hochland";region
+"herbs";category
+"windbag";iconname
+
+HERB "Würziger Wagemut"
+"Würziger Wagemut";name
+"Ebene";region
+"herbs";category
+"tangy temerity";iconname
 
 SKILL "Alchemie"
 "Alchemie";name
@@ -2018,7 +2018,7 @@ SHIPTYPE "Langboot"
 "Langboot";name
 50;size
 2;level
-3;range
+4;range
 500;capacity
 2;captainlevel
 10;sailorlevel
