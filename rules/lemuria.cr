@@ -2618,7 +2618,7 @@ RAWMATERIALS
 1;Stein
 1;Holz
 1;Eisen
-400;Silber
+100;Silber
 REGIONTYPES
 "Berge"
 "Ebene"
@@ -2635,6 +2635,20 @@ BUILDINGTYPE "Steinkreis"
 RAWMATERIALS
 5;Stein
 5;Holz
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Ruine"
+"Ruine";name
+0;level
+0;maxsize
+RAWMATERIALS
 REGIONTYPES
 "Berge"
 "Ebene"
