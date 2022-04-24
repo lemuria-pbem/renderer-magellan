@@ -11,6 +11,7 @@
       <path value="$PROJECT_DIR$/vendor/lemuria-pbem/lemuria" />
       <path value="$PROJECT_DIR$/vendor/lemuria-pbem/model-fantasya" />
       <path value="$PROJECT_DIR$/vendor/lemuria-pbem/engine-fantasya" />
+      <path value="$PROJECT_DIR$/vendor/lemuria-pbem/statistics-fantasya" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1" />

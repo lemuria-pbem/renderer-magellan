@@ -118,8 +118,11 @@ class MagellanWriter implements Writer
 
 	private Filter $filter;
 
+	private Statistics $statistics;
+
 	public function __construct(protected string $path) {
-		$this->filter = new NullFilter();
+		$this->filter     = new NullFilter();
+		$this->statistics = new Statistics();
 		$this->initVariables();
 	}
 
@@ -381,24 +384,25 @@ class MagellanWriter implements Writer
 	protected function writeRegions(Outlook $outlook): void {
 		$atlas = new TravelAtlas($outlook->Census()->Party());
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
-			$visibility = match ($atlas->getVisibility($region)) {
-				Visibility::WITH_UNIT  => '',
-				Visibility::TRAVELLED  => 'travel',
-				Visibility::LIGHTHOUSE => 'lighthouse',
-				default                => 'neighbour'
-			};
-			$this->writeRegion($region, $visibility, $outlook);
+			$this->writeRegion($region, $atlas->getVisibility($region), $outlook);
 		}
 	}
 
 	/**
 	 * @throws JsonException
 	 */
-	private function writeRegion(Region $region, string $visibility, Outlook $outlook): void {
+	private function writeRegion(Region $region, Visibility $visibility, Outlook $outlook): void {
 		$coordinates  = $this->map->getCoordinates($region);
 		$resources    = $region->Resources();
 		$peasants     = $resources[Peasant::class]->Count();
 		$intelligence = new Intelligence($region);
+
+		$magellanVisibility = match ($visibility) {
+			Visibility::WITH_UNIT, Visibility::FARSIGHT => '',
+			Visibility::TRAVELLED                       => 'travel',
+			Visibility::LIGHTHOUSE                      => 'lighthouse',
+			default                                     => 'neighbour'
+		};
 
 		if (empty($visibility)) {
 			$availability = new Availability($region);
@@ -426,7 +430,7 @@ class MagellanWriter implements Writer
 				'Name'       => $region->Name(),
 				'Terrain'    => Translator::LANDSCAPE[getClass($region->Landscape())],
 				'Insel'      => 1,
-				'visibility' => $visibility
+				'visibility' => $magellanVisibility
 			];
 		}
 
@@ -439,17 +443,19 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 		$this->writeRoads($region);
 
-		if (!in_array($visibility, ['neighbour', 'lighthouse'])) {
+		if (!in_array($magellanVisibility, ['neighbour', 'lighthouse'])) {
 			$travelled = [];
 			$navigated = [];
-			foreach (Lemuria::Report()->getAll($region) as $message) {
-				if ($this->containsMessage($message, TravelUnitMessage::class)) {
-					$travelled[] = $message;
+			if ($visibility !== Visibility::FARSIGHT) {
+				foreach (Lemuria::Report()->getAll($region) as $message) {
+					if ($this->containsMessage($message, TravelUnitMessage::class)) {
+						$travelled[] = $message;
+					}
+					if ($this->containsMessage($message, TravelVesselMessage::class)) {
+						$navigated[] = $message;
+					}
+					$this->writeRegionMessage($message, $region);
 				}
-				if ($this->containsMessage($message, TravelVesselMessage::class)) {
-					$navigated[] = $message;
-				}
-				$this->writeRegionMessage($message, $region);
 			}
 
 			if ($peasants > 0) {
@@ -489,11 +495,13 @@ class MagellanWriter implements Writer
 				$this->writeData($data);
 			}
 
-			$this->writeEffects($region);
-			$this->writeTravelled($travelled);
-			$this->writeNavigated($navigated);
+			if ($visibility !== Visibility::FARSIGHT) {
+				$this->writeEffects($region);
+				$this->writeTravelled($travelled);
+				$this->writeNavigated($navigated);
+			}
 
-			if (empty($visibility)) {
+			if (empty($magellanVisibility)) {
 				$census     = $outlook->Census();
 				$party      = $census->Party();
 				$isGuarding = $this->isGuarding($party, $intelligence);
@@ -509,7 +517,7 @@ class MagellanWriter implements Writer
 						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
 				}
-			} elseif ($visibility === 'travel') {
+			} elseif ($magellanVisibility === 'travel') {
 				$census = $outlook->Census();
 				foreach ($region->Residents() as $unit /* @var Unit $unit */) {
 					if (!$unit->IsHiding() && !$unit->Construction() && !$unit->Vessel() && !$this->hasTravelled($unit)) {
@@ -519,15 +527,19 @@ class MagellanWriter implements Writer
 			}
 
 			foreach ($region->Estate() as $construction /* @var Construction $construction */) {
-				$this->writeConstruction($construction, $visibility);
-				foreach (Lemuria::Report()->getAll($construction) as $message) {
-					$this->writeMessage($message);
+				$this->writeConstruction($construction, $magellanVisibility);
+				if ($visibility !== Visibility::FARSIGHT) {
+					foreach (Lemuria::Report()->getAll($construction) as $message) {
+						$this->writeMessage($message);
+					}
 				}
 			}
 			foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
-				$this->writeVessel($vessel, $visibility);
-				foreach (Lemuria::Report()->getAll($vessel) as $message) {
-					$this->writeMessage($message);
+				$this->writeVessel($vessel, $magellanVisibility);
+				if ($visibility !== Visibility::FARSIGHT) {
+					foreach (Lemuria::Report()->getAll($vessel) as $message) {
+						$this->writeMessage($message);
+					}
 				}
 			}
 		}
@@ -749,13 +761,16 @@ class MagellanWriter implements Writer
 	private function writeKnowledge(Unit $unit): void {
 		$knowledge = $unit->Knowledge();
 		if (count($knowledge) > 0) {
-			$calculus = new Calculus($unit);
-			$data     = ['TALENTE'];
+			$calculus   = new Calculus($unit);
+			$statistics = $this->statistics->getTalents($unit);
+			$data       = ['TALENTE'];
 			foreach ($knowledge as $ability/* @var Ability $ability */) {
+				$talent        = $ability->Talent();
 				$experience    = $ability->Experience();
-				$ability       = $calculus->knowledge($ability->Talent());
-				$talent        = Translator::TALENT[getClass($ability->Talent())];
-				$data[$talent] = [$experience, $ability->Level()];
+				$ability       = $calculus->knowledge($talent);
+				$change        = $statistics[getClass($talent)]?->change ?? 0;
+				$talent        = Translator::TALENT[getClass($talent)];
+				$data[$talent] = [$experience, $ability->Level(), $change];
 			}
 			$this->writeData($data);
 		}
