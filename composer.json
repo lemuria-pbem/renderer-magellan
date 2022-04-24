@@ -11,14 +11,14 @@
 		}
 	],
 	"version": "0.12.0",
-	"time": "2022-04-22",
+	"time": "2022-04-24",
 
 	"require": {
 		"php": "~8.1",
-		"lemuria-pbem/lemuria": "dev-dev",
-		"lemuria-pbem/engine-fantasya": "dev-dev",
-		"lemuria-pbem/model-fantasya": "dev-dev",
-		"lemuria-pbem/statistics-fantasya": "dev-dev"
+		"lemuria-pbem/lemuria": "~0.12.0",
+		"lemuria-pbem/engine-fantasya": "~0.12.0",
+		"lemuria-pbem/model-fantasya": "~0.12.0",
+		"lemuria-pbem/statistics-fantasya": "~0.12.0"
 	},
 	"require-dev": {
 		"jetbrains/phpstorm-attributes": "~1.0"
