@@ -101,7 +101,7 @@ ORDER "RESEARCH"
 "ERFORSCHEN";locale_de
 
 ORDER "GIVE"
-"GIB (u1|0) ( 1 | (JE 2) | ALLES  Ding | PERSONEN ) | ALLES | KRÄUTER | KOMMANDO | EINHEIT";syntax
+"GIB (u1|0) ( 1 | (JE 2) | ALLES  Ding | PERSONEN ) | ALLES | KRÄUTER | KOMMANDO | EINHEIT | LUXUSGÜTER | LUXUSWAREN | WAFFEN | RÜSTUNGEN | SCHILDE | KRÄUTER | TRÄNKE | TIERE | TRANSPORTER";syntax
 "GIB";locale_de
 "GEBEN";locale_de
 
@@ -161,7 +161,7 @@ ORDER "NEXT"
 1;internal
 
 ORDER "NUMBER"
-"NUMMER (EINHEIT) | (SCHIFF) | (GEBÄUDE) | (BURG) | (PARTEI) [x1]";syntax
+"NUMMER (EINHEIT) | (SCHIFF) | (GEBÄUDE) | (BURG) | (PARTEI) | (GEGENSTAND) [x1]";syntax
 "ID";locale_de
 "NUMMER";locale_de
 
@@ -234,7 +234,7 @@ ORDER "CAST"
 "ZAUBERN";locale_de
 
 ORDER "DESTROY"
-"ZERSTÖREN [1] [STRASSE richtung]";syntax
+"ZERSTÖREN ([1] [STRASSE richtung]) | (BURG b1) | (GEBÄUDE b1)";syntax
 "ZERSTÖRE";locale_de
 "ZERSTÖREN";locale_de
 
@@ -709,6 +709,9 @@ SKILL "Hiebwaffen"
 SKILL "Holzfällen"
 "Holzfällen";name
 "resource";category
+SKILL "Juwelierskunst"
+"Juwelierskunst";name
+"build";category
 SKILL "Katapultbedienung"
 "Katapultbedienung";name
 "war";category
@@ -1193,6 +1196,14 @@ ITEM "Gold"
 "Bergbau";makeskill
 "resources";category
 0;storeinbonw
+
+ITEM "Goldring"
+"Goldring";name
+0.1;weight
+"Juwelierskunst";makeskill
+3;makeskilllevel
+"resources";category
+1;storeinbonw
 
 ITEM "Pferd"
 "Pferd";name
@@ -2008,6 +2019,12 @@ RESOURCES
 1;Flachwurz
 1;Gurgelkraut
 1;Höhlenglimm
+
+ITEM "Ring der Unsichtbarkeit"
+"Ring der Unsichtbarkeit";name
+"misc";category
+0.1;weight
+0;storeinbonw
 
 ITEM "Schriftrolle"
 "Schriftrolle";name
