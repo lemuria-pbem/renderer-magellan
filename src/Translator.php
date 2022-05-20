@@ -132,6 +132,7 @@ final class Translator
 		'Gem'                   => 'Juwel',
 		'GoblinEar'             => 'Koboldohr',
 		'Gold'                  => 'Gold',
+		'GoldRing'              => 'Goldring',
 		'GoliathWater'          => 'Goliathwasser',
 		'Griffin'               => 'Greif',
 		'Griffinegg'            => 'Greifenei',
@@ -189,8 +190,9 @@ final class Translator
 	];
 
 	public final const COMPOSITION = [
-		'Scroll'    => "Schriftrolle",
-		"Spellbook" => "Zauberbuch"
+		'RingOfInvisibility' => 'Ring der Unsichtbarkeit',
+		'Scroll'             => 'Schriftrolle',
+		'Spellbook'          => 'Zauberbuch'
 	];
 
 	public final const SHIP = [
@@ -217,6 +219,7 @@ final class Translator
 		'Espionage'      => 'Spionage',
 		'Herballore'     => 'Kräuterkunde',
 		'Horsetaming'    => 'Pferdedressur',
+		'Jewelry'        => 'Juwelierskunst',
 		'Magic'          => 'Magie',
 		'Mining'         => 'Bergbau',
 		'Navigation'     => 'Segeln',
