@@ -75,6 +75,7 @@ use Lemuria\Model\Fantasya\World\PartyMap;
 use Lemuria\Model\World\Direction;
 use Lemuria\Id;
 use Lemuria\Lemuria;
+use Lemuria\Renderer\PathFactory;
 use Lemuria\Renderer\Writer;
 use Lemuria\Version;
 use Lemuria\Version\VersionFinder;
@@ -120,7 +121,7 @@ class MagellanWriter implements Writer
 
 	private Statistics $statistics;
 
-	public function __construct(protected string $path) {
+	public function __construct(protected PathFactory $pathFactory) {
 		$this->filter     = new NullFilter();
 		$this->statistics = new Statistics();
 		$this->initVariables();
@@ -140,15 +141,16 @@ class MagellanWriter implements Writer
 	/**
 	 * @throws JsonException
 	 */
-	public function render(Id $party): Writer {
-		$this->file = fopen($this->path, 'w');
+	public function render(Id $entity): Writer {
+		$party      = Party::get($entity);
+		$path       = $this->pathFactory->getPath($this, $party);
+		$this->file = fopen($path, 'w');
 		if (!$this->file) {
-			throw new \RuntimeException('Could not open file ' . $this->path . '.');
+			throw new \RuntimeException('Could not open file ' . $path . '.');
 		}
 
 		$this->writeHeader();
 
-		$party     = Party::get($party);
 		$this->map = new PartyMap(Lemuria::World(), $party);
 		$census    = new Census($party);
 		$outlook   = new Outlook($census);
@@ -162,7 +164,7 @@ class MagellanWriter implements Writer
 		$this->writeTranslations();
 
 		if (!fclose($this->file)) {
-			throw new \RuntimeException('Could not close file ' . $this->path . '.');
+			throw new \RuntimeException('Could not close file ' . $path . '.');
 		}
 		$this->file = null;
 		return $this;
