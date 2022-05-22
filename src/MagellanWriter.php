@@ -31,6 +31,7 @@ use Lemuria\Engine\Message\Section;
 use Lemuria\Entity;
 use Lemuria\Identifiable;
 use Lemuria\Model\Coordinates;
+use Lemuria\Model\Dictionary;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\BattleSpell;
 use Lemuria\Model\Fantasya\Building\Site;
@@ -121,9 +122,12 @@ class MagellanWriter implements Writer
 
 	private Statistics $statistics;
 
+	private Dictionary $dictionary;
+
 	public function __construct(protected PathFactory $pathFactory) {
 		$this->filter     = new NullFilter();
 		$this->statistics = new Statistics();
+		$this->dictionary = new Dictionary();
 		$this->initVariables();
 	}
 
@@ -230,7 +234,7 @@ class MagellanWriter implements Writer
 			'Optionen'            => 1 + 2 + 8 + 64 + 256 + 512,
 			'Punkte'              => 0,
 			'Punktedurchschnitt'  => 0,
-			'Typ'                 => Translator::RACE[getClass($party->Race())],
+			'Typ'                 => $this->dictionary->get('race.' . getClass($party->Race())),
 			'Rekrutierungskosten' => $party->Race()->Recruiting(),
 			'Anzahl Personen'     => $party->People()->count(),
 			'Parteiname'          => $party->Name(),
@@ -260,7 +264,7 @@ class MagellanWriter implements Writer
 			'PARTEI ' . $party->Id()->Id(),
 			'locale'     => self::HEADER['locale'],
 			'age'        => 1,
-			'Typ'        => Translator::RACE[getClass($party->Race())],
+			'Typ'        => $this->dictionary->get('race.' . getClass($party->Race())),
 			'Parteiname' => $party->Name(),
 			'email'      => $party->Banner(),
 			'banner'     => $party->Description(),
@@ -355,7 +359,7 @@ class MagellanWriter implements Writer
 			$class = getClass($potion);
 			$data  = [
 				'TRANK ' . $id++,
-				'Name'   => Translator::COMMODITY[$class],
+				'Name'   => $this->dictionary->get('resource.' . $class),
 				'Stufe'  => $potion->Level(),
 				'Beschr' => Translator::ALCHEMY[$class]
 			];
@@ -365,7 +369,7 @@ class MagellanWriter implements Writer
 				'ZUTATEN'
 			];
 			foreach ($potion->getMaterial() as $quantity /* @var Quantity $quantity */) {
-				$data[] = '"' . Translator::COMMODITY[getClass($quantity->Commodity())] . '"';
+				$data[] = '"' . $this->dictionary->get('resource.' . getClass($quantity->Commodity())) . '"';
 			}
 			$this->writeData($data);
 		}
@@ -412,7 +416,7 @@ class MagellanWriter implements Writer
 				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0',
 				'id'       => $region->Id()->Id(),
 				'Name'     => $region->Name(),
-				'Terrain'  => Translator::LANDSCAPE[getClass($region->Landscape())],
+				'Terrain'  => $this->dictionary->get('landscape.' . getClass($region->Landscape())),
 				'Insel'    => 1,
 				'Beschr'   => $this->compileRegionDescription($region),
 				'Bauern'   => $peasants,
@@ -430,7 +434,7 @@ class MagellanWriter implements Writer
 				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
 				'id'         => $region->Id()->Id(),
 				'Name'       => $region->Name(),
-				'Terrain'    => Translator::LANDSCAPE[getClass($region->Landscape())],
+				'Terrain'    => $this->dictionary->get('landscape.' . getClass($region->Landscape())),
 				'Insel'      => 1,
 				'visibility' => $magellanVisibility
 			];
@@ -438,7 +442,7 @@ class MagellanWriter implements Writer
 
 		$herbage = $outlook->Census()->Party()->HerbalBook()->getHerbage($region);
 		if ($herbage) {
-			$data['herb']       = Translator::COMMODITY[getClass($herbage->Herb())];
+			$data['herb']       = $this->dictionary->get('resource.' . getClass($herbage->Herb()));
 			$data['herbamount'] = Translator::occurrence($herbage->Occurrence());
 		}
 
@@ -480,7 +484,7 @@ class MagellanWriter implements Writer
 				if ($object !== $peasant || $object !== $silver) {
 					$data = [
 						'RESOURCE ' . $hash++,
-						'type'   => Translator::COMMODITY[getClass($object)],
+						'type'   => $this->dictionary->get('resource.' . getClass($object)),
 						'skill'  => 1,
 						'number' => $item->Count()
 					];
@@ -490,7 +494,7 @@ class MagellanWriter implements Writer
 			foreach ($region->Treasury() as $unicum /* @var Unicum $unicum */) {
 				$data = [
 					'RESOURCE ' . $hash++,
-					'type'   => Translator::COMPOSITION[getClass($unicum->Composition())],
+					'type'   => $this->dictionary->get('composition.' . getClass($unicum->Composition())),
 					'skill'  => 0,
 					'number' => 1
 				];
@@ -587,7 +591,7 @@ class MagellanWriter implements Writer
 	private function writeOffer(Offer $offer): void {
 		$data = [
 			'PREISE',
-			Translator::COMMODITY[getClass($offer->Commodity())] => -$offer->Price()
+			$this->dictionary->get('resource.' . getClass($offer->Commodity())) => -$offer->Price()
 		];
 		$this->writeData($data);
 	}
@@ -613,7 +617,7 @@ class MagellanWriter implements Writer
 			'Parteitarnung' => $disguise !== false ? 1 : 0,
 			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
 			'Anzahl'        => $unit->Size(),
-			'Typ'           => Translator::RACE[getClass($unit->Race())],
+			'Typ'           => $this->dictionary->get('race.' . getClass($unit->Race())),
 			'Burg'          => $unit->Construction()?->Id()->Id(),
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
@@ -665,7 +669,7 @@ class MagellanWriter implements Writer
 			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
 			'Verraeter'     => $disguise === $census->Party() ? 1 : 0,
 			'Anzahl'        => $unit->Size(),
-			'Typ'           => Translator::RACE[getClass($unit->Race())],
+			'Typ'           => $this->dictionary->get('race.' . getClass($unit->Race())),
 			'Burg'          => $unit->Construction()?->Id()->Id(),
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
@@ -701,7 +705,7 @@ class MagellanWriter implements Writer
 		$owner = $construction->Inhabitants()->Owner();
 		$data  = [
 			'BURG ' . $construction->Id()->Id(),
-			'Typ'      => Translator::BUILDING[getClass($construction->Building())],
+			'Typ'      => $this->dictionary->get('building.' . getClass($construction->Building())),
 			'Name'     => $construction->Name(),
 			'Beschr'   => $this->compileCostructionDescription($construction),
 			'Groesse'  => $construction->Size(),
@@ -731,7 +735,7 @@ class MagellanWriter implements Writer
 		}
 		$data = [
 			'SCHIFF ' . $vessel->Id()->Id(),
-			'Typ'      => Translator::SHIP[getClass($ship)],
+			'Typ'      => $this->dictionary->get('ship.' . getClass($ship)),
 			'Name'     => $vessel->Name(),
 			'Beschr'   => $this->compileVesselDescription($vessel),
 			'Groesse'  => $size,
@@ -771,7 +775,7 @@ class MagellanWriter implements Writer
 				$experience    = $ability->Experience();
 				$ability       = $calculus->knowledge($talent);
 				$change        = $statistics[getClass($talent)]?->change ?? 0;
-				$talent        = Translator::TALENT[getClass($talent)];
+				$talent        = $this->dictionary->get('talent.' . getClass($talent));
 				$data[$talent] = [$experience, $ability->Level(), $change];
 			}
 			$this->writeData($data);
@@ -819,12 +823,12 @@ class MagellanWriter implements Writer
 		if (count($resources) > 0) {
 			$data = ['GEGENSTAENDE'];
 			foreach ($resources as $quantity /* @var Quantity $quantity */) {
-				$commodity        = Translator::COMMODITY[getClass($quantity->Commodity())];
+				$commodity        = $this->dictionary->get('resource.' . getClass($quantity->Commodity()));
 				$data[$commodity] = $quantity->Count();
 			}
 			if ($treasury) {
 				foreach ($treasury as $unicum /* @var Unicum $unicum */) {
-					$composition        = Translator::COMPOSITION[getClass($unicum->Composition())];
+					$composition        = $this->dictionary->get('composition.' . getClass($unicum->Composition()));
 					$data[$composition] = 1;
 				}
 			}
@@ -842,7 +846,10 @@ class MagellanWriter implements Writer
 					$commodity instanceof Potion => 'potion',
 					default                      => getClass($commodity)
 				};
-				$commodity        = Translator::COMMODITY[$class];
+				$commodity = match ($class) {
+					'herb', 'potion' => Translator::COMMODITY[$class],
+					default          => $this->dictionary->get('resource.' . $class)
+				};
 				$data[$commodity] = isset(Translator::MONSTER_RESOURCE[$class]) ? 0 : $quantity->Count();
 			}
 			$this->writeData($data);
@@ -874,7 +881,7 @@ class MagellanWriter implements Writer
 		if ($effects) {
 			$data = ['EFFECTS'];
 			foreach ($effects as $effect => $count) {
-				$data[] = '"' . $count . ' ' . Translator::COMMODITY[$effect] . '"';
+				$data[] = '"' . $count . ' ' . $this->dictionary->get('resource.' . $effect) . '"';
 			}
 			$this->writeData($data);
 		}
@@ -1088,7 +1095,7 @@ class MagellanWriter implements Writer
 			$id           = $unicum->Id();
 			$name         = $this->escape($unicum->Name());
 			$description  = $this->escape($unicum->Description());
-			$composition  = Translator::COMPOSITION[getClass($unicum->Composition())];
+			$composition  = $this->dictionary->get('composition.' . getClass($unicum->Composition()));
 			if ($name) {
 				$unicumName = $name . ' [' . $id . '] (' . $composition . ')';
 			} else {
@@ -1117,7 +1124,7 @@ class MagellanWriter implements Writer
 				$compilation .= ',';
 			}
 			$id           = $unicum->Id();
-			$composition  = Translator::COMPOSITION[getClass($unicum->Composition())];
+			$composition  = $this->dictionary->get('composition.' . getClass($unicum->Composition()));
 			$unicumName   = $composition . ' [' . $id . ']';
 			$compilation .= ' ' . $unicumName;
 			$next         = true;
