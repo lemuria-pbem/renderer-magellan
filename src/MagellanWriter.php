@@ -410,7 +410,7 @@ class MagellanWriter implements Writer
 			default                                     => 'neighbour'
 		};
 
-		if (empty($visibility)) {
+		if (empty($magellanVisibility)) {
 			$availability = new Availability($region);
 			$data         = [
 				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0',
@@ -484,7 +484,7 @@ class MagellanWriter implements Writer
 				if ($object !== $peasant || $object !== $silver) {
 					$data = [
 						'RESOURCE ' . $hash++,
-						'type'   => $this->dictionary->get('resource.' . getClass($object)),
+						'type'   => $this->dictionary->get('resource.' . getClass($object), 1),
 						'skill'  => 1,
 						'number' => $item->Count()
 					];
