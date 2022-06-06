@@ -449,7 +449,7 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 		$this->writeRoads($region);
 
-		if (!in_array($magellanVisibility, ['neighbour', 'lighthouse'])) {
+		if ($magellanVisibility !== 'neighbour') {
 			$travelled = [];
 			$navigated = [];
 			if ($visibility !== Visibility::FARSIGHT) {
@@ -502,7 +502,9 @@ class MagellanWriter implements Writer
 			}
 
 			if ($visibility !== Visibility::FARSIGHT) {
-				$this->writeEffects($region);
+				if ($visibility !== Visibility::LIGHTHOUSE) {
+					$this->writeEffects($region);
+				}
 				$this->writeTravelled($travelled);
 				$this->writeNavigated($navigated);
 			}
@@ -523,7 +525,7 @@ class MagellanWriter implements Writer
 						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
 				}
-			} elseif ($magellanVisibility === 'travel') {
+			} elseif (in_array($magellanVisibility, ['travel', 'lighthouse'])) {
 				$census = $outlook->Census();
 				foreach ($region->Residents() as $unit /* @var Unit $unit */) {
 					if (!$unit->IsHiding() && !$unit->Construction() && !$unit->Vessel() && !$this->hasTravelled($unit)) {
@@ -534,7 +536,7 @@ class MagellanWriter implements Writer
 
 			foreach ($region->Estate() as $construction /* @var Construction $construction */) {
 				$this->writeConstruction($construction, $magellanVisibility);
-				if ($visibility !== Visibility::FARSIGHT) {
+				if (!in_array($visibility, [Visibility::LIGHTHOUSE, Visibility::FARSIGHT])) {
 					foreach (Lemuria::Report()->getAll($construction) as $message) {
 						$this->writeMessage($message);
 					}
@@ -542,7 +544,7 @@ class MagellanWriter implements Writer
 			}
 			foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
 				$this->writeVessel($vessel, $magellanVisibility);
-				if ($visibility !== Visibility::FARSIGHT) {
+				if (!in_array($visibility, [Visibility::LIGHTHOUSE, Visibility::FARSIGHT])) {
 					foreach (Lemuria::Report()->getAll($vessel) as $message) {
 						$this->writeMessage($message);
 					}
