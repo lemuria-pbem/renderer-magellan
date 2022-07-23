@@ -534,7 +534,8 @@ class MagellanWriter implements Writer
 				}
 			}
 
-			foreach ($region->Estate() as $construction /* @var Construction $construction */) {
+			$estate = clone $region->Estate();
+			foreach ($estate->sort() as $construction /* @var Construction $construction */) {
 				$this->writeConstruction($construction, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::LIGHTHOUSE, Visibility::FARSIGHT])) {
 					foreach (Lemuria::Report()->getAll($construction) as $message) {
@@ -542,7 +543,8 @@ class MagellanWriter implements Writer
 					}
 				}
 			}
-			foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
+			$fleet = clone $region->Fleet();
+			foreach ($fleet->sort() as $vessel /* @var Vessel $vessel */) {
 				$this->writeVessel($vessel, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::LIGHTHOUSE, Visibility::FARSIGHT])) {
 					foreach (Lemuria::Report()->getAll($vessel) as $message) {
