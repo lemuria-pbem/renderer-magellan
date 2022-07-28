@@ -111,6 +111,8 @@ class MagellanWriter implements Writer
 	 */
 	protected $file;
 
+	protected Dictionary $dictionary;
+
 	/**
 	 * @var array(string=>mixed)
 	 */
@@ -121,8 +123,6 @@ class MagellanWriter implements Writer
 	private Filter $filter;
 
 	private Statistics $statistics;
-
-	private Dictionary $dictionary;
 
 	public function __construct(protected PathFactory $pathFactory) {
 		$this->filter     = new NullFilter();
@@ -179,6 +179,75 @@ class MagellanWriter implements Writer
 		return $versionFinder->get();
 	}
 
+	/**
+	 * Write the Magellan VERSION header.
+	 */
+	protected function writeHeader(): void {
+		$this->writeData(self::HEADER);
+	}
+
+	protected function writeIsland(Continent $continent): void {
+		$data = [
+			'ISLAND ' . $continent->Id()->Id(),
+			'Name'   => $continent->Name(),
+			'Beschr' => $continent->Description()
+		];
+		$this->writeData($data);
+	}
+
+	protected function writeData(array $data): void {
+		$block = current($data);
+		foreach ($data as $key => $value) {
+			if (is_array($value)) {
+				if ($block === 'TALENTE') {
+					$line = implode(' ', $value) . ';' . $key;
+					fputs($this->file, $line . PHP_EOL);
+				} else {
+					$this->writeData($value);
+				}
+			} else {
+				if (is_int($key)) {
+					$line = $value;
+				} else {
+					if (is_string($value) && isset($this->variables[$value])) {
+						$value = $this->variables[$value];
+					}
+					if (is_int($value)) {
+						$line = $value . ';' . $key;
+					} else {
+						$line = '"' . $this->escape($value) . '";' . $key;
+					}
+				}
+				fputs($this->file, $line . PHP_EOL);
+			}
+		}
+	}
+
+	protected function writeMarket(?Luxuries $luxuries): void {
+		if ($luxuries) {
+			$data = [
+				'PREISE',
+				'Balsam'    => $this->getPrice(Balsam::class, $luxuries),
+				'Gewürz'    => $this->getPrice(Spice::class, $luxuries),
+				'Juwel'     => $this->getPrice(Gem::class, $luxuries),
+				'Myrrhe'    => $this->getPrice(Myrrh::class, $luxuries),
+				'Öl'        => $this->getPrice(Oil::class, $luxuries),
+				'Pelz'      => $this->getPrice(Fur::class, $luxuries),
+				'Seide'     => $this->getPrice(Silk::class, $luxuries),
+				'Weihrauch' => $this->getPrice(Olibanum::class, $luxuries)
+			];
+			$this->writeData($data);
+		}
+	}
+
+	protected function writeOffer(Offer $offer): void {
+		$data = [
+			'PREISE',
+			$this->dictionary->get('resource.' . getClass($offer->Commodity())) => -$offer->Price()
+		];
+		$this->writeData($data);
+	}
+
 	private function initVariables(): void {
 		$this->variables['$DATE']    = time();
 		$this->variables['$TURN']    = Lemuria::Calendar()->Round();
@@ -194,13 +263,6 @@ class MagellanWriter implements Writer
 			throw new \RuntimeException('Could not close file.');
 		}
 		$this->file = null;
-	}
-
-	/**
-	 * Write the Magellan VERSION header.
-	 */
-	private function writeHeader(): void {
-		$this->writeData(self::HEADER);
 	}
 
 	private function writeParties(Outlook $outlook): void {
@@ -375,19 +437,10 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	private function writeIsland(Continent $continent): void {
-		$data = [
-			'ISLAND ' . $continent->Id()->Id(),
-			'Name'   => $continent->Name(),
-			'Beschr' => $continent->Description()
-		];
-		$this->writeData($data);
-	}
-
 	/**
 	 * @throws JsonException
 	 */
-	protected function writeRegions(Outlook $outlook): void {
+	private function writeRegions(Outlook $outlook): void {
 		$atlas = new TravelAtlas($outlook->Census()->Party());
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
 			$this->writeRegion($region, $atlas->getVisibility($region), $outlook);
@@ -534,7 +587,8 @@ class MagellanWriter implements Writer
 				}
 			}
 
-			foreach ($region->Estate() as $construction /* @var Construction $construction */) {
+			$estate = clone $region->Estate();
+			foreach ($estate->sort() as $construction /* @var Construction $construction */) {
 				$this->writeConstruction($construction, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::LIGHTHOUSE, Visibility::FARSIGHT])) {
 					foreach (Lemuria::Report()->getAll($construction) as $message) {
@@ -542,7 +596,8 @@ class MagellanWriter implements Writer
 					}
 				}
 			}
-			foreach ($region->Fleet() as $vessel /* @var Vessel $vessel */) {
+			$fleet = clone $region->Fleet();
+			foreach ($fleet->sort() as $vessel /* @var Vessel $vessel */) {
 				$this->writeVessel($vessel, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::LIGHTHOUSE, Visibility::FARSIGHT])) {
 					foreach (Lemuria::Report()->getAll($vessel) as $message) {
@@ -571,31 +626,6 @@ class MagellanWriter implements Writer
 			];
 			$this->writeData($data);
 		}
-	}
-
-	private function writeMarket(?Luxuries $luxuries): void {
-		if ($luxuries) {
-			$data = [
-				'PREISE',
-				'Balsam'    => $this->getPrice(Balsam::class, $luxuries),
-				'Gewürz'    => $this->getPrice(Spice::class, $luxuries),
-				'Juwel'     => $this->getPrice(Gem::class, $luxuries),
-				'Myrrhe'    => $this->getPrice(Myrrh::class, $luxuries),
-				'Öl'        => $this->getPrice(Oil::class, $luxuries),
-				'Pelz'      => $this->getPrice(Fur::class, $luxuries),
-				'Seide'     => $this->getPrice(Silk::class, $luxuries),
-				'Weihrauch' => $this->getPrice(Olibanum::class, $luxuries)
-			];
-			$this->writeData($data);
-		}
-	}
-
-	private function writeOffer(Offer $offer): void {
-		$data = [
-			'PREISE',
-			$this->dictionary->get('resource.' . getClass($offer->Commodity())) => -$offer->Price()
-		];
-		$this->writeData($data);
 	}
 
 	/**
@@ -990,34 +1020,6 @@ class MagellanWriter implements Writer
 			$data[$key] = $translation;
 		}
 		$this->writeData($data);
-	}
-
-	private function writeData(array $data): void {
-		$block = current($data);
-		foreach ($data as $key => $value) {
-			if (is_array($value)) {
-				if ($block === 'TALENTE') {
-					$line = implode(' ', $value) . ';' . $key;
-					fputs($this->file, $line . PHP_EOL);
-				} else {
-					$this->writeData($value);
-				}
-			} else {
-				if (is_int($key)) {
-					$line = $value;
-				} else {
-					if (is_string($value) && isset($this->variables[$value])) {
-						$value = $this->variables[$value];
-					}
-					if (is_int($value)) {
-						$line = $value . ';' . $key;
-					} else {
-						$line = '"' . $this->escape($value) . '";' . $key;
-					}
-				}
-				fputs($this->file, $line . PHP_EOL);
-			}
-		}
 	}
 
 	private function escape(string $string): string {

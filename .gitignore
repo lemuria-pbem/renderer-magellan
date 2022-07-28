@@ -2,5 +2,6 @@
 
 /.idea/deployment.xml
 /.idea/encodings.xml
+/.idea/symfony2.xml
 /.idea/workspace.xml
 /composer.lock

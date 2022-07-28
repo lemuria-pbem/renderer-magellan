@@ -35,8 +35,8 @@ final class Translator
 	];
 
 	public final const COMMODITY = [
-		'herb'                  => 'Kräuter',
-		'potion'                => 'Trank'
+		'herb'   => 'Kräuter',
+		'potion' => 'Trank'
 	];
 
 	public final const SECTION = [
