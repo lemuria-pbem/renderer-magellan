@@ -10,24 +10,24 @@
 			"email": "lemuria@online.de"
 		}
 	],
-	"version": "0.12.5",
+	"version": "1.0.0",
 	"time": "2022-07-26",
 
 	"require": {
 		"php": "~8.1",
-		"lemuria-pbem/lemuria": "~0.12.0",
-		"lemuria-pbem/engine-fantasya": "~0.12.0",
-		"lemuria-pbem/model-fantasya": "~0.12.0",
-		"lemuria-pbem/statistics-fantasya": "~0.12.0"
+		"lemuria-pbem/engine-fantasya": "~1.0.0|dev-master",
+		"lemuria-pbem/lemuria": "~1.0.0|dev-master",
+		"lemuria-pbem/model-fantasya": "~1.0.0|dev-master",
+		"lemuria-pbem/statistics-fantasya": "~1.0.0|dev-master"
 	},
 	"repositories": [
 		{
 			"type": "vcs",
-			"url": "git@github.com:lemuria-pbem/lemuria.git"
+			"url": "git@github.com:lemuria-pbem/engine-fantasya.git"
 		},
 		{
 			"type": "vcs",
-			"url": "git@github.com:lemuria-pbem/engine-fantasya.git"
+			"url": "git@github.com:lemuria-pbem/lemuria.git"
 		},
 		{
 			"type": "vcs",
