@@ -32,6 +32,7 @@ use Lemuria\Entity;
 use Lemuria\Identifiable;
 use Lemuria\Model\Coordinates;
 use Lemuria\Model\Dictionary;
+use Lemuria\Model\Domain;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\BattleSpell;
 use Lemuria\Model\Fantasya\Building\Site;
@@ -51,7 +52,6 @@ use Lemuria\Model\Fantasya\Commodity\Silver;
 use Lemuria\Model\Fantasya\Commodity\Stone;
 use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
-use Lemuria\Model\Fantasya\Continent;
 use Lemuria\Model\Fantasya\Exception\JsonException;
 use Lemuria\Model\Fantasya\Herb;
 use Lemuria\Model\Fantasya\Intelligence;
@@ -158,11 +158,10 @@ class MagellanWriter implements Writer
 		$this->map = new PartyMap(Lemuria::World(), $party);
 		$census    = new Census($party);
 		$outlook   = new Outlook($census);
-		$continent = Continent::get(new Id(1));
 		$this->writeParties($outlook);
 		$this->writeMagic($party);
 		$this->writeAlchemy($party);
-		$this->writeIsland($continent);
+		$this->writeIslands();
 		$this->writeRegions($outlook);
 		$this->writeMessagetype();
 		$this->writeTranslations();
@@ -186,13 +185,15 @@ class MagellanWriter implements Writer
 		$this->writeData(self::HEADER);
 	}
 
-	protected function writeIsland(Continent $continent): void {
-		$data = [
-			'ISLAND ' . $continent->Id()->Id(),
-			'Name'   => $continent->Name(),
-			'Beschr' => $continent->Description()
-		];
-		$this->writeData($data);
+	protected function writeIslands(): void {
+		foreach (Lemuria::Catalog()->getAll(Domain::CONTINENT) as $continent) {
+			$data = [
+				'ISLAND ' . $continent->Id()->Id(),
+				'Name'   => $continent->Name(),
+				'Beschr' => $continent->Description()
+			];
+			$this->writeData($data);
+		}
 	}
 
 	protected function writeData(array $data): void {
@@ -470,7 +471,7 @@ class MagellanWriter implements Writer
 				'id'       => $region->Id()->Id(),
 				'Name'     => $region->Name(),
 				'Terrain'  => $this->dictionary->get('landscape.' . getClass($region->Landscape())),
-				'Insel'    => 1,
+				'Insel'    => $region->Continent()->Id()->Id(),
 				'Beschr'   => $this->compileRegionDescription($region),
 				'Bauern'   => $peasants,
 				'Baeume'   => $resources[Wood::class]->Count(),
@@ -488,7 +489,7 @@ class MagellanWriter implements Writer
 				'id'         => $region->Id()->Id(),
 				'Name'       => $region->Name(),
 				'Terrain'    => $this->dictionary->get('landscape.' . getClass($region->Landscape())),
-				'Insel'      => 1,
+				'Insel'      => $region->Continent()->Id()->Id(),
 				'visibility' => $magellanVisibility
 			];
 		}
