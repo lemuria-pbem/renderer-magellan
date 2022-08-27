@@ -11,11 +11,14 @@ use Lemuria\Statistics\Record;
 
 class Statistics
 {
-	public function getTalents(Unit $unit): Singletons {
+	public function getTalents(Unit $unit): Singletons|array {
 		$record = new Record(Subject::Talents->name, $unit);
 		$data   = Lemuria::Statistics()->request($record)->Data();
 		if ($data instanceof Singletons) {
 			return $data;
+		}
+		if ($data === null) {
+			return [];
 		}
 		throw new LemuriaException();
 	}
