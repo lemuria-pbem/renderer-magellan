@@ -125,4 +125,13 @@ class WorldInspector extends MagellanWriter
 			}
 		}
 	}
+
+	private function writeIsland(Continent $continent): void {
+		$data = [
+			'ISLAND ' . $continent->Id()->Id(),
+			'Name'   => $continent->Name(),
+			'Beschr' => $continent->Description()
+		];
+		$this->writeData($data);
+	}
 }
