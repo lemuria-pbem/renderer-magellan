@@ -1849,7 +1849,7 @@ RESOURCES
 
 ITEM "Eisenschild"
 "Eisenschild";name
-1;weight
+2;weight
 "Rüstungsbau";makeskill
 3;makeskilllevel
 "shield";category
@@ -1859,7 +1859,7 @@ RESOURCES
 
 ITEM "Eisenschilde"
 "Eisenschilde";name
-1;weight
+2;weight
 "Rüstungsbau";makeskill
 3;makeskilllevel
 "shield";category
@@ -1869,7 +1869,7 @@ RESOURCES
 
 ITEM "Verbeulter Eisenschild"
 "Verbeulter Eisenschild";name
-1;weight
+2;weight
 "Rüstungsbau";makeskill
 3;makeskilllevel
 "shield";category
@@ -1879,7 +1879,7 @@ RESOURCES
 
 ITEM "Verbeulte Eisenschilde"
 "Verbeulte Eisenschilde";name
-1;weight
+2;weight
 "Rüstungsbau";makeskill
 3;makeskilllevel
 "shield";category
