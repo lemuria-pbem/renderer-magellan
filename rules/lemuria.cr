@@ -1023,6 +1023,11 @@ RACE "Skelette"
 0;maintenance
 5;weight
 
+RACE "Wölfe"
+"Wölfe";name
+0;maintenance
+10;weight
+
 RACE "Zombies"
 "Zombies";name
 0;maintenance
@@ -2080,6 +2085,18 @@ ITEM "Reißzähne"
 0.01;weight
 1;storeinbonw
 
+ITEM "Wolfsfell"
+"Wolfsfell";name
+"trophies";category
+0.5;weight
+1;storeinbonw
+
+ITEM "Wolfsfelle"
+"Wolfsfelle";name
+"trophies";category
+0.5;weight
+1;storeinbonw
+
 SHIPTYPE "Boot"
 "Boot";name
 5;size
@@ -2467,6 +2484,25 @@ MAINTENANCE
 RAWMATERIALS
 5;Holz
 3;Stein
+2;Eisen
+100;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Markt"
+"Markt";name
+2;level
+MAINTENANCE
+100;Silber
+RAWMATERIALS
+2;Holz
+8;Stein
 2;Eisen
 100;Silber
 REGIONTYPES
