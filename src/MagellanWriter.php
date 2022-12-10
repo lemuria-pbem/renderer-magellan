@@ -78,7 +78,7 @@ use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\PathFactory;
 use Lemuria\Renderer\Writer;
-use Lemuria\Version;
+use Lemuria\Version\Module;
 use Lemuria\Version\VersionFinder;
 use Lemuria\Version\VersionTag;
 
@@ -103,7 +103,7 @@ class MagellanWriter implements Writer
 	];
 
 	private const ROADS = [
-		Direction::NORTHWEST, Direction::NORTHEAST, Direction::EAST, Direction::SOUTHEAST, Direction::SOUTHWEST, Direction::WEST
+		Direction::Northwest, Direction::Northeast, Direction::East, Direction::Southeast, Direction::Southwest, Direction::West
 	];
 
 	/**
@@ -186,7 +186,7 @@ class MagellanWriter implements Writer
 	}
 
 	protected function writeIslands(): void {
-		foreach (Lemuria::Catalog()->getAll(Domain::CONTINENT) as $continent) {
+		foreach (Lemuria::Catalog()->getAll(Domain::Continent) as $continent) {
 			$data = [
 				'ISLAND ' . $continent->Id()->Id(),
 				'Name'   => $continent->Name(),
@@ -253,7 +253,7 @@ class MagellanWriter implements Writer
 		$this->variables['$DATE']    = time();
 		$this->variables['$TURN']    = Lemuria::Calendar()->Round();
 		$version                     = Lemuria::Version();
-		$this->variables['$VERSION'] = $version[Version::GAME][0]->version ?? '1.0.0';
+		$this->variables['$VERSION'] = $version[Module::Game->value][0]->version ?? '1.0.0';
 	}
 
 	/**
@@ -458,9 +458,9 @@ class MagellanWriter implements Writer
 		$intelligence = new Intelligence($region);
 
 		$magellanVisibility = match ($visibility) {
-			Visibility::WITH_UNIT, Visibility::FARSIGHT => '',
-			Visibility::TRAVELLED                       => 'travel',
-			Visibility::LIGHTHOUSE                      => 'lighthouse',
+			Visibility::WithUnit, Visibility::Farsight => '',
+			Visibility::Travelled                       => 'travel',
+			Visibility::Lighthouse                      => 'lighthouse',
 			default                                     => 'neighbour'
 		};
 
@@ -506,7 +506,7 @@ class MagellanWriter implements Writer
 		if ($magellanVisibility !== 'neighbour') {
 			$travelled = [];
 			$navigated = [];
-			if ($visibility !== Visibility::FARSIGHT) {
+			if ($visibility !== Visibility::Farsight) {
 				foreach (Lemuria::Report()->getAll($region) as $message) {
 					if ($this->containsMessage($message, TravelUnitMessage::class)) {
 						$travelled[] = $message;
@@ -555,8 +555,8 @@ class MagellanWriter implements Writer
 				$this->writeData($data);
 			}
 
-			if ($visibility !== Visibility::FARSIGHT) {
-				if ($visibility !== Visibility::LIGHTHOUSE) {
+			if ($visibility !== Visibility::Farsight) {
+				if ($visibility !== Visibility::Lighthouse) {
 					$this->writeEffects($region);
 				}
 				$this->writeTravelled($travelled);
@@ -591,7 +591,7 @@ class MagellanWriter implements Writer
 			$estate = clone $region->Estate();
 			foreach ($estate->sort() as $construction /* @var Construction $construction */) {
 				$this->writeConstruction($construction, $magellanVisibility);
-				if (!in_array($visibility, [Visibility::LIGHTHOUSE, Visibility::FARSIGHT])) {
+				if (!in_array($visibility, [Visibility::Lighthouse, Visibility::Farsight])) {
 					foreach (Lemuria::Report()->getAll($construction) as $message) {
 						$this->writeMessage($message);
 					}
@@ -600,7 +600,7 @@ class MagellanWriter implements Writer
 			$fleet = clone $region->Fleet();
 			foreach ($fleet->sort() as $vessel /* @var Vessel $vessel */) {
 				$this->writeVessel($vessel, $magellanVisibility);
-				if (!in_array($visibility, [Visibility::LIGHTHOUSE, Visibility::FARSIGHT])) {
+				if (!in_array($visibility, [Visibility::Lighthouse, Visibility::Farsight])) {
 					foreach (Lemuria::Report()->getAll($vessel) as $message) {
 						$this->writeMessage($message);
 					}
@@ -691,7 +691,7 @@ class MagellanWriter implements Writer
 
 	private function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
 		$party     = $census->getParty($unit)?->Id()->Id() ?? 0;
-		$isMonster = $unit->Party()->Type() === Type::MONSTER;
+		$isMonster = $unit->Party()->Type() === Type::Monster;
 		$disguise  = $unit->Disguise();
 		$data      = [
 			'EINHEIT ' . $unit->Id()->Id(),
@@ -970,7 +970,7 @@ class MagellanWriter implements Writer
 	private function writeBattleMessage(BattleMessage $message, Coordinates $coordinates): void {
 		$data = [
 			'MESSAGE ' . $message->Id()->Id(),
-			'type'     => Section::BATTLE->value,
+			'type'     => Section::Battle->value,
 			'rendered' => (string)$message,
 			'region'   => $coordinates->X() . ' ' . $coordinates->Y() . ' 0'
 		];

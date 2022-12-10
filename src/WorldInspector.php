@@ -63,7 +63,7 @@ class WorldInspector extends MagellanWriter
 	}
 
 	private function writeRegions(): void {
-		foreach (Lemuria::Catalog()->getAll(Domain::LOCATION) as $region /* @var Region $region */) {
+		foreach (Lemuria::Catalog()->getAll(Domain::Location) as $region /* @var Region $region */) {
 			$this->writeRegion($region);
 		}
 	}
