@@ -253,7 +253,7 @@ class MagellanWriter implements Writer
 		$this->variables['$DATE']    = time();
 		$this->variables['$TURN']    = Lemuria::Calendar()->Round();
 		$version                     = Lemuria::Version();
-		$this->variables['$VERSION'] = $version[Module::Game->value][0]->version ?? '1.0.0';
+		$this->variables['$VERSION'] = $version[Module::Game][0]->version ?? '1.0.0';
 	}
 
 	/**
