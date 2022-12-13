@@ -53,6 +53,7 @@ use Lemuria\Model\Fantasya\Commodity\Stone;
 use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
 use Lemuria\Model\Fantasya\Exception\JsonException;
+use Lemuria\Model\Fantasya\Exception\WorldMapException;
 use Lemuria\Model\Fantasya\Herb;
 use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
@@ -74,6 +75,7 @@ use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Model\Fantasya\Vessel;
 use Lemuria\Model\Fantasya\World\PartyMap;
 use Lemuria\Model\World\Direction;
+use Lemuria\Model\World\Geometry;
 use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\PathFactory;
@@ -443,9 +445,27 @@ class MagellanWriter implements Writer
 	 */
 	private function writeRegions(Outlook $outlook): void {
 		$atlas = new TravelAtlas($outlook->Census()->Party());
-		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
-			$this->writeRegion($region, $atlas->getVisibility($region), $outlook);
+		try {
+			$withBeyond = $this->map->Geometry() === Geometry::Spherical;
+		} catch (WorldMapException) {
+			$withBeyond = false;
 		}
+		$visibilities = [Visibility::Travelled, Visibility::WithUnit];
+
+		$beyond = [];
+		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
+			$visibility = $atlas->getVisibility($region);
+			$this->writeRegion($region, $visibility, $outlook);
+			if ($withBeyond && $this->map->isEdge($region) && in_array($visibility, $visibilities)) {
+				$regions = $this->map->getBeyond($region);
+				$n       = count($regions);
+				for ($i = 0; $i < $n; $i++) {
+					$region = $regions->getLocation($i);
+					$beyond[$region->Id()->Id()] = [$regions->getCoordinates($i), $region];
+				}
+			}
+		}
+		$this->writeBeyond($beyond);
 	}
 
 	/**
@@ -606,6 +626,22 @@ class MagellanWriter implements Writer
 					}
 				}
 			}
+		}
+	}
+
+	private function writeBeyond(array $regions): void {
+		foreach ($regions as $beyond) {
+			$coordinates = $beyond[0];
+			$region      = $beyond[1];
+			$data        = [
+				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y(),
+				'id'         => Lemuria::Catalog()->nextId(Domain::Location)->Id(),
+				'Name'       => $region->Name(),
+				'Terrain'    => $this->dictionary->get('landscape.' . getClass($region->Landscape())),
+				'Insel'      => $region->Continent()->Id()->Id(),
+				'visibility' => 'neighbour'
+			];
+			$this->writeData($data);
 		}
 	}
 
