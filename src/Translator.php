@@ -24,7 +24,8 @@ final class Translator
 		'Silk'           => true,
 		'Silver'         => true,
 		'Skull'          => true,
-		'Spice'          => true
+		'Spice'          => true,
+		'WolfSkin'       => true
 	];
 
 	public final const HEALTH = [
