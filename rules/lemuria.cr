@@ -2766,6 +2766,12 @@ REGIONTYPE "Ozean"
 "true";isOcean
 "false";isAstralVisible
 
+REGIONTYPE "See"
+"See";name
+0;maxworkers
+"true";isOcean
+"false";isAstralVisible
+
 FACTION "22"
 22;id
 "true";isMonster
