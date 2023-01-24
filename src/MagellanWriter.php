@@ -996,7 +996,7 @@ class MagellanWriter implements Writer
 		if (!$this->filter->retains($message)) {
 			$data = [
 				'MESSAGE ' . $message->Id()->Id(),
-				'type'     => $message->Section()->value,
+				'type'     => $this->section($message->Section()),
 				'rendered' => (string)$message
 			];
 			$this->writeData($data);
@@ -1018,7 +1018,7 @@ class MagellanWriter implements Writer
 			$coordinates = $this->map->getCoordinates($region);
 			$data        = [
 				'MESSAGE ' . $message->Id()->Id(),
-				'type'     => $message->Section()->value,
+				'type'     => $this->section($message->Section()),
 				'rendered' => (string)$message,
 				'region'   => $coordinates->X() . ' ' . $coordinates->Y() . ' 0'
 			];
@@ -1031,7 +1031,7 @@ class MagellanWriter implements Writer
 			$coordinates = $this->map->getCoordinates($unit->Region());
 			$data        = [
 				'MESSAGE ' . $message->Id()->Id(),
-				'type'     => $message->Section()->value,
+				'type'     => $this->section($message->Section()),
 				'rendered' => (string)$message,
 				'unit'     => $unit->Id()->Id(),
 				'region'   => $coordinates->X() . ' ' . $coordinates->Y() . ' 0'
@@ -1042,12 +1042,13 @@ class MagellanWriter implements Writer
 
 	private function writeMessagetype(): void {
 		foreach (Section::cases() as $section) {
-			$data = [
-				'MESSAGETYPE ' . $section->value,
+			$code        = $this->section($section);
+			$data[$code] = [
+				'MESSAGETYPE ' . $code,
 				'text'    => '"$rendered"',
-				'section' => Translator::SECTION[$section->value]
+				'section' => Translator::SECTION[$code]
 			];
-			$this->writeData($data);
+			$this->writeData(array_values($data));
 		}
 	}
 
@@ -1171,5 +1172,9 @@ class MagellanWriter implements Writer
 			$next         = true;
 		}
 		return $compilation;
+	}
+
+	private function section(Section $section): int {
+		return $section === Section::Guard ? Section::Movement->value : $section->value;
 	}
 }
