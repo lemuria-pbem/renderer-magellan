@@ -33,7 +33,6 @@ use Lemuria\Identifiable;
 use Lemuria\Model\Coordinates;
 use Lemuria\Model\Dictionary;
 use Lemuria\Model\Domain;
-use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\BattleSpell;
 use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Horse;
@@ -52,6 +51,7 @@ use Lemuria\Model\Fantasya\Commodity\Silver;
 use Lemuria\Model\Fantasya\Commodity\Stone;
 use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
+use Lemuria\Model\Fantasya\Continent;
 use Lemuria\Model\Fantasya\Exception\JsonException;
 use Lemuria\Model\Fantasya\Exception\WorldMapException;
 use Lemuria\Model\Fantasya\Herb;
@@ -62,15 +62,12 @@ use Lemuria\Model\Fantasya\Offer;
 use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\Party\Type;
 use Lemuria\Model\Fantasya\Potion;
-use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
 use Lemuria\Model\Fantasya\Resources;
-use Lemuria\Model\Fantasya\Spell;
 use Lemuria\Model\Fantasya\Talent\Alchemy;
 use Lemuria\Model\Fantasya\Talent\Magic;
 use Lemuria\Model\Fantasya\Treasury;
-use Lemuria\Model\Fantasya\Unicum;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Model\Fantasya\Vessel;
 use Lemuria\Model\Fantasya\World\PartyMap;
@@ -116,7 +113,7 @@ class MagellanWriter implements Writer
 	protected Dictionary $dictionary;
 
 	/**
-	 * @var array(string=>mixed)
+	 * @var array<string, mixed>
 	 */
 	private array $variables = [];
 
@@ -188,7 +185,7 @@ class MagellanWriter implements Writer
 	}
 
 	protected function writeIslands(): void {
-		foreach (Lemuria::Catalog()->getAll(Domain::Continent) as $continent) {
+		foreach (Continent::all() as $continent) {
 			$data = [
 				'ISLAND ' . $continent->Id()->Id(),
 				'Name'   => $continent->Name(),
@@ -276,8 +273,8 @@ class MagellanWriter implements Writer
 		$acquaintances = $party->Diplomacy()->Acquaintances();
 
 		$parties = [];
-		foreach ($census->getAtlas() as $region /* @var Region $region */) {
-			foreach ($outlook->getApparitions($region) as $unit /* @var Unit $unit */) {
+		foreach ($census->getAtlas() as $region) {
+			foreach ($outlook->getApparitions($region) as $unit) {
 				$foreign = $census->getParty($unit);
 				if ($foreign && $foreign !== $party) {
 					$id           = $foreign->Id()->Id();
@@ -314,7 +311,7 @@ class MagellanWriter implements Writer
 		foreach (Lemuria::Report()->getAll($party) as $message) {
 			$this->writeMessage($message);
 		}
-		foreach ($party->People() as $unit /* @var Unit $unit */) {
+		foreach ($party->People() as $unit) {
 			foreach (Lemuria::Report()->getAll($unit) as $message) {
 				$this->writeUnitMessage($message, $unit);
 			}
@@ -378,7 +375,7 @@ class MagellanWriter implements Writer
 	 */
 	private function writeMagic(Party $party): void {
 		$id = 1;
-		foreach ($party->SpellBook() as $spell /* @var Spell $spell */) {
+		foreach ($party->SpellBook() as $spell) {
 			$details = new SpellDetails($spell);
 			$data = [
 				'ZAUBER ' . $id++,
@@ -408,14 +405,14 @@ class MagellanWriter implements Writer
 	private function writeAlchemy(Party $party): void {
 		$alchemy = Lemuria::Builder()->create(Alchemy::class);
 		$level   = 0;
-		foreach ($party->People() as $unit /* @var Unit $unit */) {
+		foreach ($party->People() as $unit) {
 			$calculus  = new Calculus($unit);
 			$level = max($level, $calculus->knowledge($alchemy)->Level());
 		}
 		$level = (int)floor($level / 2);
 
 		$id = 1;
-		foreach (AbstractPotion::all() as $potion /* @var Potion $potion */) {
+		foreach (AbstractPotion::all() as $potion /** @var Potion $potion */) {
 			$difficulty = $potion->Level();
 			if ($difficulty > $level) {
 				continue;
@@ -433,7 +430,7 @@ class MagellanWriter implements Writer
 			$data = [
 				'ZUTATEN'
 			];
-			foreach ($potion->getMaterial() as $quantity /* @var Quantity $quantity */) {
+			foreach ($potion->getMaterial() as $quantity) {
 				$data[] = '"' . $this->dictionary->get('resource.' . getClass($quantity->Commodity())) . '"';
 			}
 			$this->writeData($data);
@@ -453,7 +450,7 @@ class MagellanWriter implements Writer
 		$visibilities = [Visibility::Travelled, Visibility::WithUnit];
 
 		$beyond = [];
-		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region /* @var Region $region */) {
+		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region) {
 			$visibility = $atlas->getVisibility($region);
 			$this->writeRegion($region, $visibility, $outlook);
 			if ($withBeyond && $this->map->isEdge($region) && in_array($visibility, $visibilities)) {
@@ -565,7 +562,7 @@ class MagellanWriter implements Writer
 					$this->writeData($data);
 				}
 			}
-			foreach ($region->Treasury() as $unicum /* @var Unicum $unicum */) {
+			foreach ($region->Treasury() as $unicum) {
 				$data = [
 					'RESOURCE ' . $hash++,
 					'type'   => $this->dictionary->get('composition.' . getClass($unicum->Composition())),
@@ -587,21 +584,21 @@ class MagellanWriter implements Writer
 				$census     = $outlook->Census();
 				$party      = $census->Party();
 				$isGuarding = $this->isGuarding($party, $intelligence);
-				foreach ($region->Residents() as $unit /* @var Unit $unit */) {
+				foreach ($region->Residents() as $unit) {
 					if ($unit->Party() === $party) {
 						$this->writeUnit($unit);
 					} elseif ($unit->Construction() || $unit->Vessel()) {
 						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
 				}
-				foreach ($outlook->getApparitions($region) as $unit /* @var Unit $unit */) {
+				foreach ($outlook->getApparitions($region) as $unit) {
 					if ($unit->Party() !== $party) {
 						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
 				}
 			} elseif (in_array($magellanVisibility, ['travel', 'lighthouse'])) {
 				$census = $outlook->Census();
-				foreach ($region->Residents() as $unit /* @var Unit $unit */) {
+				foreach ($region->Residents() as $unit) {
 					if (!$unit->IsHiding() && !$unit->Construction() && !$unit->Vessel() && !$this->hasTravelled($unit)) {
 						$this->writeForeignUnit($unit, $census, false);
 					}
@@ -609,7 +606,7 @@ class MagellanWriter implements Writer
 			}
 
 			$estate = clone $region->Estate();
-			foreach ($estate->sort() as $construction /* @var Construction $construction */) {
+			foreach ($estate->sort() as $construction) {
 				$this->writeConstruction($construction, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::Lighthouse, Visibility::Farsight])) {
 					foreach (Lemuria::Report()->getAll($construction) as $message) {
@@ -618,7 +615,7 @@ class MagellanWriter implements Writer
 				}
 			}
 			$fleet = clone $region->Fleet();
-			foreach ($fleet->sort() as $vessel /* @var Vessel $vessel */) {
+			foreach ($fleet->sort() as $vessel) {
 				$this->writeVessel($vessel, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::Lighthouse, Visibility::Farsight])) {
 					foreach (Lemuria::Report()->getAll($vessel) as $message) {
@@ -799,7 +796,7 @@ class MagellanWriter implements Writer
 		$passengers = $vessel->Passengers();
 		$captain    = $passengers->Owner();
 		$cargo      = 0;
-		foreach ($passengers as $unit /* @var Unit $unit */) {
+		foreach ($passengers as $unit) {
 			$cargo += $unit->Weight();
 		}
 		$data = [
@@ -839,7 +836,7 @@ class MagellanWriter implements Writer
 			$calculus   = new Calculus($unit);
 			$statistics = $this->statistics->getTalents($unit);
 			$data       = ['TALENTE'];
-			foreach ($knowledge as $ability/* @var Ability $ability */) {
+			foreach ($knowledge as $ability) {
 				$talent        = $ability->Talent();
 				$experience    = $ability->Experience();
 				$ability       = $calculus->knowledge($talent);
@@ -861,7 +858,7 @@ class MagellanWriter implements Writer
 		$spellBook = $unit->Party()->SpellBook();
 		if (count($spellBook) > 0) {
 			$data = ['SPRUECHE'];
-			foreach ($spellBook as $spell /* @var Spell $spell */) {
+			foreach ($spellBook as $spell) {
 				$details = new SpellDetails($spell);
 				$data[]  = '"' . $details->Name() . '"';
 			}
@@ -891,12 +888,12 @@ class MagellanWriter implements Writer
 	private function writeResources(Resources $resources, ?Treasury $treasury = null): void {
 		if (count($resources) > 0) {
 			$data = ['GEGENSTAENDE'];
-			foreach ($resources as $quantity /* @var Quantity $quantity */) {
+			foreach ($resources as $quantity) {
 				$commodity        = $this->dictionary->get('resource.' . getClass($quantity->Commodity()));
 				$data[$commodity] = $quantity->Count();
 			}
 			if ($treasury) {
-				foreach ($treasury as $unicum /* @var Unicum $unicum */) {
+				foreach ($treasury as $unicum) {
 					$composition        = $this->dictionary->get('composition.' . getClass($unicum->Composition()));
 					$data[$composition] = 1;
 				}
@@ -908,7 +905,7 @@ class MagellanWriter implements Writer
 	private function writeMonsterResources(Resources $resources): void {
 		if (count($resources) > 0) {
 			$data = ['GEGENSTAENDE'];
-			foreach ($resources as $quantity /* @var Quantity $quantity */) {
+			foreach ($resources as $quantity) {
 				$commodity = $quantity->Commodity();
 				$class     = match (true) {
 					$commodity instanceof Herb   => 'herb',
@@ -942,7 +939,7 @@ class MagellanWriter implements Writer
 			if ($effect instanceof PotionEffect) {
 				$effects[getClass($effect->Potion())] = $effect->Count();
 			} elseif ($effect instanceof PotionInfluence) {
-				foreach ($effect->getPotions() as $potion /* @var Potion $potion */) {
+				foreach ($effect->getPotions() as $potion /** @var Potion $potion */) {
 					$effects[getClass($potion)] = $effect->getCount($potion);
 				}
 			}
@@ -960,14 +957,14 @@ class MagellanWriter implements Writer
 		if ($battle->count()) {
 			$coordinates = $this->map->getCoordinates($battle->Location());
 			$this->writeData(['BATTLE ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0']);
-			foreach ($battle as $message /* @var BattleMessage $message */) {
+			foreach ($battle as $message /** @var BattleMessage $message */) {
 				$this->writeBattleMessage($message, $coordinates);
 			}
 		}
 	}
 
 	/**
-	 * @param LemuriaMessage[] $travelled
+	 * @param array<LemuriaMessage> $travelled
 	 */
 	private function writeTravelled(array $travelled): void {
 		if (!empty($travelled)) {
@@ -980,7 +977,7 @@ class MagellanWriter implements Writer
 	}
 
 	/**
-	 * @param LemuriaMessage[] $navigated
+	 * @param array<LemuriaMessage> $navigated
 	 */
 	private function writeNavigated(array $navigated): void {
 		if (!empty($navigated)) {
@@ -1075,7 +1072,7 @@ class MagellanWriter implements Writer
 	}
 
 	private function getPrice(string $class, Luxuries $luxuries): int {
-		/* @var Luxury $luxury */
+		/** @var Luxury $luxury */
 		$luxury = Lemuria::Builder()->create($class);
 		$offer  = $luxuries->Offer();
 		if ($luxury === $offer->Commodity()) {
@@ -1085,7 +1082,7 @@ class MagellanWriter implements Writer
 	}
 
 	private function isGuarding(Party $party, Intelligence $intelligence): bool {
-		foreach ($intelligence->getGuards() as $unit /* @var Unit $unit */) {
+		foreach ($intelligence->getGuards() as $unit) {
 			if ($unit->Party() === $party) {
 				return true;
 			}
@@ -1130,7 +1127,7 @@ class MagellanWriter implements Writer
 			$compilation .= Translator::MISC['specialItems'] . ':';
 		}
 		$next = false;
-		foreach ($treasury as $unicum /* @var Unicum $unicum */) {
+		foreach ($treasury as $unicum) {
 			if ($next) {
 				$compilation .= ',';
 			}
@@ -1161,7 +1158,7 @@ class MagellanWriter implements Writer
 			$compilation .= Translator::MISC['specialItems'] . ':';
 		}
 		$next = false;
-		foreach ($treasury as $unicum /* @var Unicum $unicum */) {
+		foreach ($treasury as $unicum) {
 			if ($next) {
 				$compilation .= ',';
 			}

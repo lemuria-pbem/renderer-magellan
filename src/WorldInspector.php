@@ -3,7 +3,6 @@ declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
 use function Lemuria\getClass;
-use Lemuria\Model\Domain;
 use Lemuria\Model\World;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Command\Entertain;
@@ -19,7 +18,6 @@ use Lemuria\Model\Fantasya\Continent;
 use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Id;
-use Lemuria\Lemuria;
 use Lemuria\Renderer\PathFactory;
 use Lemuria\Renderer\Writer;
 
@@ -63,7 +61,7 @@ class WorldInspector extends MagellanWriter
 	}
 
 	private function writeRegions(): void {
-		foreach (Lemuria::Catalog()->getAll(Domain::Location) as $region /* @var Region $region */) {
+		foreach (Region::all() as $region) {
 			$this->writeRegion($region);
 		}
 	}
