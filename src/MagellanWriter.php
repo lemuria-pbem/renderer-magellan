@@ -3,6 +3,7 @@ declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
 use function Lemuria\getClass;
+use function Lemuria\number;
 use Lemuria\Engine\Combat\Battle;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Calculus;
@@ -13,6 +14,7 @@ use Lemuria\Engine\Fantasya\Effect\Hunger;
 use Lemuria\Engine\Fantasya\Effect\PotionEffect;
 use Lemuria\Engine\Fantasya\Effect\PotionInfluence;
 use Lemuria\Engine\Fantasya\Effect\TravelEffect;
+use Lemuria\Engine\Fantasya\Effect\Unmaintained;
 use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
@@ -34,6 +36,9 @@ use Lemuria\Model\Coordinates;
 use Lemuria\Model\Dictionary;
 use Lemuria\Model\Domain;
 use Lemuria\Model\Fantasya\BattleSpell;
+use Lemuria\Model\Fantasya\Building\Canal;
+use Lemuria\Model\Fantasya\Building\Market;
+use Lemuria\Model\Fantasya\Building\Port;
 use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Horse;
 use Lemuria\Model\Fantasya\Commodity\Iron;
@@ -54,6 +59,9 @@ use Lemuria\Model\Fantasya\Construction;
 use Lemuria\Model\Fantasya\Continent;
 use Lemuria\Model\Fantasya\Exception\JsonException;
 use Lemuria\Model\Fantasya\Exception\WorldMapException;
+use Lemuria\Model\Fantasya\Extension\Duty;
+use Lemuria\Model\Fantasya\Extension\Fee;
+use Lemuria\Model\Fantasya\Extension\Market as MarketExtension;
 use Lemuria\Model\Fantasya\Herb;
 use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
@@ -62,6 +70,7 @@ use Lemuria\Model\Fantasya\Offer;
 use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\Party\Type;
 use Lemuria\Model\Fantasya\Potion;
+use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Relation;
 use Lemuria\Model\Fantasya\Resources;
@@ -1111,7 +1120,111 @@ class MagellanWriter implements Writer
 	}
 
 	private function compileCostructionDescription(Construction $construction): string {
-		return $this->compileShortTreasuryDescription($construction->Description(), $construction->Treasury());
+		$description = $construction->Description();
+		switch ($construction->Building()::class) {
+			case Canal::class :
+				$description = $this->compileCanalDescription($description, $construction);
+				break;
+			case Market::class :
+				$description = $this->compileMarketDescription($description, $construction);
+				break;
+			case Port::class :
+				$description = $this->compilePortDescription($description, $construction);
+		}
+		return $this->compileShortTreasuryDescription($description, $construction->Treasury());
+	}
+
+	private function compileCanalDescription($description, $construction): string {
+		$compilation = trim($description);
+		if (!empty($compilation)) {
+			$compilation .= str_ends_with($compilation, '.') ? ' ' : '. ';
+		}
+
+		if ($this->isMaintained($construction)) {
+			/** @var Fee $extension */
+			$extension = $construction->Extensions()->offsetGet(Fee::class);
+			$fee       = $extension->Fee();
+			if ($fee instanceof Quantity) {
+				$compilation .= str_replace('$fee', $this->good($fee), Translator::BUILDINGS['canal']['fee']);
+			} else {
+				$compilation .= Translator::BUILDINGS['canal']['noFee'];
+			}
+		} else {
+			$compilation .= Translator::BUILDINGS['canal']['notMaintained'];
+		}
+		return $compilation;
+	}
+
+	private function compileMarketDescription($description, $construction): string {
+		$compilation = trim($description);
+		if (!empty($compilation)) {
+			$compilation .= str_ends_with($compilation, '.') ? ' ' : '. ';
+		}
+		if (!$this->isMaintained($construction)) {
+			$compilation .= Translator::BUILDINGS['market']['notMaintained'];
+			return $compilation;
+		}
+
+		/** @var MarketExtension $market */
+		$market       = $construction->Extensions()->offsetGet(MarketExtension::class);
+		$fee          = $market->Fee();
+		$compilation .= Translator::BUILDINGS['market']['order'] . ': ';
+		if ($fee instanceof Quantity) {
+			$compilation .= str_replace('$fee', $this->good($fee), Translator::BUILDINGS['market']['fee']);
+		} elseif (is_float($fee)) {
+			$fee          = (string)(int)round(100.0 * $fee);
+			$compilation .= str_replace('$fee', $fee, Translator::BUILDINGS['market']['feePercent']);
+		} else {
+			$compilation .= Translator::BUILDINGS['market']['noFee'];
+		}
+
+		$tradeables = $market->Tradeables();
+		if ($tradeables->isEmpty()) {
+			$compilation .= ' ' . Translator::BUILDINGS['market']['noRules'];
+		} else {
+			$commodities = [];
+			foreach ($tradeables as $commodity) {
+				$commodities[] = $this->dictionary->get('resource.' . getClass($commodity), 1);
+			}
+			$goods = implode(', ', $commodities);
+			if ($tradeables->IsExclusion()) {
+				$translation = Translator::BUILDINGS['market']['forbidden'];
+			} else {
+				$translation = Translator::BUILDINGS['market']['allowed'];
+			}
+			$compilation .= ' ' . str_replace('$goods', $goods, $translation);
+		}
+
+		return $compilation;
+	}
+
+	private function compilePortDescription($description, $construction): string {
+		$compilation = trim($description);
+		if (!empty($compilation)) {
+			$compilation .= str_ends_with($compilation, '.') ? ' ' : '. ';
+		}
+
+		if ($this->isMaintained($construction)) {
+			/** @var Fee $extension */
+			$extension = $construction->Extensions()->offsetGet(Fee::class);
+			$fee       = $extension->Fee();
+			if ($fee instanceof Quantity) {
+				$compilation .= str_replace('$fee', $this->good($fee), Translator::BUILDINGS['port']['fee']);
+			} else {
+				$compilation .= Translator::BUILDINGS['port']['noFee'];
+			}
+
+			/** @var Duty $extension */
+			$extension = $construction->Extensions()->offsetGet(Duty::class);
+			$duty      = $extension->Duty();
+			if ($duty > 0.0) {
+				$duty         = number($duty);
+				$compilation .= ' ' . str_replace('$duty', $duty, Translator::BUILDINGS['port']['duty']);
+			}
+		} else {
+			$compilation .= Translator::BUILDINGS['port']['notMaintained'];
+		}
+		return $compilation;
 	}
 
 	private function compileVesselDescription(Vessel $vessel): string {
@@ -1171,7 +1284,19 @@ class MagellanWriter implements Writer
 		return $compilation;
 	}
 
+	private function good(Quantity $quantity): string {
+		$commodity = getClass($quantity->Commodity());
+		$amount    = $quantity->Count();
+		$index     = $amount === 1 ? 0 : 1;
+		return number($amount) . ' ' . $this->dictionary->get('resource.' . $commodity, $index);
+	}
+
 	private function section(Section $section): int {
 		return $section === Section::Guard ? Section::Movement->value : $section->value;
+	}
+
+	private function isMaintained(Construction $construction): bool {
+		$effect = new Unmaintained(State::getInstance());
+		return !Lemuria::Score()->find($effect->setConstruction($construction));
 	}
 }

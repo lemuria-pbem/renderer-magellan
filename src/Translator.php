@@ -73,6 +73,30 @@ final class Translator
 		'Woundshut'       => 'bringt den Personen der Einheit bis zu 400 Trefferpunkte zurück',
 	];
 
+	public final const BUILDINGS = [
+		'canal' => [
+			'notMaintained' => 'Der Kanal ist derzeit nicht nutzbar.',
+			'fee'           => 'Die Nutzungsgebühr beträgt $fee.',
+			'noFee'         => 'Es gibt keine Nutzungsgebühr.'
+		],
+		'market' => [
+			'notMaintained' => 'Der Markt ist geschlossen.',
+			'order'         => 'Marktordnung',
+			'fee'           => 'Die Marktgebühr beträgt $fee.',
+			'feePercent'    => 'Die Marktgebühr beträgt $fee % des Umsatzes.',
+			'noFee'         => 'Es gibt keine Marktgebühr.',
+			'allowed'       => 'Auf diesem Markt dürfen nur die folgenden Waren gehandelt werden: $goods',
+			'forbidden'     => 'Die Marktaufsicht hat den Handel mit den folgenden Waren verboten: $goods',
+			'noRules'       => 'Es gibt keine Handelsbeschränkungen.'
+		],
+		'port' => [
+			'notMaintained' => 'Der Hafen ist derzeit außer Betrieb.',
+			'fee'           => 'Die Liegegebühr beträgt $fee.',
+			'noFee'         => 'Es gibt keine Liegegebühr.',
+			'duty'          => 'Der Hafenmeister erhebt $duty % Zoll auf eingeführte Luxuswaren.'
+		]
+	];
+
 	public final const TRANSLATIONS = [
 		'Stangenwaffen' => 'Speerkampf'
 	];
