@@ -106,7 +106,7 @@ class MagellanWriter implements Writer
 		'date'          => '$DATE',
 		'Runde'         => '$TURN',
 		'Zeitalter'     => 1,
-		'mailto'        => 'lemuria@online.de',
+		'mailto'        => 'lemuria@fantasya-pbem.de',
 		'mailcmd'       => 'Lemuria Befehle'
 	];
 
