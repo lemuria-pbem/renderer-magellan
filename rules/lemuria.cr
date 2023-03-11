@@ -1512,6 +1512,69 @@ ITEM "Rostige Streitäxte"
 RESOURCES
 1;Rostige Streitaxt
 
+ITEM "Hellebarde"
+"Hellebarde";name
+2;weight
+"Waffenbau";makeskill
+"Stangenwaffen";useskill
+4;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Eisen
+1;Holz
+
+ITEM "Hellebarden"
+"Hellebarden";name
+2;weight
+"Waffenbau";makeskill
+"Stangenwaffen";useskill
+4;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+1;Eisen
+1;Holz
+
+ITEM "Verbogene Hellebarde"
+"Verbogene Hellebarde";name
+2;weight
+"Stangenwaffen";useskill
+"weapons";category
+1;storeinbonw
+
+ITEM "Verbogene Hellebarden"
+"Verbogene Hellebarden";name
+2;weight
+"Stangenwaffen";useskill
+"weapons";category
+1;storeinbonw
+
+ITEM "Zweihänder"
+"Zweihänder";name
+2;weight
+"Waffenbau";makeskill
+"Hiebwaffen";useskill
+5;makeskilllevel
+"weapons";category
+1;storeinbonw
+RESOURCES
+2;Eisen
+
+ITEM "Rostiger Zweihänder"
+"Rostiger Zweihänder";name
+2;weight
+"Hiebwaffen";useskill
+"weapons";category
+1;storeinbonw
+
+ITEM "Rostige Zweihänder"
+"Rostige Zweihänder";name
+2;weight
+"Hiebwaffen";useskill
+"weapons";category
+1;storeinbonw
+
 ITEM "Kriegselefant"
 "Kriegselefant";name
 300;weight
