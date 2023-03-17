@@ -301,7 +301,7 @@ class MagellanWriter implements Writer
 		$data = [
 			'PARTEI ' . $party->Id()->Id(),
 			'locale'              => self::HEADER['locale'],
-			'age'                 => 1,
+			'age'                 => Lemuria::Calendar()->Round() - $party->Round() + 1,
 			'Optionen'            => 1 + 2 + 8 + 64 + 256 + 512,
 			'Punkte'              => 0,
 			'Punktedurchschnitt'  => 0,
