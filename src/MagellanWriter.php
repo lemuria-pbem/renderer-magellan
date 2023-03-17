@@ -96,18 +96,18 @@ class MagellanWriter implements Writer
 		'VERSION 69',
 		'charset'       => 'UTF-8',
 		'locale'        => 'de',
-		'Spiel'         => 'Lemuria',
+		'Spiel'         => '$GAME',
 		'Konfiguration' => 'Standard',
 		'Basis'         => 36,
 		'noskillpoints' => 0,
-		'max_units'     => 1000,
+		'max_units'     => '$MAX_UNITS',
 		'Koordinaten'   => 'Hex',
 		'Build'         => '$VERSION',
 		'date'          => '$DATE',
 		'Runde'         => '$TURN',
-		'Zeitalter'     => 1,
-		'mailto'        => 'lemuria@fantasya-pbem.de',
-		'mailcmd'       => 'Lemuria Befehle'
+		'Zeitalter'     => '$ERA',
+		'mailto'        => '$MAILTO',
+		'mailcmd'       => '$MAILCMD'
 	];
 
 	private const ROADS = [
@@ -143,6 +143,15 @@ class MagellanWriter implements Writer
 		if ($this->file) {
 			$this->close();
 		}
+	}
+
+	public function setHeader(Header $header): MagellanWriter {
+		$this->variables['$GAME'] = $header->Game();
+		$this->variables['$MAX_UNITS'] = $header->MaxUnits();
+		$this->variables['$ERA'] = $header->Era();
+		$this->variables['$MAILTO'] = $header->MailTo()->Address();
+		$this->variables['$MAILCMD'] = $header->MailTo()->Command();
+		return $this;
 	}
 
 	public function setFilter(Filter $filter): Writer {
