@@ -2,7 +2,6 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
-use function Lemuria\getClass;
 use Lemuria\Model\World;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Command\Entertain;
@@ -77,7 +76,7 @@ class WorldInspector extends MagellanWriter
 			'REGION ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0',
 			'id'       => $region->Id()->Id(),
 			'Name'     => $region->Name(),
-			'Terrain'  => $this->dictionary->get('landscape.' . getClass($region->Landscape())),
+			'Terrain'  => $this->translateSingleton($region->Landscape()),
 			'Insel'    => 1,
 			'Beschr'   => $region->Description(),
 			'Bauern'   => $peasants,
@@ -93,7 +92,7 @@ class WorldInspector extends MagellanWriter
 
 		$herbage = $region->Herbage();
 		if ($herbage) {
-			$data['herb']       = $this->dictionary->get('resource.' . getClass($herbage->Herb()));
+			$data['herb']       = $this->translateSingleton($herbage->Herb());
 			$data['herbamount'] = Translator::occurrence($herbage->Occurrence());
 		}
 
@@ -115,7 +114,7 @@ class WorldInspector extends MagellanWriter
 			if ($object::class !== Peasant::class || $object::class !== Silver::class) {
 				$data = [
 					'RESOURCE ' . $hash++,
-					'type'   => $this->dictionary->get('resource.' . getClass($object), 1),
+					'type'   => $this->translateSingleton($object, 1),
 					'skill'  => 1,
 					'number' => $item->Count()
 				];
