@@ -2088,6 +2088,12 @@ RESOURCES
 1;Gurgelkraut
 1;Höhlenglimm
 
+ITEM "Kadaver"
+"Kadaver";name
+"misc";category
+10;weight
+0;storeinbonw
+
 ITEM "Ring der Unsichtbarkeit"
 "Ring der Unsichtbarkeit";name
 "misc";category
@@ -2274,21 +2280,21 @@ CASTLETYPE "Zitadelle"
 RAWMATERIALS
 1;Stein
 
-CASTLETYPE "Zitadelle"
-"Zitadelle";name
-7;level
-1250;minsize
-6249;maxsize
-16;wage
-0;tradetax
-RAWMATERIALS
-1;Stein
-
 CASTLETYPE "Akropolis"
 "Akropolis";name
 10;level
 6250;minsize
+31249;maxsize
 17;wage
+0;tradetax
+RAWMATERIALS
+1;Stein
+
+CASTLETYPE "Megapolis"
+"Megapolis";name
+15;level
+31250;minsize
+18;wage
 0;tradetax
 RAWMATERIALS
 1;Stein
