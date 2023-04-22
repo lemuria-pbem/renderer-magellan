@@ -286,21 +286,13 @@ class MagellanWriter implements Writer
 	private function writeParties(Outlook $outlook): void {
 		$census = $outlook->Census();
 		$party  = $census->Party();
-
 		$this->writeParty($party);
-		$acquaintances = $party->Diplomacy()->Acquaintances();
 
 		$parties = [];
 		foreach ($census->getAtlas() as $region) {
-			foreach ($outlook->getApparitions($region) as $unit) {
-				$foreign = $census->getParty($unit);
-				if ($foreign && $foreign !== $party) {
-					$id           = $foreign->Id()->Id();
-					$parties[$id] = $foreign;
-				}
-			}
+			$this->collectParties($outlook, $region, $parties);
 		}
-
+		$acquaintances = $party->Diplomacy()->Acquaintances();
 		foreach ($parties as $id => $foreign) {
 			$this->writeForeignParty($foreign, $acquaintances->has(new Id($id)));
 		}
@@ -1087,6 +1079,36 @@ class MagellanWriter implements Writer
 	private function hasTravelled(Unit $unit): bool {
 		$effect = new TravelEffect(State::getInstance());
 		return Lemuria::Score()->find($effect->setUnit($unit)) instanceof TravelEffect;
+	}
+
+	private function collectParties(Outlook $outlook, Region $region, array &$parties): void {
+		$census = $outlook->Census();
+		$party  = $census->Party();
+		foreach ($region->Estate() as $construction) {
+			foreach ($construction->Inhabitants() as $unit) {
+				$foreign = $census->getParty($unit);
+				if ($foreign && $foreign !== $party) {
+					$id           = $foreign->Id()->Id();
+					$parties[$id] = $foreign;
+				}
+			}
+		}
+		foreach ($region->Fleet() as $vessel) {
+			foreach ($vessel->Passengers() as $unit) {
+				$foreign = $census->getParty($unit);
+				if ($foreign && $foreign !== $party) {
+					$id           = $foreign->Id()->Id();
+					$parties[$id] = $foreign;
+				}
+			}
+		}
+		foreach ($outlook->getApparitions($region) as $unit) {
+			$foreign = $census->getParty($unit);
+			if ($foreign && $foreign !== $party) {
+				$id           = $foreign->Id()->Id();
+				$parties[$id] = $foreign;
+			}
+		}
 	}
 
 	private function getPrice(string $class, Luxuries $luxuries): int {
