@@ -658,7 +658,7 @@ class MagellanWriter implements Writer
 			if ($region->hasRoad($direction)) {
 				$percent = 100;
 			} elseif ($roads && $roads[$direction] > 0.0) {
-				$percent = (int)round(100.0 * $roads[$direction]);
+				$percent = (int)floor(100.0 * $roads[$direction]);
 			} else {
 				continue;
 			}
