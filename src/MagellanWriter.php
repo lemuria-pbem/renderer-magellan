@@ -608,10 +608,8 @@ class MagellanWriter implements Writer
 				}
 			} elseif (in_array($magellanVisibility, ['travel', 'lighthouse'])) {
 				$census = $outlook->Census();
-				foreach ($region->Residents() as $unit) {
-					if (!$unit->IsHiding() && !$unit->Construction() && !$unit->Vessel() && !$this->hasTravelled($unit)) {
-						$this->writeForeignUnit($unit, $census, false);
-					}
+				foreach ($outlook->getTravelled($region) as $unit) {
+					$this->writeForeignUnit($unit, $census, false);
 				}
 			}
 
