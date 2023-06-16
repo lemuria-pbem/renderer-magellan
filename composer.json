@@ -2,7 +2,7 @@
 	"name": "lemuria-pbem/renderer-magellan",
 	"description": "This library is part of the PbeM Lemuria. It creates game files in the Magellan CR format.",
 	"type": "library",
-	"keywords": ["atlantis", "eressea", "fantasya", "game", "lemuria", "magellan", "pbem", "renderer", "rpg", "strategy", "world"],
+	"keywords": ["atlantis", "eressea", "fantasy", "fantasya", "game", "lemuria", "magellan", "pbem", "pbm", "renderer", "rpg", "strategy", "world"],
 	"license": "GPL-3.0",
 	"authors": [
 		{
@@ -10,15 +10,15 @@
 			"email": "lemuria@online.de"
 		}
 	],
-	"version": "1.3.2",
-	"time": "2023-06-10",
+	"version": "1.4.0",
+	"time": "2023-06-16",
 
 	"require": {
 		"php": "~8.2",
-		"lemuria-pbem/engine-fantasya": "~1.3.0|dev-master",
-		"lemuria-pbem/lemuria": "~1.3.0|dev-master",
-		"lemuria-pbem/model-fantasya": "~1.3.0|dev-master",
-		"lemuria-pbem/statistics-fantasya": "~1.3.0|dev-master"
+		"lemuria-pbem/engine-fantasya": "~1.4.0|dev-feature/realm",
+		"lemuria-pbem/lemuria": "~1.4.0|dev-feature/realm",
+		"lemuria-pbem/model-fantasya": "~1.4.0|dev-feature/realm",
+		"lemuria-pbem/statistics-fantasya": "~1.4.0|dev-feature/realm"
 	},
 	"repositories": [
 		{
