@@ -546,7 +546,7 @@ class MagellanWriter implements Writer
 			}
 
 			if ($peasants > 0) {
-				$castle = $intelligence->getGovernment();
+				$castle = $intelligence->getCastle();
 				if ($castle?->Size() > Site::MAX_SIZE) {
 					$this->writeMarket($region->Luxuries());
 				} else {

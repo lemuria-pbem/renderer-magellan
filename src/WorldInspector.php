@@ -98,7 +98,7 @@ class WorldInspector extends MagellanWriter
 
 		$this->writeData($data);
 
-		$castle = $intelligence->getGovernment();
+		$castle = $intelligence->getCastle();
 		if ($castle?->Size() > Site::MAX_SIZE) {
 			$this->writeMarket($region->Luxuries());
 		} else {
