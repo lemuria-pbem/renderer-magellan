@@ -10,17 +10,18 @@ use Lemuria\Engine\Fantasya\Calculus;
 use Lemuria\Engine\Fantasya\Census;
 use Lemuria\Engine\Fantasya\Combat\Log\Message as BattleMessage;
 use Lemuria\Engine\Fantasya\Command\Entertain;
+use Lemuria\Engine\Fantasya\Context;
 use Lemuria\Engine\Fantasya\Effect\Hunger;
 use Lemuria\Engine\Fantasya\Effect\PotionEffect;
 use Lemuria\Engine\Fantasya\Effect\PotionInfluence;
-use Lemuria\Engine\Fantasya\Effect\TravelEffect;
 use Lemuria\Engine\Fantasya\Effect\Unmaintained;
-use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Engine\Fantasya\Factory\GrammarTrait;
 use Lemuria\Engine\Fantasya\Factory\Model\Observables;
 use Lemuria\Engine\Fantasya\Factory\Model\SpellDetails;
 use Lemuria\Engine\Fantasya\Factory\Model\TravelAtlas;
 use Lemuria\Engine\Fantasya\Factory\Model\Visibility;
+use Lemuria\Engine\Fantasya\Factory\Model\Wage;
+use Lemuria\Engine\Fantasya\Factory\RealmTrait;
 use Lemuria\Engine\Fantasya\Factory\SpellParser;
 use Lemuria\Engine\Fantasya\Message\LemuriaMessage;
 use Lemuria\Engine\Fantasya\Message\Region\TravelUnitMessage;
@@ -93,6 +94,7 @@ use Lemuria\Version\VersionTag;
 class MagellanWriter implements Writer
 {
 	use GrammarTrait;
+	use RealmTrait;
 
 	private const HEADER = [
 		'VERSION 69',
@@ -132,9 +134,12 @@ class MagellanWriter implements Writer
 
 	private Statistics $statistics;
 
+	private Context $context;
+
 	public function __construct(protected PathFactory $pathFactory) {
 		$this->filter     = new NullFilter();
 		$this->statistics = new Statistics();
+		$this->context    = new Context(State::getInstance());
 		$this->initDictionary();
 		$this->initVariables();
 	}
@@ -482,7 +487,7 @@ class MagellanWriter implements Writer
 		$coordinates  = $this->map->getCoordinates($region);
 		$resources    = $region->Resources();
 		$peasants     = $resources[Peasant::class]->Count();
-		$intelligence = new Intelligence($region);
+		$intelligence = $this->context->getIntelligence($region);
 
 		$magellanVisibility = match ($visibility) {
 			Visibility::WithUnit, Visibility::Farsight => '',
@@ -493,6 +498,7 @@ class MagellanWriter implements Writer
 
 		if (empty($magellanVisibility)) {
 			$availability = new Availability($region);
+			$wage         = new Wage($this->calculateInfrastructure($region));
 			$data         = [
 				'REGION ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0',
 				'id'       => $region->Id()->Id(),
@@ -508,7 +514,7 @@ class MagellanWriter implements Writer
 				'Silber'   => $resources[Silver::class]->Count(),
 				'Unterh'   => (int)floor($resources[Silver::class]->Count() * Entertain::QUOTA),
 				'Rekruten' => $availability->getResource(Peasant::class)->Count(),
-				'Lohn'     => $intelligence->getWage(Subsistence::WAGE)
+				'Lohn'     => $wage->getWage()
 			];
 		} else {
 			$data = [
@@ -1072,11 +1078,6 @@ class MagellanWriter implements Writer
 	private function hasHunger(Unit $unit): bool {
 		$effect = new Hunger(new State());
 		return Lemuria::Score()->find($effect->setUnit($unit)) instanceof Hunger;
-	}
-
-	private function hasTravelled(Unit $unit): bool {
-		$effect = new TravelEffect(State::getInstance());
-		return Lemuria::Score()->find($effect->setUnit($unit)) instanceof TravelEffect;
 	}
 
 	private function collectParties(Outlook $outlook, Region $region, array &$parties): void {
