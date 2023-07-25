@@ -168,7 +168,8 @@ class MagellanWriter implements Writer
 	 * @throws JsonException
 	 */
 	public function render(Id $entity): Writer {
-		$party      = Party::get($entity);
+		$party = Party::get($entity);
+		$this->context->setParty($party);
 		$path       = $this->pathFactory->getPath($this, $party);
 		$this->file = fopen($path, 'w');
 		if (!$this->file) {
@@ -1147,6 +1148,7 @@ class MagellanWriter implements Writer
 
 	private function compileRegionDescription(Region $region): string {
 		$description = $this->compileRealmDescription($region);
+		$description = $this->compileQuotasDescription($description, $region);
 		return $this->compileShortTreasuryDescription($description, $region->Treasury());
 	}
 
@@ -1163,6 +1165,24 @@ class MagellanWriter implements Writer
 			} else {
 				$description .= 'Die Region gehört zum Reich ' . $realm->Name() . '.';
 			}
+		}
+		return $description;
+	}
+
+	private function compileQuotasDescription(string $description, Region $region) : string {
+		$quotas = $this->context->Party()->Regulation()->getQuotas($region);
+		if ($quotas?->count() > 0) {
+			if ($description) {
+				$description .= (str_ends_with($description, '.') ? ' ' : '. ') . 'Grenzen: ';
+			}
+			$list = [];
+			foreach ($quotas as $quota) {
+				$commodity = $quota->Commodity();
+				$item      = $commodity instanceof Herb ? $this->dictionary->get('kind.Herb') : $this->translateSingleton($commodity);
+				$threshold = $quota->Threshold();
+				$list[]    = $item . ' ' . (is_float($threshold) ? (int)(100 * $threshold) . '%' : number($threshold));
+			}
+			$description .= implode(', ', $list) . '.';
 		}
 		return $description;
 	}
