@@ -1146,7 +1146,25 @@ class MagellanWriter implements Writer
 	}
 
 	private function compileRegionDescription(Region $region): string {
-		return $this->compileShortTreasuryDescription($region->Description(), $region->Treasury());
+		$description = $this->compileRealmDescription($region);
+		return $this->compileShortTreasuryDescription($description, $region->Treasury());
+	}
+
+	private function compileRealmDescription(Region $region) : string {
+		$description = trim($region->Description());
+		$realm       = $region->Realm();
+		$central     = $realm?->Territory()->Central();
+		if ($central) {
+			if ($description) {
+				$description .= str_ends_with($description, '.') ? ' ' : '. ';
+			}
+			if ($region === $central) {
+				$description .= 'Zentralregion des Reiches ' . $realm->Name() . '.';
+			} else {
+				$description .= 'Die Region gehört zum Reich ' . $realm->Name() . '.';
+			}
+		}
+		return $description;
 	}
 
 	private function compileCostructionDescription(Construction $construction): string {
