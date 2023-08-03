@@ -1161,7 +1161,14 @@ class MagellanWriter implements Writer
 				$description .= str_ends_with($description, '.') ? ' ' : '. ';
 			}
 			if ($region === $central) {
-				$description .= 'Zentralregion des Reiches ' . $realm->Name() . '.';
+				$description     .= 'Zentralregion des Reiches ' . $realm->Name() . '.';
+				$realmDescription = $realm->Description();
+				if ($realmDescription) {
+					if (!str_ends_with($realmDescription, '.')) {
+						$realmDescription .= '.';
+					}
+					$description .= ' ' . $realmDescription;
+				}
 			} else {
 				$description .= 'Die Region gehört zum Reich ' . $realm->Name() . '.';
 			}
