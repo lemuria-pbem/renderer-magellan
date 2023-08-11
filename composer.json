@@ -11,14 +11,14 @@
 		}
 	],
 	"version": "1.4.0",
-	"time": "2023-08-03",
+	"time": "2023-08-11",
 
 	"require": {
 		"php": "~8.2",
-		"lemuria-pbem/engine-fantasya": "~1.4.0|dev-feature/realm",
-		"lemuria-pbem/lemuria": "~1.4.0|dev-feature/realm",
-		"lemuria-pbem/model-fantasya": "~1.4.0|dev-feature/realm",
-		"lemuria-pbem/statistics-fantasya": "~1.4.0|dev-feature/realm"
+		"lemuria-pbem/engine-fantasya": "~1.4.0|dev-master",
+		"lemuria-pbem/lemuria": "~1.4.0|dev-master",
+		"lemuria-pbem/model-fantasya": "~1.4.0|dev-master",
+		"lemuria-pbem/statistics-fantasya": "~1.4.0|dev-master"
 	},
 	"repositories": [
 		{

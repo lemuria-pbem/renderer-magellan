@@ -2,10 +2,10 @@
 declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
+use Lemuria\Engine\Fantasya\Factory\Model\Wage;
 use Lemuria\Model\World;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Command\Entertain;
-use Lemuria\Engine\Fantasya\Event\Subsistence;
 use Lemuria\Model\Fantasya\Building\Site;
 use Lemuria\Model\Fantasya\Commodity\Horse;
 use Lemuria\Model\Fantasya\Commodity\Iron;
@@ -72,6 +72,7 @@ class WorldInspector extends MagellanWriter
 		$intelligence = new Intelligence($region);
 
 		$availability = new Availability($region);
+		$wage         = new Wage($this->calculateInfrastructure($region));
 		$data         = [
 			'REGION ' . $coordinates->X() . ' ' . $coordinates->Y() . ' 0',
 			'id'       => $region->Id()->Id(),
@@ -87,7 +88,7 @@ class WorldInspector extends MagellanWriter
 			'Silber'   => $resources[Silver::class]->Count(),
 			'Unterh'   => (int)floor($resources[Silver::class]->Count() * Entertain::QUOTA),
 			'Rekruten' => $availability->getResource(Peasant::class)->Count(),
-			'Lohn'     => $intelligence->getWage(Subsistence::WAGE)
+			'Lohn'     => $wage->getWage()
 		];
 
 		$herbage = $region->Herbage();
