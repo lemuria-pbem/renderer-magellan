@@ -43,7 +43,7 @@ ORDER "SIEGE"
 "BELAGERUNG";locale_de
 
 ORDER "NAME"
-"NAME [EINHEIT] | PARTEI | GEB훃DE | BURG | SCHIFF | REGION Text";syntax
+"NAME [EINHEIT] | PARTEI | GEB훃DE | BURG | SCHIFF | REGION | REICH Text";syntax
 "BENENNE";locale_de
 "BENENNEN";locale_de
 "NAME";locale_de
@@ -54,7 +54,7 @@ ORDER "USE"
 "BENUTZEN";locale_de
 
 ORDER "DESCRIBE"
-"TEXT [EINHEIT] | PARTEI | GEB훃DE | BURG | SCHIFF | REGION Text";syntax
+"TEXT [EINHEIT] | PARTEI | GEB훃DE | BURG | SCHIFF | REGION | REICH Text";syntax
 "BESCHREIBE";locale_de
 "BESCHREIBEN";locale_de
 "TEXT";locale_de
@@ -79,6 +79,10 @@ ORDER "DEFAULT"
 "DEFAULT Order";syntax
 "DEFAULT";locale_de
 "VORLAGE";locale_de
+
+ORDER "ALTERNATIVE"
+"ALTERNATIVE Order";syntax
+"ALTERNATIVE";locale_de
 
 ORDER "UNIT"
 "EINHEIT u1";syntax
@@ -135,7 +139,7 @@ ORDER "TEACH"
 "LEHREN";locale_de
 
 ORDER "LEARN"
-"LERNEN (Talent [1])|(AUTO Talent)";syntax
+"LERNEN Talent [1]";syntax
 "LERNE";locale_de
 "LERNEN";locale_de
 
@@ -161,9 +165,13 @@ ORDER "NEXT"
 1;internal
 
 ORDER "NUMBER"
-"NUMMER (EINHEIT) | (SCHIFF) | (GEB훃DE) | (BURG) | (PARTEI) | (GEGENSTAND) [x1]";syntax
+"NUMMER (EINHEIT) | (SCHIFF) | (GEB훃DE) | (BURG) | (PARTEI) | (GEGENSTAND) | (REICH) [x1]";syntax
 "ID";locale_de
 "NUMMER";locale_de
+
+ORDER "REICH"
+"REICH x1";syntax
+"REICH";locale_de
 
 ORDER "FACTION"
 "PARTEI f1";syntax
@@ -184,6 +192,10 @@ ORDER "RESERVE"
 "RESERVIEREN (1) | (ALLES) | (JE 2) Gegenstand";syntax
 "RESERVIERE";locale_de
 "RESERVIEREN";locale_de
+
+ORDER "GRENZE"
+"GRENZE (1) Gegenstand";syntax
+"GRENZE";locale_de
 
 ORDER "ROUTE"
 "ROUTE Richtung1+";syntax
