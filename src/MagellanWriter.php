@@ -150,7 +150,7 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	public function setHeader(Header $header): MagellanWriter {
+	public function setHeader(Header $header): static {
 		$this->variables['$GAME'] = $header->Game();
 		$this->variables['$MAX_UNITS'] = $header->MaxUnits();
 		$this->variables['$ERA'] = $header->Era();
@@ -159,7 +159,7 @@ class MagellanWriter implements Writer
 		return $this;
 	}
 
-	public function setFilter(Filter $filter): Writer {
+	public function setFilter(Filter $filter): static {
 		$this->filter = $filter;
 		return $this;
 	}
@@ -167,7 +167,7 @@ class MagellanWriter implements Writer
 	/**
 	 * @throws JsonException
 	 */
-	public function render(Id $entity): Writer {
+	public function render(Id $entity): static {
 		$party = Party::get($entity);
 		$this->context->setParty($party);
 		$path       = $this->pathFactory->getPath($this, $party);

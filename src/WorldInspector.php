@@ -18,7 +18,6 @@ use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Id;
 use Lemuria\Renderer\PathFactory;
-use Lemuria\Renderer\Writer;
 
 class WorldInspector extends MagellanWriter
 {
@@ -30,7 +29,7 @@ class WorldInspector extends MagellanWriter
 		parent::__construct($pathFactory);
 	}
 
-	public function render(Id $entity): Writer {
+	public function render(Id $entity): static {
 		$this->file = fopen($this->path, 'w');
 		if (!$this->file) {
 			throw new \RuntimeException('Could not open file ' . $this->path . '.');
@@ -49,12 +48,12 @@ class WorldInspector extends MagellanWriter
 		return $this;
 	}
 
-	public function setWorld(World $world): WorldInspector {
+	public function setWorld(World $world): static {
 		$this->map = $world;
 		return $this;
 	}
 
-	public function setPath(string $path): WorldInspector {
+	public function setPath(string $path): static {
 		$this->path = $path;
 		return $this;
 	}
