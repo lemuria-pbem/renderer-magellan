@@ -777,7 +777,7 @@ class MagellanWriter implements Writer
 
 		if ($isMonster) {
 			$this->writeMonsterResources($unit->Inventory());
-		} elseif ($seenByGuards) {
+		} elseif ($seenByGuards || $unit->IsGuarding()) {
 			$this->writeResources(new Observables($unit->Inventory()));
 		}
 	}
