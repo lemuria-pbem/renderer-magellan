@@ -744,7 +744,7 @@ class MagellanWriter implements Writer
 		$data      = [
 			'EINHEIT ' . $unit->Id()->Id(),
 			'Name'          => $unit->Name(),
-			'Beschr'        => $unit->Description(),
+			'Beschr'        => $this->compileForeignUnitDescription($unit),
 			'Partei'        => $party,
 			'Parteitarnung' => $disguise !== false ? 1 : 0,
 			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
@@ -1143,7 +1143,27 @@ class MagellanWriter implements Writer
 	}
 
 	private function compileUnitDescription(Unit $unit): string {
-		return $this->compileFullTreasuryDescription($unit->Description(), $unit->Treasury());
+		$description = $this->compileFullTreasuryDescription($unit->Description(), $unit->Treasury());
+		$direction   = $unit->GuardDirection();
+		if ($direction !== Direction::None) {
+			if ($description) {
+				$description .= ' ';
+			}
+			$description .= 'Bewacht die Grenze nach ' . $this->dictionary->get('world', $direction->value) . '.';
+		}
+		return $description;
+	}
+
+	private function compileForeignUnitDescription(Unit $unit): string {
+		$description = $unit->Description();
+		$direction   = $unit->GuardDirection();
+		if ($direction !== Direction::None) {
+			if ($description) {
+				$description .= ' ';
+			}
+			$description .= 'Bewacht die Grenze nach ' . $this->dictionary->get('world', $direction->value) . '.';
+		}
+		return $description;
 	}
 
 	private function compileRegionDescription(Region $region): string {
