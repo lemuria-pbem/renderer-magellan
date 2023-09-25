@@ -1200,8 +1200,9 @@ class MagellanWriter implements Writer
 		$quotas = $this->context->Party()->Regulation()->getQuotas($region);
 		if ($quotas?->count() > 0) {
 			if ($description) {
-				$description .= (str_ends_with($description, '.') ? ' ' : '. ') . 'Grenzen: ';
+				$description .= (str_ends_with($description, '.') ? ' ' : '. ');
 			}
+			$description .=  'Grenzen: ';
 			$list = [];
 			foreach ($quotas as $quota) {
 				$commodity = $quota->Commodity();
