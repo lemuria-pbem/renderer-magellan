@@ -96,7 +96,7 @@ class MagellanWriter implements Writer
 	use GrammarTrait;
 	use RealmTrait;
 
-	private const HEADER = [
+	private const array HEADER = [
 		'VERSION 69',
 		'charset'       => 'UTF-8',
 		'locale'        => 'de',
@@ -114,7 +114,10 @@ class MagellanWriter implements Writer
 		'mailcmd'       => '$MAILCMD'
 	];
 
-	private const ROADS = [
+	/**
+	 * @type array<string>
+	 */
+	private const array ROADS = [
 		Direction::Northwest, Direction::Northeast, Direction::East, Direction::Southeast, Direction::Southwest, Direction::West
 	];
 

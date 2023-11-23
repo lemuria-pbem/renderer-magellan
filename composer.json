@@ -14,7 +14,7 @@
 	"time": "2023-11-25",
 
 	"require": {
-		"php": "~8.2",
+		"php": "~8.3",
 		"lemuria-pbem/engine-fantasya": "~1.5.0|dev-feature/NPC",
 		"lemuria-pbem/lemuria": "~1.5.0|dev-feature/NPC",
 		"lemuria-pbem/model-fantasya": "~1.5.0|dev-feature/NPC",

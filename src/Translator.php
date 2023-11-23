@@ -4,11 +4,20 @@ namespace Lemuria\Renderer\Magellan;
 
 final class Translator
 {
-	public final const BATTLE_ROW = [5, 4, 3, 2, 1, 1, 0];
+	/**
+	 * @type array<int>
+	 */
+	public final const array BATTLE_ROW = [5, 4, 3, 2, 1, 1, 0];
 
-	public final const COAST = ['N' => 1, 'NE' => 1, 'E' => 2, 'SE' => 3, 'S' => 4, 'SW' => 4, 'W' => 5, 'NW' => 0];
+	/**
+	 * @type array<string, int>
+	 */
+	public final const array COAST = ['N' => 1, 'NE' => 1, 'E' => 2, 'SE' => 3, 'S' => 4, 'SW' => 4, 'W' => 5, 'NW' => 0];
 
-	public final const MONSTER_RESOURCE = [
+	/**
+	 * @type array<string, true>
+	 */
+	public final const array MONSTER_RESOURCE = [
 		'herb'           => true,
 		'potion'         => true,
 		'Balsam'         => true,
@@ -28,19 +37,28 @@ final class Translator
 		'WolfSkin'       => true
 	];
 
-	public final const HEALTH = [
+	/**
+	 * @type array<string>
+	 */
+	public final const array HEALTH = [
 		'gesund',
 		'erschoepft',
 		'verwundet',
 		'schwer verwundet'
 	];
 
-	public final const COMMODITY = [
+	/**
+	 * @type array<string, string>
+	 */
+	public final const array COMMODITY = [
 		'herb'   => 'Kräuter',
 		'potion' => 'Trank'
 	];
 
-	public final const SECTION = [
+	/**
+	 * @type array<int, string>
+	 */
+	public final const array SECTION = [
 		1 => 'battle',
 		2 => 'economy',
 		3 => 'errors',
@@ -52,13 +70,19 @@ final class Translator
 		9 => 'study'
 	];
 
-	public final const SPELL = [
+	/**
+	 * @type array<int|string, string>
+	 */
+	public final const array SPELL = [
 		'' => 'normal',
 		0  => 'precombat',
 		1  => 'combat'
 	];
 
-	public final const ALCHEMY = [
+	/**
+	 * @type array<string, string>
+	 */
+	public final const array ALCHEMY = [
 		'BerserkBlood'    => '10 Personen erhalten im Kampf einen Angriffsbonus',
 		'Brainpower'      => 'erhöhte Lernchance für 10 Personen',
 		'DrinkOfCreation' => 'verdoppelt Produktivität von 10 Leuten bei MACHEN',
@@ -73,7 +97,10 @@ final class Translator
 		'Woundshut'       => 'bringt den Personen der Einheit bis zu 400 Trefferpunkte zurück',
 	];
 
-	public final const BUILDINGS = [
+	/**
+	 * @type array<string, array<string, string>>
+	 */
+	public final const array BUILDINGS = [
 		'canal' => [
 			'notMaintained' => 'Der Kanal ist derzeit nicht nutzbar.',
 			'fee'           => 'Die Nutzungsgebühr beträgt $fee.',
@@ -97,11 +124,17 @@ final class Translator
 		]
 	];
 
-	public final const TRANSLATIONS = [
+	/**
+	 * @type array<string, string>
+	 */
+	public final const array TRANSLATIONS = [
 		'Stangenwaffen' => 'Speerkampf'
 	];
 
-	public final const MISC = [
+	/**
+	 * @type array<string, string>
+	 */
+	public final const array MISC = [
 		'isNotLooting' => 'sammelt keine Beute',
 		'specialItems' => 'Besondere Gegenstände',
 		'unnamed'      => 'unbenannt'
