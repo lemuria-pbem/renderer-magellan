@@ -597,19 +597,36 @@ class MagellanWriter implements Writer
 				$this->writeNavigated($navigated);
 			}
 
+			$estate = clone $region->Estate();
+			$estate->sort();
+			$fleet = clone $region->Fleet();
+			$fleet->sort();
 			if (empty($magellanVisibility)) {
 				$census     = $outlook->Census();
 				$party      = $census->Party();
 				$isGuarding = $this->isGuarding($party, $intelligence);
-				foreach ($region->Residents() as $unit) {
-					if ($unit->Party() === $party) {
-						$this->writeUnit($unit);
-					} elseif ($unit->Construction() || $unit->Vessel()) {
-						$this->writeForeignUnit($unit, $census, $isGuarding);
+				foreach ($estate as $construction) {
+					foreach ($construction->Inhabitants() as $unit) {
+						if ($unit->Party() === $party) {
+							$this->writeUnit($unit);
+						} else {
+							$this->writeForeignUnit($unit, $census, $isGuarding);
+						}
+					}
+				}
+				foreach ($fleet as $vessel) {
+					foreach ($vessel->Passengers() as $unit) {
+						if ($unit->Party() === $party) {
+							$this->writeUnit($unit);
+						} else {
+							$this->writeForeignUnit($unit, $census, $isGuarding);
+						}
 					}
 				}
 				foreach ($outlook->getApparitions($region) as $unit) {
-					if ($unit->Party() !== $party) {
+					if ($unit->Party() === $party) {
+						$this->writeUnit($unit);
+					} else {
 						$this->writeForeignUnit($unit, $census, $isGuarding);
 					}
 				}
@@ -620,8 +637,7 @@ class MagellanWriter implements Writer
 				}
 			}
 
-			$estate = clone $region->Estate();
-			foreach ($estate->sort() as $construction) {
+			foreach ($estate as $construction) {
 				$this->writeConstruction($construction, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::Lighthouse, Visibility::Farsight])) {
 					foreach (Lemuria::Report()->getAll($construction) as $message) {
@@ -629,8 +645,8 @@ class MagellanWriter implements Writer
 					}
 				}
 			}
-			$fleet = clone $region->Fleet();
-			foreach ($fleet->sort() as $vessel) {
+
+			foreach ($fleet as $vessel) {
 				$this->writeVessel($vessel, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::Lighthouse, Visibility::Farsight])) {
 					foreach (Lemuria::Report()->getAll($vessel) as $message) {
