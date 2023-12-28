@@ -2497,6 +2497,25 @@ REGIONTYPES
 "Wüste"
 "Wald"
 
+BUILDINGTYPE "Kräuterhütte"
+"Kräuterhütte";name
+3;level
+RAWMATERIALS
+5;Holz
+2;Stein
+1;Eisen
+100;Silber
+TALENTBONI
+1;Kräuterkunde
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
 BUILDINGTYPE "Werkstatt"
 "Werkstatt";name
 4;level
