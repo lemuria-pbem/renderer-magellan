@@ -2642,6 +2642,23 @@ REGIONTYPES
 "Wüste"
 "Wald"
 
+BUILDINGTYPE "Forsthaus"
+"Forsthaus";name
+3;level
+RAWMATERIALS
+5;Holz
+2;Stein
+2;Eisen
+50;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
 BUILDINGTYPE "Markt"
 "Markt";name
 2;level
