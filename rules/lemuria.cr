@@ -2148,6 +2148,18 @@ ITEM "Greifenfedern"
 0.01;weight
 1;storeinbonw
 
+ITEM "Pegasusfeder"
+"Pegasusfeder";name
+"trophies";category
+0.01;weight
+1;storeinbonw
+
+ITEM "Pegasusfedern"
+"Pegasusfedern";name
+"trophies";category
+0.01;weight
+1;storeinbonw
+
 ITEM "Totenschädel"
 "Totenschädel";name
 "trophies";category
@@ -2310,6 +2322,60 @@ CASTLETYPE "Megapolis"
 0;tradetax
 RAWMATERIALS
 1;Stein
+
+BUILDINGTYPE "Jagdhaus"
+"Jagdhaus";name
+3;level
+MAINTENANCE
+100;Silber
+RAWMATERIALS
+5;Holz
+3;Stein
+1;Eisen
+50;Silber
+REGIONTYPES
+"Ebene"
+"Wald"
+
+BUILDINGTYPE "Oase"
+"Oase";name
+3;level
+MAINTENANCE
+100;Silber
+RAWMATERIALS
+3;Holz
+5;Stein
+1;Eisen
+50;Silber
+REGIONTYPES
+"Wüste"
+
+BUILDINGTYPE "Pilzhöhle"
+"Pilzhöhle";name
+2;level
+MAINTENANCE
+100;Silber
+RAWMATERIALS
+1;Holz
+2;Stein
+1;Eisen
+20;Silber
+REGIONTYPES
+"Berge"
+"Gletscher"
+
+BUILDINGTYPE "Plantage"
+"Plantage";name
+2;level
+MAINTENANCE
+100;Silber
+RAWMATERIALS
+2;Holz
+1;Stein
+1;Eisen
+20;Silber
+REGIONTYPES
+"Sumpf"
 
 BUILDINGTYPE "Holzfällerhütte"
 "Holzfällerhütte";name

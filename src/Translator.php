@@ -30,6 +30,7 @@ final class Translator
 		'Myrrh'          => true,
 		'Oil'            => true,
 		'Olibanum'       => true,
+		'Pegasusfeather' => true,
 		'Silk'           => true,
 		'Silver'         => true,
 		'Skull'          => true,
