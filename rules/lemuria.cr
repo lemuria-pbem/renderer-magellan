@@ -2678,6 +2678,25 @@ REGIONTYPES
 "Wüste"
 "Wald"
 
+BUILDINGTYPE "Gewächshaus"
+"Gewächshaus";name
+5;level
+MAINTENANCE
+100;Silber
+RAWMATERIALS
+3;Holz
+3;Stein
+6;Eisen
+250;Silber
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
 BUILDINGTYPE "Markt"
 "Markt";name
 2;level
@@ -2871,6 +2890,34 @@ BUILDINGTYPE "Steinkreis"
 RAWMATERIALS
 5;Stein
 5;Holz
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Geschäft"
+"Geschäft";name
+0;level
+0;maxsize
+RAWMATERIALS
+REGIONTYPES
+"Berge"
+"Ebene"
+"Gletscher"
+"Hochland"
+"Sumpf"
+"Wüste"
+"Wald"
+
+BUILDINGTYPE "Höhle"
+"Höhle";name
+0;level
+0;maxsize
+RAWMATERIALS
 REGIONTYPES
 "Berge"
 "Ebene"
