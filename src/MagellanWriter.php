@@ -58,7 +58,6 @@ use Lemuria\Model\Fantasya\Commodity\Stone;
 use Lemuria\Model\Fantasya\Commodity\Wood;
 use Lemuria\Model\Fantasya\Construction;
 use Lemuria\Model\Fantasya\Continent;
-use Lemuria\Model\Fantasya\Exception\JsonException;
 use Lemuria\Model\Fantasya\Exception\WorldMapException;
 use Lemuria\Model\Fantasya\Extension\Duty;
 use Lemuria\Model\Fantasya\Extension\Fee;
@@ -83,6 +82,7 @@ use Lemuria\Model\Fantasya\Vessel;
 use Lemuria\Model\Fantasya\World\PartyMap;
 use Lemuria\Model\World\Direction;
 use Lemuria\Model\World\Geometry;
+use Lemuria\Model\World\Map;
 use Lemuria\Id;
 use Lemuria\Lemuria;
 use Lemuria\Renderer\PathFactory;
@@ -126,12 +126,12 @@ class MagellanWriter implements Writer
 	 */
 	protected $file;
 
+	protected Map $map;
+
 	/**
 	 * @var array<string, mixed>
 	 */
 	private array $variables = [];
-
-	private readonly PartyMap $map;
 
 	private Filter $filter;
 
@@ -167,9 +167,6 @@ class MagellanWriter implements Writer
 		return $this;
 	}
 
-	/**
-	 * @throws JsonException
-	 */
 	public function render(Id $entity): static {
 		$party = Party::get($entity);
 		$this->context->setParty($party);
@@ -301,9 +298,6 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
-	/**
-	 * @throws JsonException
-	 */
 	protected function writeUnit(Unit $unit): void {
 		$aura       = $unit->Aura();
 		$disguise   = $unit->Disguise();
@@ -359,51 +353,6 @@ class MagellanWriter implements Writer
 		$this->writeResources($unit->Inventory(), $unit->Treasury());
 		$this->writeOrders($unit);
 		$this->writeEffects($unit);
-	}
-
-	protected function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
-		$party     = $census->getParty($unit)?->Id()->Id() ?? 0;
-		$isMonster = $unit->Party()->Type() === Type::Monster;
-		$disguise  = $unit->Disguise();
-		$data      = [
-			'EINHEIT ' . $unit->Id()->Id(),
-			'Name'          => $unit->Name(),
-			'Beschr'        => $this->compileForeignUnitDescription($unit),
-			'Partei'        => $party,
-			'Parteitarnung' => $disguise !== false ? 1 : 0,
-			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
-			'Verraeter'     => $disguise === $census->Party() ? 1 : 0,
-			'Anzahl'        => $unit->Size(),
-			'Typ'           => $this->translateSingleton($unit->Race()),
-			'Burg'          => $unit->Construction()?->Id()->Id(),
-			'Schiff'        => $unit->Vessel()?->Id()->Id(),
-			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
-			'hp'            => Translator::HEALTH[0]
-		];
-		if (!$party || $isMonster) {
-			unset($data['Partei']);
-		}
-		if ($disguise === false || $isMonster) {
-			unset($data['Parteitarnung']);
-			unset($data['Anderepartei']);
-			unset($data['Verraeter']);
-		}
-		if (!$unit->Construction()) {
-			unset($data['Burg']);
-		}
-		if (!$unit->Vessel()) {
-			unset($data['Schiff']);
-		}
-		if (!$unit->IsGuarding()) {
-			unset($data['bewacht']);
-		}
-		$this->writeData($data);
-
-		if ($isMonster) {
-			$this->writeMonsterResources($unit->Inventory());
-		} elseif ($seenByGuards || $unit->IsGuarding()) {
-			$this->writeResources(new Observables($unit->Inventory()));
-		}
 	}
 
 	protected function writeRoads(Region $region): void {
@@ -511,6 +460,42 @@ class MagellanWriter implements Writer
 		$this->writeData($data);
 	}
 
+	protected function compileRealmDescription(Region $region) : string {
+		$description = trim($region->Description());
+		$realm       = $region->Realm();
+		$central     = $realm?->Territory()->Central();
+		if ($central) {
+			if ($description) {
+				$description .= str_ends_with($description, '.') ? ' ' : '. ';
+			}
+			if ($region === $central) {
+				$description     .= 'Zentralregion des Reiches ' . $realm->Name() . ' [' . $realm->Identifier() . '].';
+				$realmDescription = $realm->Description();
+				if ($realmDescription) {
+					if (!str_ends_with($realmDescription, '.')) {
+						$realmDescription .= '.';
+					}
+					$description .= ' ' . $realmDescription;
+				}
+			} else {
+				$description .= 'Die Region gehört zum Reich ' . $realm->Name() . ' [' . $realm->Identifier() . '].';
+			}
+		}
+		return $description;
+	}
+
+	protected function compileForeignUnitDescription(Unit $unit): string {
+		$description = $unit->Description();
+		$direction   = $unit->GuardDirection();
+		if ($direction !== Direction::None) {
+			if ($description) {
+				$description .= ' ';
+			}
+			$description .= 'Bewacht die Grenze nach ' . $this->dictionary->get('world', $direction->value) . '.';
+		}
+		return $description;
+	}
+
 	private function initVariables(): void {
 		$this->variables['$DATE']    = time();
 		$this->variables['$TURN']    = Lemuria::Calendar()->Round();
@@ -574,9 +559,51 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	/**
-	 * @throws JsonException
-	 */
+	private function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
+		$party     = $census->getParty($unit)?->Id()->Id() ?? 0;
+		$isMonster = $unit->Party()->Type() === Type::Monster;
+		$disguise  = $unit->Disguise();
+		$data      = [
+			'EINHEIT ' . $unit->Id()->Id(),
+			'Name'          => $unit->Name(),
+			'Beschr'        => $this->compileForeignUnitDescription($unit),
+			'Partei'        => $party,
+			'Parteitarnung' => $disguise !== false ? 1 : 0,
+			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
+			'Verraeter'     => $disguise === $census->Party() ? 1 : 0,
+			'Anzahl'        => $unit->Size(),
+			'Typ'           => $this->translateSingleton($unit->Race()),
+			'Burg'          => $unit->Construction()?->Id()->Id(),
+			'Schiff'        => $unit->Vessel()?->Id()->Id(),
+			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
+			'hp'            => Translator::HEALTH[0]
+		];
+		if (!$party || $isMonster) {
+			unset($data['Partei']);
+		}
+		if ($disguise === false || $isMonster) {
+			unset($data['Parteitarnung']);
+			unset($data['Anderepartei']);
+			unset($data['Verraeter']);
+		}
+		if (!$unit->Construction()) {
+			unset($data['Burg']);
+		}
+		if (!$unit->Vessel()) {
+			unset($data['Schiff']);
+		}
+		if (!$unit->IsGuarding()) {
+			unset($data['bewacht']);
+		}
+		$this->writeData($data);
+
+		if ($isMonster) {
+			$this->writeMonsterResources($unit->Inventory());
+		} elseif ($seenByGuards || $unit->IsGuarding()) {
+			$this->writeResources(new Observables($unit->Inventory()));
+		}
+	}
+
 	private function writeMagic(Party $party): void {
 		$id = 1;
 		foreach ($party->SpellBook() as $spell) {
@@ -641,9 +668,6 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	/**
-	 * @throws JsonException
-	 */
 	private function writeRegions(Outlook $outlook): void {
 		$atlas = new TravelAtlas($outlook->Census()->Party());
 		try {
@@ -669,9 +693,6 @@ class MagellanWriter implements Writer
 		$this->writeBeyond($beyond);
 	}
 
-	/**
-	 * @throws JsonException
-	 */
 	private function writeRegion(Region $region, Visibility $visibility, Outlook $outlook): void {
 		$coordinates  = $this->map->getCoordinates($region);
 		$resources    = $region->Resources();
@@ -680,9 +701,9 @@ class MagellanWriter implements Writer
 
 		$magellanVisibility = match ($visibility) {
 			Visibility::WithUnit, Visibility::Farsight => '',
-			Visibility::Travelled                       => 'travel',
-			Visibility::Lighthouse                      => 'lighthouse',
-			default                                     => 'neighbour'
+			Visibility::Travelled                      => 'travel',
+			Visibility::Lighthouse                     => 'lighthouse',
+			default                                    => 'neighbour'
 		};
 
 		if (empty($magellanVisibility)) {
@@ -861,9 +882,6 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	/**
-	 * @throws JsonException
-	 */
 	private function writeKnowledge(Unit $unit): void {
 		$knowledge = $unit->Knowledge();
 		if (count($knowledge) > 0) {
@@ -885,9 +903,6 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	/**
-	 * @throws JsonException
-	 */
 	private function writeSpells(Unit $unit): void {
 		$spellBook = $unit->Party()->SpellBook();
 		if (count($spellBook) > 0) {
@@ -1173,46 +1188,10 @@ class MagellanWriter implements Writer
 		return $description;
 	}
 
-	private function compileForeignUnitDescription(Unit $unit): string {
-		$description = $unit->Description();
-		$direction   = $unit->GuardDirection();
-		if ($direction !== Direction::None) {
-			if ($description) {
-				$description .= ' ';
-			}
-			$description .= 'Bewacht die Grenze nach ' . $this->dictionary->get('world', $direction->value) . '.';
-		}
-		return $description;
-	}
-
 	private function compileRegionDescription(Region $region): string {
 		$description = $this->compileRealmDescription($region);
 		$description = $this->compileQuotasDescription($description, $region);
 		return $this->compileShortTreasuryDescription($description, $region->Treasury());
-	}
-
-	private function compileRealmDescription(Region $region) : string {
-		$description = trim($region->Description());
-		$realm       = $region->Realm();
-		$central     = $realm?->Territory()->Central();
-		if ($central) {
-			if ($description) {
-				$description .= str_ends_with($description, '.') ? ' ' : '. ';
-			}
-			if ($region === $central) {
-				$description     .= 'Zentralregion des Reiches ' . $realm->Name() . ' [' . $realm->Identifier() . '].';
-				$realmDescription = $realm->Description();
-				if ($realmDescription) {
-					if (!str_ends_with($realmDescription, '.')) {
-						$realmDescription .= '.';
-					}
-					$description .= ' ' . $realmDescription;
-				}
-			} else {
-				$description .= 'Die Region gehört zum Reich ' . $realm->Name() . ' [' . $realm->Identifier() . '].';
-			}
-		}
-		return $description;
 	}
 
 	private function compileQuotasDescription(string $description, Region $region) : string {
