@@ -3,6 +3,9 @@ declare(strict_types = 1);
 namespace Lemuria\Renderer\Magellan;
 
 use Lemuria\Engine\Fantasya\Factory\Model\Wage;
+use Lemuria\Lemuria;
+use Lemuria\Model\Fantasya\Landmass;
+use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\World;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Command\Entertain;
@@ -25,8 +28,15 @@ class WorldInspector extends MagellanWriter
 
 	private World $map;
 
+	private ?Party $party = null;
+
+	private ?Landmass $regions = null;
+
+	private bool $withInfrastructure = false;
+
 	public function __construct(PathFactory $pathFactory) {
 		parent::__construct($pathFactory);
+		$this->map = Lemuria::World();
 	}
 
 	public function render(Id $entity): static {
@@ -37,6 +47,15 @@ class WorldInspector extends MagellanWriter
 
 		$this->writeHeader();
 
+		if ($this->party) {
+			$this->writeParty($this->party);
+			foreach (Party::all() as $party) {
+				if ($party !== $this->party && !$party->hasRetired()) {
+					$this->writeForeignParty($party, true);
+				}
+			}
+		}
+
 		$continent = Continent::get(new Id(1));
 		$this->writeIsland($continent);
 		$this->writeRegions();
@@ -45,6 +64,21 @@ class WorldInspector extends MagellanWriter
 			throw new \RuntimeException('Could not close file ' . $this->path . '.');
 		}
 		$this->file = null;
+		return $this;
+	}
+
+	public function withInfrastructure(bool $withInfrastructure = true): static {
+		$this->withInfrastructure = $withInfrastructure;
+		return $this;
+	}
+
+	public function setParty(Party $party): static {
+		$this->party = $party;
+		return $this;
+	}
+
+	public function setRegions(Landmass $regions): static {
+		$this->regions = $regions;
 		return $this;
 	}
 
@@ -59,7 +93,8 @@ class WorldInspector extends MagellanWriter
 	}
 
 	private function writeRegions(): void {
-		foreach (Region::all() as $region) {
+		$regions = $this->regions ?: Region::all();
+		foreach ($regions as $region) {
 			$this->writeRegion($region);
 		}
 	}
@@ -97,6 +132,7 @@ class WorldInspector extends MagellanWriter
 		}
 
 		$this->writeData($data);
+		$this->writeRoads($region);
 
 		$castle = $intelligence->getCastle();
 		if ($castle?->Size() > Site::MAX_SIZE) {
@@ -119,6 +155,25 @@ class WorldInspector extends MagellanWriter
 					'number' => $item->Count()
 				];
 				$this->writeData($data);
+			}
+		}
+
+		if ($this->withInfrastructure) {
+			$estate = clone $region->Estate();
+			foreach ($estate->sort() as $construction) {
+				$this->writeConstruction($construction);
+				$unit = $construction->Inhabitants()->Owner();
+				if ($unit) {
+					$this->writeUnit($unit);
+				}
+			}
+			$fleet = clone $region->Fleet();
+			foreach ($fleet->sort() as $vessel) {
+				$this->writeVessel($vessel);
+				$unit = $vessel->Passengers()->Owner();
+				if ($unit) {
+					$this->writeUnit($unit);
+				}
 			}
 		}
 	}

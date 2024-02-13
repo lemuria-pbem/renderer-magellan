@@ -250,6 +250,242 @@ class MagellanWriter implements Writer
 		}
 	}
 
+	protected function writeParty(Party $party): void {
+		$data = [
+			'PARTEI ' . $party->Id()->Id(),
+			'locale'              => self::HEADER['locale'],
+			'age'                 => Lemuria::Calendar()->Round() - $party->Round() + 1,
+			'Optionen'            => 1 + 2 + 8 + 64 + 256 + 512,
+			'Punkte'              => 0,
+			'Punktedurchschnitt'  => 0,
+			'Typ'                 => $this->translateSingleton($party->Race()),
+			'Rekrutierungskosten' => $party->Race()->Recruiting(),
+			'Anzahl Personen'     => $party->People()->count(),
+			'Parteiname'          => $party->Name(),
+			'email'               => $party->Banner(),
+			'banner'              => $party->Description(),
+		];
+		$this->writeData($data);
+
+		foreach ($party->Diplomacy() as $relation) {
+			$this->writeAlliance($relation);
+		}
+		foreach (Lemuria::Report()->getAll($party) as $message) {
+			$this->writeMessage($message);
+		}
+		foreach ($party->People() as $unit) {
+			foreach (Lemuria::Report()->getAll($unit) as $message) {
+				$this->writeUnitMessage($message, $unit);
+			}
+		}
+		foreach (Lemuria::Hostilities()->findFor($party) as $battleLog) {
+			$this->writeBattle($battleLog);
+		}
+	}
+
+	protected function writeForeignParty(Party $party, bool $isKnown): void {
+		$data = [
+			'PARTEI ' . $party->Id()->Id(),
+			'locale'     => self::HEADER['locale'],
+			'age'        => 1,
+			'Typ'        => $this->translateSingleton($party->Race()),
+			'Parteiname' => $party->Name(),
+			'email'      => $party->Banner(),
+			'banner'     => $party->Description(),
+		];
+		if (!$isKnown) {
+			unset($data['Typ']);
+			//unset($data['Parteiname']);
+			unset($data['banner']);
+		}
+		$this->writeData($data);
+	}
+
+	/**
+	 * @throws JsonException
+	 */
+	protected function writeUnit(Unit $unit): void {
+		$aura       = $unit->Aura();
+		$disguise   = $unit->Disguise();
+		$health     = $unit->Health();
+		$healthCode = match (true) {
+			$health <= 0.35 => 3,
+			$health <= 0.7  => 2,
+			$health < 1.0   => 1,
+			default         => 0
+		};
+		$data     = [
+			'EINHEIT ' . $unit->Id()->Id(),
+			'Name'          => $unit->Name(),
+			'Beschr'        => $this->compileUnitDescription($unit),
+			'Partei'        => $unit->Party()->Id()->Id(),
+			'Parteitarnung' => $disguise !== false ? 1 : 0,
+			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
+			'Anzahl'        => $unit->Size(),
+			'Typ'           => $this->translateSingleton($unit->Race()),
+			'Burg'          => $unit->Construction()?->Id()->Id(),
+			'Schiff'        => $unit->Vessel()?->Id()->Id(),
+			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
+			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()->value] ?? 4,
+			'hp'            => Translator::HEALTH[$healthCode],
+			'weight'        => $unit->Weight()
+		];
+		if (!$unit->IsLooting()) {
+			$data['privat'] = Translator::MISC['isNotLooting'];
+		}
+		if ($this->hasHunger($unit)) {
+			$data['hunger'] = 1;
+		}
+		if ($aura) {
+			$data['Aura']    = $aura->Aura();
+			$data['Auramax'] = $aura->Maximum();
+		}
+		if ($disguise === false) {
+			unset($data['Parteitarnung']);
+			unset($data['Anderepartei']);
+		}
+		if (!$unit->Construction()) {
+			unset($data['Burg']);
+		}
+		if (!$unit->Vessel()) {
+			unset($data['Schiff']);
+		}
+		if (!$unit->IsGuarding()) {
+			unset($data['bewacht']);
+		}
+		$this->writeData($data);
+
+		$this->writeKnowledge($unit);
+		$this->writeResources($unit->Inventory(), $unit->Treasury());
+		$this->writeOrders($unit);
+		$this->writeEffects($unit);
+	}
+
+	protected function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
+		$party     = $census->getParty($unit)?->Id()->Id() ?? 0;
+		$isMonster = $unit->Party()->Type() === Type::Monster;
+		$disguise  = $unit->Disguise();
+		$data      = [
+			'EINHEIT ' . $unit->Id()->Id(),
+			'Name'          => $unit->Name(),
+			'Beschr'        => $this->compileForeignUnitDescription($unit),
+			'Partei'        => $party,
+			'Parteitarnung' => $disguise !== false ? 1 : 0,
+			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
+			'Verraeter'     => $disguise === $census->Party() ? 1 : 0,
+			'Anzahl'        => $unit->Size(),
+			'Typ'           => $this->translateSingleton($unit->Race()),
+			'Burg'          => $unit->Construction()?->Id()->Id(),
+			'Schiff'        => $unit->Vessel()?->Id()->Id(),
+			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
+			'hp'            => Translator::HEALTH[0]
+		];
+		if (!$party || $isMonster) {
+			unset($data['Partei']);
+		}
+		if ($disguise === false || $isMonster) {
+			unset($data['Parteitarnung']);
+			unset($data['Anderepartei']);
+			unset($data['Verraeter']);
+		}
+		if (!$unit->Construction()) {
+			unset($data['Burg']);
+		}
+		if (!$unit->Vessel()) {
+			unset($data['Schiff']);
+		}
+		if (!$unit->IsGuarding()) {
+			unset($data['bewacht']);
+		}
+		$this->writeData($data);
+
+		if ($isMonster) {
+			$this->writeMonsterResources($unit->Inventory());
+		} elseif ($seenByGuards || $unit->IsGuarding()) {
+			$this->writeResources(new Observables($unit->Inventory()));
+		}
+	}
+
+	protected function writeRoads(Region $region): void {
+		$roads = $region->Roads();
+		foreach (self::ROADS as $road => $direction) {
+			if ($region->hasRoad($direction)) {
+				$percent = 100;
+			} elseif ($roads && $roads[$direction] > 0.0) {
+				$percent = (int)floor(100.0 * $roads[$direction]);
+			} else {
+				continue;
+			}
+			$data = [
+				'GRENZE ' . $region->Id()->Id() . $road,
+				'typ'      => 'Straße',
+				'richtung' => $road,
+				'prozent'  => $percent
+			];
+			$this->writeData($data);
+		}
+	}
+
+	protected function writeConstruction(Construction $construction, string $visibility = ''): void {
+		$owner = $construction->Inhabitants()->Owner();
+		$data  = [
+			'BURG ' . $construction->Id()->Id(),
+			'Typ'      => $this->translateSingleton($construction->Building()),
+			'Name'     => $construction->Name(),
+			'Beschr'   => $this->compileCostructionDescription($construction),
+			'Groesse'  => $construction->Size(),
+			'Besitzer' => $owner?->Id()->Id(),
+			'Partei'   => $owner?->Party()->Id()->Id()
+		];
+		if (!$owner) {
+			unset($data['Besitzer']);
+			unset($data['Partei']);
+		}
+		if (!empty($visibility)) {
+			unset($data['Besitzer']);
+		}
+		$this->writeData($data);
+		$this->writeEffects($construction);
+	}
+
+	protected function writeVessel(Vessel $vessel, string $visibility = ''): void {
+		$ship       = $vessel->Ship();
+		$size       = (int)round($vessel->Completion() * $ship->Wood());
+		$coast      = Translator::COAST[$vessel->Anchor()->value] ?? null;
+		$passengers = $vessel->Passengers();
+		$captain    = $passengers->Owner();
+		$cargo      = 0;
+		foreach ($passengers as $unit) {
+			$cargo += $unit->Weight();
+		}
+		$data = [
+			'SCHIFF ' . $vessel->Id()->Id(),
+			'Typ'      => $this->translateSingleton($ship),
+			'Name'     => $vessel->Name(),
+			'Beschr'   => $this->compileVesselDescription($vessel),
+			'Groesse'  => $size,
+			'Schaden'  => (int)round(100.0 * (1.0 - $vessel->Completion())),
+			'cargo'    => $cargo,
+			'capacity' => $ship->Payload(),
+			'Kapitaen' => $captain?->Id()->Id(),
+			'Partei'   => $captain?->Party()->Id()->Id(),
+			'Kueste'   => $coast
+		];
+		if (!$captain) {
+			unset($data['Kapitaen']);
+			unset($data['Partei']);
+		}
+		if (!empty($visibility)) {
+			unset($data['cargo']);
+			unset($data['Kapitaen']);
+		}
+		if ($coast === null) {
+			unset($data['Kueste']);
+		}
+		$this->writeData($data);
+		$this->writeEffects($vessel);
+	}
+
 	protected function writeMarket(?Luxuries $luxuries): void {
 		if ($luxuries) {
 			$data = [
@@ -305,57 +541,6 @@ class MagellanWriter implements Writer
 		foreach ($parties as $id => $foreign) {
 			$this->writeForeignParty($foreign, $acquaintances->has(new Id($id)));
 		}
-	}
-
-	private function writeParty(Party $party): void {
-		$data = [
-			'PARTEI ' . $party->Id()->Id(),
-			'locale'              => self::HEADER['locale'],
-			'age'                 => Lemuria::Calendar()->Round() - $party->Round() + 1,
-			'Optionen'            => 1 + 2 + 8 + 64 + 256 + 512,
-			'Punkte'              => 0,
-			'Punktedurchschnitt'  => 0,
-			'Typ'                 => $this->translateSingleton($party->Race()),
-			'Rekrutierungskosten' => $party->Race()->Recruiting(),
-			'Anzahl Personen'     => $party->People()->count(),
-			'Parteiname'          => $party->Name(),
-			'email'               => $party->Banner(),
-			'banner'              => $party->Description(),
-		];
-		$this->writeData($data);
-
-		foreach ($party->Diplomacy() as $relation) {
-			$this->writeAlliance($relation);
-		}
-		foreach (Lemuria::Report()->getAll($party) as $message) {
-			$this->writeMessage($message);
-		}
-		foreach ($party->People() as $unit) {
-			foreach (Lemuria::Report()->getAll($unit) as $message) {
-				$this->writeUnitMessage($message, $unit);
-			}
-		}
-		foreach (Lemuria::Hostilities()->findFor($party) as $battleLog) {
-			$this->writeBattle($battleLog);
-		}
-	}
-
-	private function writeForeignParty(Party $party, bool $isKnown): void {
-		$data = [
-			'PARTEI ' . $party->Id()->Id(),
-			'locale'     => self::HEADER['locale'],
-			'age'        => 1,
-			'Typ'        => $this->translateSingleton($party->Race()),
-			'Parteiname' => $party->Name(),
-			'email'      => $party->Banner(),
-			'banner'     => $party->Description(),
-		];
-		if (!$isKnown) {
-			unset($data['Typ']);
-			//unset($data['Parteiname']);
-			unset($data['banner']);
-		}
-		$this->writeData($data);
 	}
 
 	private function writeAlliance(Relation $relation): void {
@@ -674,191 +859,6 @@ class MagellanWriter implements Writer
 			];
 			$this->writeData($data);
 		}
-	}
-
-	private function writeRoads(Region $region): void {
-		$roads = $region->Roads();
-		foreach (self::ROADS as $road => $direction) {
-			if ($region->hasRoad($direction)) {
-				$percent = 100;
-			} elseif ($roads && $roads[$direction] > 0.0) {
-				$percent = (int)floor(100.0 * $roads[$direction]);
-			} else {
-				continue;
-			}
-			$data = [
-				'GRENZE ' . $region->Id()->Id() . $road,
-				'typ'      => 'Straße',
-				'richtung' => $road,
-				'prozent'  => $percent
-			];
-			$this->writeData($data);
-		}
-	}
-
-	/**
-	 * @throws JsonException
-	 */
-	private function writeUnit(Unit $unit): void {
-		$aura       = $unit->Aura();
-		$disguise   = $unit->Disguise();
-		$health     = $unit->Health();
-		$healthCode = match (true) {
-			$health <= 0.35 => 3,
-			$health <= 0.7  => 2,
-			$health < 1.0   => 1,
-			default         => 0
-		};
-		$data     = [
-			'EINHEIT ' . $unit->Id()->Id(),
-			'Name'          => $unit->Name(),
-			'Beschr'        => $this->compileUnitDescription($unit),
-			'Partei'        => $unit->Party()->Id()->Id(),
-			'Parteitarnung' => $disguise !== false ? 1 : 0,
-			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
-			'Anzahl'        => $unit->Size(),
-			'Typ'           => $this->translateSingleton($unit->Race()),
-			'Burg'          => $unit->Construction()?->Id()->Id(),
-			'Schiff'        => $unit->Vessel()?->Id()->Id(),
-			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
-			'Kampfstatus'   => Translator::BATTLE_ROW[$unit->BattleRow()->value] ?? 4,
-			'hp'            => Translator::HEALTH[$healthCode],
-			'weight'        => $unit->Weight()
-		];
-		if (!$unit->IsLooting()) {
-			$data['privat'] = Translator::MISC['isNotLooting'];
-		}
-		if ($this->hasHunger($unit)) {
-			$data['hunger'] = 1;
-		}
-		if ($aura) {
-			$data['Aura']    = $aura->Aura();
-			$data['Auramax'] = $aura->Maximum();
-		}
-		if ($disguise === false) {
-			unset($data['Parteitarnung']);
-			unset($data['Anderepartei']);
-		}
-		if (!$unit->Construction()) {
-			unset($data['Burg']);
-		}
-		if (!$unit->Vessel()) {
-			unset($data['Schiff']);
-		}
-		if (!$unit->IsGuarding()) {
-			unset($data['bewacht']);
-		}
-		$this->writeData($data);
-
-		$this->writeKnowledge($unit);
-		$this->writeResources($unit->Inventory(), $unit->Treasury());
-		$this->writeOrders($unit);
-		$this->writeEffects($unit);
-	}
-
-	private function writeForeignUnit(Unit $unit, Census $census, bool $seenByGuards): void {
-		$party     = $census->getParty($unit)?->Id()->Id() ?? 0;
-		$isMonster = $unit->Party()->Type() === Type::Monster;
-		$disguise  = $unit->Disguise();
-		$data      = [
-			'EINHEIT ' . $unit->Id()->Id(),
-			'Name'          => $unit->Name(),
-			'Beschr'        => $this->compileForeignUnitDescription($unit),
-			'Partei'        => $party,
-			'Parteitarnung' => $disguise !== false ? 1 : 0,
-			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
-			'Verraeter'     => $disguise === $census->Party() ? 1 : 0,
-			'Anzahl'        => $unit->Size(),
-			'Typ'           => $this->translateSingleton($unit->Race()),
-			'Burg'          => $unit->Construction()?->Id()->Id(),
-			'Schiff'        => $unit->Vessel()?->Id()->Id(),
-			'bewacht'       => $unit->IsGuarding() ? 1 : 0,
-			'hp'            => Translator::HEALTH[0]
-		];
-		if (!$party || $isMonster) {
-			unset($data['Partei']);
-		}
-		if ($disguise === false || $isMonster) {
-			unset($data['Parteitarnung']);
-			unset($data['Anderepartei']);
-			unset($data['Verraeter']);
-		}
-		if (!$unit->Construction()) {
-			unset($data['Burg']);
-		}
-		if (!$unit->Vessel()) {
-			unset($data['Schiff']);
-		}
-		if (!$unit->IsGuarding()) {
-			unset($data['bewacht']);
-		}
-		$this->writeData($data);
-
-		if ($isMonster) {
-			$this->writeMonsterResources($unit->Inventory());
-		} elseif ($seenByGuards || $unit->IsGuarding()) {
-			$this->writeResources(new Observables($unit->Inventory()));
-		}
-	}
-
-	private function writeConstruction(Construction $construction, string $visibility): void {
-		$owner = $construction->Inhabitants()->Owner();
-		$data  = [
-			'BURG ' . $construction->Id()->Id(),
-			'Typ'      => $this->translateSingleton($construction->Building()),
-			'Name'     => $construction->Name(),
-			'Beschr'   => $this->compileCostructionDescription($construction),
-			'Groesse'  => $construction->Size(),
-			'Besitzer' => $owner?->Id()->Id(),
-			'Partei'   => $owner?->Party()->Id()->Id()
-		];
-		if (!$owner) {
-			unset($data['Besitzer']);
-			unset($data['Partei']);
-		}
-		if (!empty($visibility)) {
-			unset($data['Besitzer']);
-		}
-		$this->writeData($data);
-		$this->writeEffects($construction);
-	}
-
-	private function writeVessel(Vessel $vessel, string $visibility): void {
-		$ship       = $vessel->Ship();
-		$size       = (int)round($vessel->Completion() * $ship->Wood());
-		$coast      = Translator::COAST[$vessel->Anchor()->value] ?? null;
-		$passengers = $vessel->Passengers();
-		$captain    = $passengers->Owner();
-		$cargo      = 0;
-		foreach ($passengers as $unit) {
-			$cargo += $unit->Weight();
-		}
-		$data = [
-			'SCHIFF ' . $vessel->Id()->Id(),
-			'Typ'      => $this->translateSingleton($ship),
-			'Name'     => $vessel->Name(),
-			'Beschr'   => $this->compileVesselDescription($vessel),
-			'Groesse'  => $size,
-			'Schaden'  => (int)round(100.0 * (1.0 - $vessel->Completion())),
-			'cargo'    => $cargo,
-			'capacity' => $ship->Payload(),
-			'Kapitaen' => $captain?->Id()->Id(),
-			'Partei'   => $captain?->Party()->Id()->Id(),
-			'Kueste'   => $coast
-		];
-		if (!$captain) {
-			unset($data['Kapitaen']);
-			unset($data['Partei']);
-		}
-		if (!empty($visibility)) {
-			unset($data['cargo']);
-			unset($data['Kapitaen']);
-		}
-		if ($coast === null) {
-			unset($data['Kueste']);
-		}
-		$this->writeData($data);
-		$this->writeEffects($vessel);
 	}
 
 	/**
