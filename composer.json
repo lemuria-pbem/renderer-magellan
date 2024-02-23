@@ -15,10 +15,10 @@
 
 	"require": {
 		"php": "~8.3",
-		"lemuria-pbem/engine-fantasya": "~1.5.0|dev-feature/NPC",
-		"lemuria-pbem/lemuria": "~1.5.0|dev-feature/NPC",
-		"lemuria-pbem/model-fantasya": "~1.5.0|dev-feature/NPC",
-		"lemuria-pbem/statistics-fantasya": "~1.5.0|dev-feature/NPC"
+		"lemuria-pbem/engine-fantasya": "~1.5.0|dev-master",
+		"lemuria-pbem/lemuria": "~1.5.0|dev-master",
+		"lemuria-pbem/model-fantasya": "~1.5.0|dev-master",
+		"lemuria-pbem/statistics-fantasya": "~1.5.0|dev-master"
 	},
 	"repositories": [
 		{
