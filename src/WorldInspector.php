@@ -228,7 +228,7 @@ class WorldInspector extends MagellanWriter
 			'Anderepartei'  => $disguise ? $disguise->Id()->Id() : 0,
 			'Verraeter'     => $disguise === $this->party ? 1 : 0,
 			'Anzahl'        => $unit->Size(),
-			'Typ'           => $this->translateSingleton($unit->Race()),
+			'Typ'           => $this->translateSingleton($unit->Race(), 1),
 			'Burg'          => $unit->Construction()?->Id()->Id(),
 			'Schiff'        => $unit->Vessel()?->Id()->Id(),
 			'bewacht'       => $unit->IsGuarding() ? 1 : 0,

@@ -3005,3 +3005,7 @@ REGIONTYPE "See"
 FACTION "22"
 22;id
 "true";isMonster
+
+FACTION "35"
+22;id
+"true";isMonster
