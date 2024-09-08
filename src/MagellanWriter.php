@@ -213,7 +213,7 @@ class MagellanWriter implements Writer
 			$data = [
 				'ISLAND ' . $continent->Id()->Id(),
 				'Name'   => $continent->Name(),
-				'Beschr' => $continent->Description()
+				'Beschr' => $this->clearDescription($continent->Description())
 			];
 			$this->writeData($data);
 		}
@@ -260,7 +260,7 @@ class MagellanWriter implements Writer
 			'Anzahl Personen'     => $party->People()->count(),
 			'Parteiname'          => $party->Name(),
 			'email'               => $party->Banner(),
-			'banner'              => $party->Description(),
+			'banner'              => $this->clearDescription($party->Description()),
 		];
 		$this->writeData($data);
 
@@ -288,7 +288,7 @@ class MagellanWriter implements Writer
 			'Typ'        => $this->translateSingleton($party->Race(), 1),
 			'Parteiname' => $party->Name(),
 			'email'      => $party->Banner(),
-			'banner'     => $party->Description(),
+			'banner'     => $this->clearDescription($party->Description()),
 		];
 		if (!$isKnown) {
 			unset($data['Typ']);
@@ -461,7 +461,7 @@ class MagellanWriter implements Writer
 	}
 
 	protected function compileRealmDescription(Region $region) : string {
-		$description = trim($region->Description());
+		$description = $this->clearDescription($region->Description());
 		$realm       = $region->Realm();
 		$central     = $realm?->Territory()->Central();
 		if ($central) {
@@ -470,7 +470,7 @@ class MagellanWriter implements Writer
 			}
 			if ($region === $central) {
 				$description     .= 'Zentralregion des Reiches ' . $realm->Name() . ' [' . $realm->Identifier() . '].';
-				$realmDescription = $realm->Description();
+				$realmDescription = $this->clearDescription($realm->Description());
 				if ($realmDescription) {
 					if (!str_ends_with($realmDescription, '.')) {
 						$realmDescription .= '.';
@@ -485,7 +485,7 @@ class MagellanWriter implements Writer
 	}
 
 	protected function compileForeignUnitDescription(Unit $unit): string {
-		$description = $unit->Description();
+		$description = $this->clearDescription($unit->Description());
 		$direction   = $unit->GuardDirection();
 		if ($direction !== Direction::None) {
 			if ($description) {
@@ -520,6 +520,7 @@ class MagellanWriter implements Writer
 
 		$parties = [];
 		foreach ($census->getAtlas() as $region) {
+			/** @var Region $region */
 			$this->collectParties($outlook, $region, $parties);
 		}
 		$acquaintances = $party->Diplomacy()->Acquaintances();
@@ -679,6 +680,7 @@ class MagellanWriter implements Writer
 
 		$beyond = [];
 		foreach ($atlas->forRound(Lemuria::Calendar()->Round() - 1) as $region) {
+			/** @var Region $region */
 			$visibility = $atlas->getVisibility($region);
 			$this->writeRegion($region, $visibility, $outlook);
 			if ($withBeyond && $this->map->isEdge($region) && in_array($visibility, $visibilities)) {
@@ -1177,7 +1179,8 @@ class MagellanWriter implements Writer
 	}
 
 	private function compileUnitDescription(Unit $unit): string {
-		$description = $this->compileFullTreasuryDescription($unit->Description(), $unit->Treasury());
+		$description = $this->clearDescription($unit->Description());
+		$description = $this->compileFullTreasuryDescription($description, $unit->Treasury());
 		$direction   = $unit->GuardDirection();
 		if ($direction !== Direction::None) {
 			if ($description) {
@@ -1214,7 +1217,7 @@ class MagellanWriter implements Writer
 	}
 
 	private function compileCostructionDescription(Construction $construction): string {
-		$description = $construction->Description();
+		$description = $this->clearDescription($construction->Description());
 		switch ($construction->Building()::class) {
 			case Canal::class :
 				$description = $this->compileCanalDescription($description, $construction);
@@ -1322,7 +1325,8 @@ class MagellanWriter implements Writer
 	}
 
 	private function compileVesselDescription(Vessel $vessel): string {
-		return $this->compileShortTreasuryDescription($vessel->Description(), $vessel->Treasury());
+		$description = $this->clearDescription($vessel->Description());
+		return $this->compileShortTreasuryDescription($description, $vessel->Treasury());
 	}
 
 	private function compileFullTreasuryDescription(string $compilation, Treasury $treasury): string {
@@ -1340,7 +1344,7 @@ class MagellanWriter implements Writer
 			}
 			$id           = $unicum->Id();
 			$name         = $this->escape($unicum->Name());
-			$description  = $this->escape($unicum->Description());
+			$description  = $this->clearDescription($unicum->Description());
 			$composition  = $this->translateSingleton($unicum->Composition());
 			if ($name) {
 				$unicumName = $name . ' [' . $id . '] (' . $composition . ')';
@@ -1376,6 +1380,17 @@ class MagellanWriter implements Writer
 			$next         = true;
 		}
 		return $compilation;
+	}
+
+	private function clearDescription(string $description): string {
+		$description = $this->escape(trim($description));
+		if (strpos($description, "\n")) {
+			while (strpos($description, "\n\n")) {
+				$description = str_replace("\n\n", "\n", $description);
+			}
+			$description = str_replace("\n", " ", $description);
+		}
+		return $description;
 	}
 
 	private function good(Quantity $quantity): string {
