@@ -375,8 +375,9 @@ class MagellanWriter implements Writer
 		}
 	}
 
-	protected function writeConstruction(Construction $construction, string $visibility = ''): void {
+	protected function writeConstruction(Construction $construction, Census $census, string $visibility = ''): void {
 		$owner = $construction->Inhabitants()->Owner();
+		$party = $owner ? $census->getParty($owner) : null;
 		$data  = [
 			'BURG ' . $construction->Id()->Id(),
 			'Typ'      => $this->translateSingleton($construction->Building()),
@@ -384,10 +385,12 @@ class MagellanWriter implements Writer
 			'Beschr'   => $this->compileCostructionDescription($construction),
 			'Groesse'  => $construction->Size(),
 			'Besitzer' => $owner?->Id()->Id(),
-			'Partei'   => $owner?->Party()->Id()->Id()
+			'Partei'   => $party?->Id()->Id()
 		];
 		if (!$owner) {
 			unset($data['Besitzer']);
+		}
+		if (!$party) {
 			unset($data['Partei']);
 		}
 		if (!empty($visibility)) {
@@ -397,12 +400,13 @@ class MagellanWriter implements Writer
 		$this->writeEffects($construction);
 	}
 
-	protected function writeVessel(Vessel $vessel, string $visibility = ''): void {
+	protected function writeVessel(Vessel $vessel, Census $census, string $visibility = ''): void {
 		$ship       = $vessel->Ship();
 		$size       = (int)round($vessel->Completion() * $ship->Wood());
 		$coast      = Translator::COAST[$vessel->Anchor()->value] ?? null;
 		$passengers = $vessel->Passengers();
 		$captain    = $passengers->Owner();
+		$party      = $captain ? $census->getParty($captain) : null;
 		$cargo      = 0;
 		foreach ($passengers as $unit) {
 			$cargo += $unit->Weight();
@@ -417,11 +421,13 @@ class MagellanWriter implements Writer
 			'cargo'    => $cargo,
 			'capacity' => $ship->Payload(),
 			'Kapitaen' => $captain?->Id()->Id(),
-			'Partei'   => $captain?->Party()->Id()->Id(),
+			'Partei'   => $party?->Id()->Id(),
 			'Kueste'   => $coast
 		];
 		if (!$captain) {
 			unset($data['Kapitaen']);
+		}
+		if (!$party) {
 			unset($data['Partei']);
 		}
 		if (!empty($visibility)) {
@@ -739,7 +745,8 @@ class MagellanWriter implements Writer
 			];
 		}
 
-		$herbage = $outlook->Census()->Party()->HerbalBook()->getHerbage($region);
+		$census  = $outlook->Census();
+		$herbage = $census->Party()->HerbalBook()->getHerbage($region);
 		if ($herbage) {
 			$data['herb']       = $this->translateSingleton($herbage->Herb());
 			$data['herbamount'] = Translator::occurrence($herbage->Occurrence());
@@ -813,7 +820,6 @@ class MagellanWriter implements Writer
 			$fleet = clone $region->Fleet();
 			$fleet->sort();
 			if (empty($magellanVisibility)) {
-				$census     = $outlook->Census();
 				$party      = $census->Party();
 				$isGuarding = $this->isGuarding($party, $intelligence);
 				foreach ($estate as $construction) {
@@ -842,14 +848,13 @@ class MagellanWriter implements Writer
 					}
 				}
 			} elseif (in_array($magellanVisibility, ['travel', 'lighthouse'])) {
-				$census = $outlook->Census();
 				foreach ($outlook->getTravelled($region) as $unit) {
 					$this->writeForeignUnit($unit, $census, false);
 				}
 			}
 
 			foreach ($estate as $construction) {
-				$this->writeConstruction($construction, $magellanVisibility);
+				$this->writeConstruction($construction, $census, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::Lighthouse, Visibility::Farsight])) {
 					foreach (Lemuria::Report()->getAll($construction) as $message) {
 						$this->writeMessage($message);
@@ -858,7 +863,7 @@ class MagellanWriter implements Writer
 			}
 
 			foreach ($fleet as $vessel) {
-				$this->writeVessel($vessel, $magellanVisibility);
+				$this->writeVessel($vessel, $census, $magellanVisibility);
 				if (!in_array($visibility, [Visibility::Lighthouse, Visibility::Farsight])) {
 					foreach (Lemuria::Report()->getAll($vessel) as $message) {
 						$this->writeMessage($message);
