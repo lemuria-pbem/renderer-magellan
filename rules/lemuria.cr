@@ -1030,6 +1030,16 @@ RACE "Kraken"
 0;maintenance
 320;weight
 
+RACE "Riesenfrösche"
+"Riesenfrösche";name
+0;maintenance
+7;weight
+
+RACE "Sandwürmer"
+"Sandwürmer";name
+0;maintenance
+600;weight
+
 RACE "Skelette"
 "Skelette";name
 0;maintenance
