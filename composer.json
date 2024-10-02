@@ -11,14 +11,14 @@
 		}
 	],
 	"version": "1.5.4",
-	"time": "2024-09-24",
+	"time": "2024-10-02",
 
 	"require": {
 		"php": "~8.3",
-		"lemuria-pbem/engine-fantasya": "~1.5.0|dev-master",
-		"lemuria-pbem/lemuria": "~1.5.0|dev-master",
-		"lemuria-pbem/model-fantasya": "~1.5.0|dev-master",
-		"lemuria-pbem/statistics-fantasya": "~1.5.0|dev-master"
+		"lemuria-pbem/engine-fantasya": "~1.6.0|dev-feature/dispatcher",
+		"lemuria-pbem/lemuria": "~1.6.0|dev-feature/dispatcher",
+		"lemuria-pbem/model-fantasya": "~1.6.0|dev-feature/dispatcher",
+		"lemuria-pbem/statistics-fantasya": "~1.6.0|dev-feature/dispatcher"
 	},
 	"repositories": [
 		{
