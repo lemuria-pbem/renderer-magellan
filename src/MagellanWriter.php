@@ -4,6 +4,7 @@ namespace Lemuria\Renderer\Magellan;
 
 use function Lemuria\getClass;
 use function Lemuria\number;
+use Lemuria\Dispatcher\Event\Renderer\Written;
 use Lemuria\Engine\Combat\Battle;
 use Lemuria\Engine\Fantasya\Availability;
 use Lemuria\Engine\Fantasya\Calculus;
@@ -193,6 +194,7 @@ class MagellanWriter implements Writer
 			throw new \RuntimeException('Could not close file ' . $path . '.');
 		}
 		$this->file = null;
+		Lemuria::Dispatcher()->dispatch(new Written($this, $entity, $path));
 		return $this;
 	}
 
